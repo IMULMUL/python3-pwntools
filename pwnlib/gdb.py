@@ -32,7 +32,7 @@ def debug_shellcode(data, execute=None, **kwargs):
         with open(tmp_elf,'wb+') as f:
             f.write(elf_data)
             f.flush()
-        os.chmod(tmp_elf, 0777)
+        os.chmod(tmp_elf, 0o777)
         atexit.register(lambda: os.unlink(tmp_elf))
         return debug(tmp_elf, execute=None, arch=context.arch)
 
@@ -110,7 +110,7 @@ def debug(args, exe=None, execute=None, ssh=None, arch=None):
     attach(('127.0.0.1', port), exe=orig_args[0], execute=execute, arch=context.arch)
 
     if ssh:
-        remote <> listener.wait_for_connection()
+        remote != listener.wait_for_connection()
 
     return gdbserver
 
@@ -340,7 +340,7 @@ def ssh_gdb(ssh, process, execute = None, arch = None, **kwargs):
     forwardport = l.lport
 
     attach(('127.0.0.1', forwardport), execute, local_exe, arch)
-    l.wait_for_connection() <> ssh.connect_remote('127.0.0.1', gdbport)
+    l.wait_for_connection() != ssh.connect_remote('127.0.0.1', gdbport)
     return c
 
 def find_module_addresses(binary, ssh=None, ulimit=False):
@@ -453,7 +453,7 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
         try:
             path     = next(p for p in local_libs.keys() if remote_path in p)
         except StopIteration:
-            print "Skipping %r" % remote_path
+            print("Skipping %r" % remote_path)
             continue
 
         # Load it

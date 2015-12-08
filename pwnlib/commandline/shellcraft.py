@@ -104,7 +104,7 @@ def main():
     args = p.parse_args()
 
     if not args.shellcode:
-        print '\n'.join(shellcraft.templates)
+        print('\n'.join(shellcraft.templates))
         exit()
 
     if args.format == 'default':
@@ -160,7 +160,7 @@ def main():
             if not in_doctest:
                 doc.append(line)
             i += 1
-        print '\n'.join(doc).rstrip()
+        print('\n'.join(doc).rstrip())
         exit()
 
     defargs = len(func.func_defaults or ())
@@ -185,10 +185,10 @@ def main():
     code = func(*args.args)
 
     if args.format in ['a', 'asm', 'assembly']:
-        print code
+        print(code)
         exit()
     if args.format == 'p':
-        print cpp(code)
+        print(cpp(code))
         exit()
 
     code = asm(code)

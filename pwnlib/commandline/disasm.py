@@ -36,12 +36,12 @@ def main():
         dat = ''.join(args.hex)
         dat = dat.translate(None, whitespace)
         if not set(hexdigits) >= set(dat):
-            print "This is not a hex string"
+            print("This is not a hex string")
             exit(-1)
         dat = dat.decode('hex')
     else:
         dat = sys.stdin.read()
 
-    print asm.disasm(dat, arch = args.context)
+    print(asm.disasm(dat, arch = args.context))
 
 if __name__ == '__main__': main()

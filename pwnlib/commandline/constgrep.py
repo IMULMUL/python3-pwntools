@@ -72,7 +72,7 @@ def main():
 
     if args.exact:
         # This is the simple case
-        print asm.cpp(args.exact, os = os, arch = arch).strip()
+        print(asm.cpp(args.exact, os = os, arch = arch).strip())
     else:
         # New we search in the right module.
         # But first: We find the right module
@@ -122,7 +122,7 @@ def main():
 
         # Output all matching constants
         for _, k in sorted(out):
-            print '#define %s %s' % (k.ljust(maxlen), asm.cpp(k, os = os, arch = arch).strip())
+            print('#define %s %s' % (k.ljust(maxlen), asm.cpp(k, os = os, arch = arch).strip()))
 
         # If we are in match_mode, then try to find a combination of
         # constants that yield the exact given value
@@ -140,7 +140,7 @@ def main():
                 out = [(v, k) for v, k in out if mask & v == v]
 
             if reduce(lambda x, cur: x | cur[0], good, 0) == constant:
-                print
-                print '(%s) == %s' % (' | '.join(k for v, k in good), args.constant)
+                print()
+                print('(%s) == %s' % (' | '.join(k for v, k in good), args.constant))
 
 if __name__ == '__main__': main()

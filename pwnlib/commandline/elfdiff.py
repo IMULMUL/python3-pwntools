@@ -24,6 +24,6 @@ p.add_argument('b')
 
 def main():
     a = p.parse_args()
-    print diff(dump(a.a), dump(a.b))
+    print(diff(dump(a.a), dump(a.b)))
 
 if __name__ == '__main__': main()

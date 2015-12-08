@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 from setuptools import setup, find_packages
 from distutils.util import convert_path
 from distutils.command.install import INSTALL_SCHEMES
@@ -13,7 +13,7 @@ for dirpath, dirnames, filenames in os.walk(convert_path('pwnlib/shellcraft/temp
 # Get the version
 ns = {}
 with open(convert_path('pwnlib/version.py')) as fd:
-    exec fd.read() in ns
+    exec(fd.read(), None, ns)
 version = ns['__version__']
 
 # This makes pwntools-LICENSE.txt appear with the package folders
@@ -75,7 +75,7 @@ setup(
         'Environment :: Console',
         'Operating System :: OS Independent',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.2',
         'Intended Audience :: Developers'
     ]
 )

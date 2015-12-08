@@ -154,7 +154,8 @@ def do(c, *args):
     if s:
         put(s)
 
-def goto((r, c)):
+def goto(arg):
+    r, c = arg
     do('cup', r - scroll + height - 1, c)
 
 cells = []

@@ -102,7 +102,7 @@ def main():
                         try:
                             b = chr(int(hl[i + 2: i + 4], 16))
                         except:
-                            print 'Bad escape sequence:', hl[i:]
+                            print('Bad escape sequence:', hl[i:])
                             sys.exit(1)
                         out.append(b)
                         i += 3
@@ -123,7 +123,7 @@ def main():
 
     try:
         for line in hexdump_iter(infile, width, highlight = highlight, begin = offset + skip):
-            print line
+            print(line)
     except (KeyboardInterrupt, IOError):
         pass
 

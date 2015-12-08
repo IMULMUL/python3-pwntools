@@ -11,8 +11,8 @@ parser.add_argument('data', nargs='*',
 def main():
     args = parser.parse_args()
     if not args.data:
-        print sys.stdin.read().encode('hex')
+        print(sys.stdin.read().encode('hex'))
     else:
-        print ' '.join(args.data).encode('hex')
+        print(' '.join(args.data).encode('hex'))
 
 if __name__ == '__main__': main()
