@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Implements context management so that nested/scoped contexts and threaded
@@ -247,7 +247,7 @@ class ContextType(object):
 
     The context is usually specified at the top of the Python file for clarity. ::
 
-        #!/usr/bin/env python
+        #!/usr/bin/env python3
         context.update(arch='i386', os='linux')
 
     Currently supported properties and their defaults are listed below.

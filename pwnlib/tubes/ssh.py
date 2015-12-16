@@ -623,7 +623,7 @@ class ssh(Timeout):
         stderr = {sys.stdin: 0, sys.stdout:1, sys.stderr:2}.get(stderr, stderr)
 
         script = r"""
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os, sys
 exe   = %r
 argv  = %r
@@ -689,7 +689,7 @@ os.execve(exe, argv, env)
 
             script = misc.sh_string(script)
             with context.local(log_level='error'):
-                python = self.run('test -x "$(which python 2>&1)" && exec python -c %s check; echo 2' % script)
+                python = self.run('test -x "$(which python3 2>&1)" && exec python3 -c %s check; echo 2' % script)
             result = safeeval.const(python.recvline())
 
             # If an error occurred, try to grab as much output

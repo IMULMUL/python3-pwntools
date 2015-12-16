@@ -24,7 +24,7 @@ Pwntools is available as a ``pip`` package.
 
 .. code-block:: bash
 
-    $ apt-get install python2.7 python2.7-dev python-pip
+    $ apt-get install python3 python3-dev python-pip
     $ pip install pwntools
 
 Latest Version
