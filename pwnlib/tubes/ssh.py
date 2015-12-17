@@ -22,7 +22,7 @@ from .sock import sock
 # Kill the warning line:
 # No handlers could be found for logger "paramiko.transport"
 paramiko_log = logging.getLogger("paramiko.transport")
-h = logging.StreamHandler(file('/dev/null','w+'))
+h = logging.StreamHandler(open('/dev/null','w+'))
 h.setFormatter(logging.Formatter())
 paramiko_log.addHandler(h)
 

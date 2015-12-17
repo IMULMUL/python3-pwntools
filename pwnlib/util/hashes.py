@@ -3,7 +3,7 @@ Functions for computing various hashes of files and strings.
 """
 import hashlib
 
-for _algo in hashlib.algorithms:
+for _algo in hashlib.algorithms_guaranteed:
     def _closure():
         hash = hashlib.__dict__[_algo]
         def file(p):

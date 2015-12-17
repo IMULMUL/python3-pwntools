@@ -3,7 +3,7 @@ import base64
 import random
 import re
 import string
-import StringIO
+import io
 
 from . import lists
 from . import packing
@@ -360,8 +360,8 @@ def xor_pair(data, avoid = '\x00\n'):
     return res1, res2
 
 
-def randoms(count, alphabet = string.lowercase):
-    """randoms(count, alphabet = string.lowercase) -> str
+def randoms(count, alphabet = string.ascii_lowercase):
+    """randoms(count, alphabet = string.ascii_lowercase) -> str
 
     Returns a random string of a given length using only the specified alphabet.
 
@@ -378,7 +378,7 @@ def randoms(count, alphabet = string.lowercase):
       'evafjilupm'
 """
 
-    return ''.join(random.choice(alphabet) for _ in xrange(count))
+    return ''.join(random.choice(alphabet) for _ in range(count))
 
 
 def rol(n, k, word_size = None):
@@ -688,7 +688,7 @@ def hexdump(s, width = 16, skip = True, hexii = False, begin = 0,
       A hexdump-dump in the form of a string.
 """
     s = packing.flat(s)
-    return '\n'.join(hexdump_iter(StringIO.StringIO(s),
+    return '\n'.join(hexdump_iter(io.StringIO(s),
                                   width,
                                   skip,
                                   hexii,

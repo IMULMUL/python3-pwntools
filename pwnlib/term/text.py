@@ -6,9 +6,9 @@ from . import termcap
 
 
 def eval_when(when):
-    if isinstance(when, file) or \
-      when in ('always', 'never', 'auto', sys.stderr, sys.stdout):
-        if   when == 'always':
+    if hasattr(when, 'isatty') or \
+       when in ('always', 'never', 'auto', sys.stderr, sys.stdout):
+        if when == 'always':
             return True
         elif when == 'never':
             return False
@@ -23,7 +23,7 @@ class Module(types.ModuleType):
     def __init__(self):
         self.__file__ = __file__
         self.__name__ = __name__
-        self.num_colors = termcap.get('colors', default = 8)
+        self.num_colors = termcap.get('colors', default=8)
         self.has_bright = self.num_colors >= 16
         self.has_gray = self.has_bright
         self.when = 'auto'
@@ -36,8 +36,8 @@ class Module(types.ModuleType):
             'magenta': 5,
             'cyan': 6,
             'white': 7,
-            }
-        self._reset = '\x1b[m'
+        }
+        self._reset = b'\x1b[m'
         self._attributes = {}
         for x, y in [('italic'   , 'sitm'),
                      ('bold'     , 'bold'),
@@ -62,15 +62,22 @@ class Module(types.ModuleType):
         return termcap.get('setab', c) or termcap.get('setb', c)
 
     def _decorator(self, desc, init):
-        def f(self, s, when = None):
+        def f(self, s, when=None):
+            if isinstance(s, str):
+                begin = init.decode('utf-8')
+                end = self._reset.decode('utf-8')
+            else:
+                begin = init
+                end = self._reset
+
             if when:
                 if eval_when(when):
-                    return init + s + self._reset
+                    return begin + s + end
                 else:
                     return s
             else:
                 if self.when:
-                    return init + s + self._reset
+                    return begin + s + end
                 else:
                     return s
         setattr(Module, desc, f)
@@ -79,7 +86,7 @@ class Module(types.ModuleType):
     def __getattr__(self, desc):
         try:
             ds = desc.replace('gray', 'bright_black').split('_')
-            init = ''
+            init = b''
             while ds:
                 d = ds[0]
                 try:

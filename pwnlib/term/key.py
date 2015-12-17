@@ -10,9 +10,9 @@ from . import keyconsts as kc
 from . import termcap
 
 try:    _fd = sys.stdin.fileno()
-except: _fd = file('/dev/null', 'r').fileno()
+except: _fd = open('/dev/null', 'r').fileno()
 
-def getch(timeout = 0):
+def getch(timeout=0):
     while True:
         try:
             rfds, _wfds, _xfds = select.select([_fd], [], [], timeout)
@@ -26,13 +26,13 @@ def getch(timeout = 0):
                 continue
             raise
 
-def getraw(timeout = None):
+def getraw(timeout=None):
     '''Get list of raw key codes corresponding to zero or more key presses'''
     cs = []
     c = getch(timeout)
-    while c != None: # timeout
+    while c is not None: # timeout
         cs.append(c)
-        if c == None: # EOF
+        if c is None: # EOF
             break
         c = getch()
     return cs
@@ -52,7 +52,7 @@ class Matcher:
             m |= kc.MOD_ALT
         if 'C' in mods:
             m |= kc.MOD_CTRL
-        if   len(k) == 1:
+        if len(k) == 1:
             t = kc.TYPE_UNICODE
             c = k
             h = ord(k)
@@ -79,7 +79,7 @@ class Matcher:
                         ])
 
     def __eq__(self, other):
-        if   isinstance(other, Matcher):
+        if isinstance(other, Matcher):
             return all([other._type == self._type,
                         other._code == self._code,
                         other._mods == self._mods,
@@ -99,7 +99,7 @@ class Matcher:
         return self._desc
 
 class Key:
-    def __init__(self, type, code = None, mods = kc.MOD_NONE):
+    def __init__(self, type, code=None, mods=kc.MOD_NONE):
         self.type = type
         self.code = code
         self.mods = mods
@@ -108,7 +108,7 @@ class Key:
     def __str__(self):
         if self._str:
             return self._str
-        if   self.type == kc.TYPE_UNICODE:
+        if self.type == kc.TYPE_UNICODE:
             if self.code == ' ':
                 s = '<space>'
             else:
@@ -136,7 +136,7 @@ class Key:
         return self.__str__()
 
     def __eq__(self, other):
-        if   isinstance(other, (unicode, str)):
+        if isinstance(other, str):
             return Matcher(other)(self)
         elif isinstance(other, Matcher):
             return other(self)
@@ -151,14 +151,14 @@ class Key:
 _cbuf = []
 _kbuf = []
 
-def _read(timeout = 0):
+def _read(timeout=0):
     _cbuf.extend(getraw(timeout))
 
 def _peek():
     if _cbuf:
         return _peek_ti() or _peek_csi() or _peek_simple()
 
-def get(timeout = None):
+def get(timeout=None):
     if _kbuf:
         return _kbuf.pop(0)
     k = _peek()
@@ -172,7 +172,7 @@ def unget(k):
 
 # terminfo
 def _name_to_key(fname):
-    if   fname in kc.FUNCSYMS:
+    if fname in kc.FUNCSYMS:
         k = Key(kc.TYPE_KEYSYM, *kc.FUNCSYMS[fname])
     elif fname[0] == 'f' and fname[1:].isdigit():
         k = Key(kc.TYPE_FUNCTION, int(fname[1:]))
@@ -188,7 +188,7 @@ _ti_table = None
 
 def _peek_ti():
     global _cbuf
-    if _ti_table == None:
+    if _ti_table is None:
         _init_ti_table()
     # XXX: Faster lookup, plox
     for seq, key in _ti_table:
@@ -228,7 +228,7 @@ def _parse_csi(offset):
         i += 1
     while i < end:
         c = _cbuf[i]
-        if   c >= ord('0') and c <= ord('9'):
+        if c >= ord('0') and c <= ord('9'):
             if not in_num:
                 args.append(c - ord('0'))
                 in_num = True
@@ -253,7 +253,7 @@ def _csi_func(cmd, args):
     if len(args) > 1 and args[1]:
         k.mods |= args[1] - 1
 
-    if   args[0] == 0x1b and len(args) == 3:
+    if args[0] == 0x1b and len(args) == 3:
         k.type = kc.TYPE_KEYSYM
         k.code = args[2]
         return k
@@ -285,10 +285,10 @@ def _csi_R(cmd, args):
         return _csi_ss3(cmd, args)
 
 _csi_handlers = {
-    '~' : _csi_func,
-    'u' : _csi_u,
-    'R' : _csi_R,
-    }
+    '~': _csi_func,
+    'u': _csi_u,
+    'R': _csi_R,
+}
 
 _csi_ss3s = {
     'A': (kc.TYPE_KEYSYM, kc.KEY_UP),
@@ -305,9 +305,7 @@ _csi_ss3s = {
     'Z': (kc.TYPE_KEYSYM, kc.KEY_TAB),
 }
 
-_csi_ss3kp = {
-
-}
+_csi_ss3kp = {}
 
 _csi_funcs = {
     1 : (kc.TYPE_KEYSYM, kc.KEY_FIND),
@@ -338,19 +336,19 @@ _csi_funcs = {
     32: (kc.TYPE_FUNCTION, 18),
     33: (kc.TYPE_FUNCTION, 19),
     34: (kc.TYPE_FUNCTION, 20),
-    }
+}
 
 def _peekkey_csi(offset):
     global _cbuf
     ret = _parse_csi(offset)
     if not ret:
         _cbuf = _cbuf[offset:]
-        return Key(kc.TYPE_UNICODE, u'[', kc.MOD_ALT)
+        return Key(kc.TYPE_UNICODE, '[', kc.MOD_ALT)
     cmd, args, numb = ret
     # print cmd, args, '\r'
     _cbuf = _cbuf[numb:]
     k = None
-    if   chr(cmd[0]) in _csi_handlers:
+    if chr(cmd[0]) in _csi_handlers:
         k = _csi_handlers[chr(cmd[0])](cmd, args)
     elif chr(cmd[0]) in _csi_ss3s:
         k = _csi_ss3(cmd, args)
@@ -365,7 +363,7 @@ def _peekkey_csi(offset):
 def _peekkey_ss3(offset):
     global _cbuf
     if len(_cbuf) <= offset:
-        return Key(kc.TYPE_UNICODE, u'O', kc.MOD_ALT)
+        return Key(kc.TYPE_UNICODE, 'O', kc.MOD_ALT)
     cmd = _cbuf[offset]
     if cmd < 0x40 or cmd >= 0x80:
         return
@@ -385,9 +383,9 @@ def _peek_csi():
     global _cbuf
     # print 'csi', _cbuf, '\r'
     c0 = _cbuf[0]
-    if   c0 == 0x1b and len(_cbuf) >= 2:
+    if c0 == 0x1b and len(_cbuf) >= 2:
         c1 = _cbuf[1]
-        if   c1 == ord('['):
+        if c1 == ord('['):
             return _peekkey_csi(2)
         elif c1 == ord('O'):
             return _peekkey_ss3(2)
@@ -402,7 +400,7 @@ def _peek_simple():
     if not _cbuf:
         return
     c0 = _cbuf.pop(0)
-    if   c0 is None:
+    if c0 is None:
         _cbuf = []
         return Key(kc.TYPE_EOF)
     elif c0 == 0x1b:
@@ -415,8 +413,8 @@ def _peek_simple():
         else:
             return Key(kc.TYPE_KEYSYM, kc.KEY_ESCAPE)
     elif c0 < 0xa0:
-        if   c0 < 0x20:
-            if   c0 == 8:
+        if c0 < 0x20:
+            if c0 == 8:
                 k = Key(kc.TYPE_KEYSYM, kc.KEY_BACKSPACE)
             elif c0 == 9:
                 k = Key(kc.TYPE_KEYSYM, kc.KEY_TAB)
@@ -424,23 +422,23 @@ def _peek_simple():
                 k = Key(kc.TYPE_KEYSYM, kc.KEY_ENTER)
             else:
                 k = Key(kc.TYPE_UNICODE)
-                if   c0 == 0:
-                    k.code = u' '
+                if c0 == 0:
+                    k.code = ' '
                 elif chr(c0 + 0x40) in string.uppercase:
-                    k.code = unichr(c0 + 0x60)
+                    k.code = chr(c0 + 0x60)
                 else:
-                    k.code = unichr(c0 + 0x40)
+                    k.code = chr(c0 + 0x40)
                 k.mods |= kc.MOD_CTRL
         elif c0 == 0x7f:
             # print 'del\r'
             k = Key(kc.TYPE_KEYSYM, kc.KEY_DEL)
         elif c0 >= 0x20 and c0 < 0x80:
-            k = Key(kc.TYPE_UNICODE, unichr(c0))
+            k = Key(kc.TYPE_UNICODE, chr(c0))
         else:
-            k = Key(kc.TYPE_UNICODE, unichr(c0 - 0x40), kc.MOD_CTRL | kc.MOD_ALT)
+            k = Key(kc.TYPE_UNICODE, chr(c0 - 0x40), kc.MOD_CTRL | kc.MOD_ALT)
     else: # utf8
         n = 0
-        if   c0 & 0b11100000 == 0b11000000:
+        if c0 & 0b11100000 == 0b11000000:
             n = 2
         elif c0 & 0b11110000 == 0b11100000:
             n = 3

@@ -4,26 +4,25 @@ import os
 
 cache = None
 def get(cap, *args, **kwargs):
-    default = kwargs.pop('default', '')
+    default = kwargs.pop('default', b'')
 
     if 'PWNLIB_NOTERM' in os.environ:
-        return ''
+        return b''
 
     if kwargs != {}:
         raise TypeError("get(): No such argument %r" % kwargs.popitem()[0])
 
-    if cache == None:
+    if cache is None:
         init()
     s = cache.get(cap)
     if not s:
         s = curses.tigetstr(cap)
-        if s == None:
+        if s is None:
             s = curses.tigetnum(cap)
             if s == -2:
                 s = curses.tigetflag(cap)
                 if s == -1:
-                    # default to empty string so tparm doesn't fail
-                    s = ''
+                    s = default
                 else:
                     s = bool(s)
         cache[cap] = s

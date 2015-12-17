@@ -371,7 +371,7 @@ class tube(Timeout):
         """
         lines = []
         with self.countdown(timeout):
-            for _ in xrange(numlines):
+            for _ in range(numlines):
                 try:
                     # We must set 'keepends' to True here so that we can
                     # restore the original, unmodified data to the buffer

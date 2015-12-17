@@ -11,6 +11,8 @@ import sys
 import tempfile
 import threading
 import time
+import pickle
+import io
 
 import pwnlib
 
@@ -55,13 +57,3 @@ from pwnlib.util.packing import *
 from pwnlib.util.proc import pidof
 from pwnlib.util.splash import *
 from pwnlib.util.web import *
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO

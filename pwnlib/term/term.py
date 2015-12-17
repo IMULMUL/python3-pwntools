@@ -99,13 +99,13 @@ def init():
     # we start with one empty cell at the current cursor position
     put('\x1b[6n')
     fd.flush()
-    s = ''
+    s = b''
     while True:
         c = os.read(fd.fileno(), 1)
         s += c
-        if c == 'R':
+        if c == b'R':
             break
-    row, col = re.findall('\x1b' + r'\[(\d*);(\d*)R', s)[0]
+    row, col = re.findall('\x1b' + r'\[(\d*);(\d*)R', s.decode('utf-8'))[0]
     row = int(row) - height
     col = int(col) - 1
     cell = Cell()
@@ -120,7 +120,7 @@ def init():
         def __init__(self, fd):
             self._fd = fd
         def write(self, s):
-            output(s, frozen = True)
+            output(s, frozen=True)
         def __getattr__(self, k):
             return self._fd.__getattribute__(k)
     if sys.stdout.isatty():
@@ -145,9 +145,13 @@ def init():
     sys.excepthook = hook
 
 def put(s):
-    fd.write(s)
+    if isinstance(s, str):
+        fd.write(s)
+    else:
+        fd.write(s.decode('utf-8'))
 
-def flush(): fd.flush()
+def flush():
+    fd.flush()
 
 def do(c, *args):
     s = termcap.get(c, *args)
@@ -195,7 +199,7 @@ def parse_csi(buf, offset):
         i += 1
     while i < end:
         c = buf[i]
-        if   c >= ord('0') and c <= ord('9'):
+        if c >= ord('0') and c <= ord('9'):
             if not in_num:
                 args.append(c - ord('0'))
                 in_num = True
@@ -216,7 +220,7 @@ def parse_csi(buf, offset):
 def parse_utf8(buf, offset):
     c0 = buf[offset]
     n = 0
-    if   c0 & 0b11100000 == 0b11000000:
+    if c0 & 0b11100000 == 0b11000000:
         n = 2
     elif c0 & 0b11110000 == 0b11100000:
         n = 3
@@ -251,7 +255,7 @@ def parse(s):
                 i = j
         elif c == 0x1b and len(buf) > i + 1:
             c1 = buf[i + 1]
-            if   c1 == ord('['):
+            if c1 == ord('['):
                 ret = parse_csi(buf, i + 2)
                 if ret:
                     cmd, args, j = ret
@@ -318,7 +322,7 @@ def parse(s):
 
 saved_cursor = None
 # XXX: render cells that is half-way on the screen
-def render_cell(cell, clear_after = False):
+def render_cell(cell, clear_after=False):
     global scroll, saved_cursor
     row, col = cell.start
     row = row - scroll + height - 1
@@ -326,7 +330,7 @@ def render_cell(cell, clear_after = False):
         return
     indent = min(cell.indent, width - 1)
     for t, x in cell.content:
-        if   t == STR:
+        if t == STR:
             i = 0
             while i < len(x):
                 if col >= width:
@@ -353,7 +357,7 @@ def render_cell(cell, clear_after = False):
                     m = args[1]
                 else:
                     m = None
-                if   c == ord('A'):
+                if c == ord('A'):
                     n = n or 1
                     row = max(0, row - n)
                 elif c == ord('B'):
@@ -405,7 +409,7 @@ def render_cell(cell, clear_after = False):
                 put('\x08')
                 col -= 1
         elif t == CR:
-#            put('\r')
+            # put('\r')
             col = 0
         elif t == SOH:
             put('\x01')
@@ -420,7 +424,7 @@ def render_cell(cell, clear_after = False):
     row = row + scroll - height + 1
     cell.end = (row, col)
 
-def render_from(i, force = False, clear_after = False):
+def render_from(i, force=False, clear_after=False):
     e = None
     # `i` should always be a valid cell, but in case i f***ed up somewhere, I'll
     # check it and just do nothing if something went wrong.
@@ -433,7 +437,7 @@ def render_from(i, force = False, clear_after = False):
             break
         elif e:
             c.start = e
-        render_cell(c, clear_after = clear_after)
+        render_cell(c, clear_after=clear_after)
         e = c.end
     if clear_after and (e[0] < scroll or e[1] < width - 1):
         put('\x1b[J')
@@ -447,11 +451,11 @@ def redraw():
     # XXX: remove this line when render_cell is fixed
     if cells[i].start[0] - scroll + height <= 0:
         i += 1
-    render_from(i, force = True, clear_after = True)
+    render_from(i, force=True, clear_after=True)
 
 lock = threading.Lock()
-def output(s = '', float = False, priority = 10, frozen = False,
-            indent = 0, before = None, after = None):
+def output(s='', float=False, priority=10, frozen=False,
+           indent=0, before=None, after=None):
     with lock:
         rel = before or after
         if rel:
@@ -486,10 +490,10 @@ def output(s = '', float = False, priority = 10, frozen = False,
             return h
         # the invariant is that the cursor is placed after the last cell
         if i == len(cells) - 1:
-            render_cell(cell, clear_after = True)
+            render_cell(cell, clear_after=True)
             flush()
         else:
-            render_from(i, clear_after = True)
+            render_from(i, clear_after=True)
         return h
 
 def find_cell(h):
@@ -513,7 +517,7 @@ def update(h, s):
             return
         if not c.frozen and c.content != s:
             c.content = parse(s)
-            render_from(i, clear_after = True)
+            render_from(i, clear_after=True)
 
 def freeze(h):
     try:

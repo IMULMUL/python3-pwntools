@@ -94,7 +94,7 @@ class MemLeak(object):
         Returns:
             A string of length ``n``, or ``None``.
         """
-        addresses = [addr+i for i in xrange(n)]
+        addresses = [addr+i for i in range(n)]
 
         for address in addresses:
             # Cache hit
@@ -133,7 +133,7 @@ class MemLeak(object):
             return None
 
         # Cache is filled, satisfy the request
-        return ''.join(self.cache[addr+i] for i in xrange(n))
+        return ''.join(self.cache[addr+i] for i in range(n))
 
     def raw(self, addr, numb):
         """raw(addr, numb) -> list

@@ -5,7 +5,7 @@ import codecs
 import json
 import os
 import tempfile
-import urlparse
+import urllib.parse as urlparse
 
 from .context import context
 from .elf import ELF

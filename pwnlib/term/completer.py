@@ -6,9 +6,9 @@ from . import readline
 
 class Completer:
     def complete(self, _left, _right):
-        raise Exception("unimplemented")
+        raise NotImplementedError()
     def suggest(self, _left, _right):
-        raise Exception("unimplemented")
+        raise NotImplementedError()
     def __enter__(self):
         self._saved_complete_hook = readline.complete_hook
         self._saved_suggest_hook = readline.suggest_hook
@@ -18,7 +18,7 @@ class Completer:
         readline.suggest_hook = self._saved_suggest_hook
 
 class WordCompleter(Completer):
-    def __init__(self, delims = None):
+    def __init__(self, delims=None):
         self.delims = delims or ' \t\n`!@#$^&*()=+[{]}\\|;:\'",<>?'
         self._cur_word = None
         self._completions = []
@@ -52,10 +52,10 @@ class WordCompleter(Completer):
         return self._completions
 
     def complete_word(self, word):
-        raise Exception("unimplemented")
+        raise NotImplementedError()
 
 class LongestPrefixCompleter(WordCompleter):
-    def __init__(self, words = None, delims = None):
+    def __init__(self, words=None, delims=None):
         words = words or []
         WordCompleter.__init__(self, delims)
         self.words = words
@@ -80,7 +80,7 @@ class LongestPrefixCompleter(WordCompleter):
             return cs
 
 class PathCompleter(Completer):
-    def __init__(self, mask = '*', only_dirs = False):
+    def __init__(self, mask='*', only_dirs=False):
         if mask != '*':
             mask = mask.replace('.', '\\.').replace('*', '.*')
             self.mask = re.compile('^' + mask + '$')

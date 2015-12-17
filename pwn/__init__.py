@@ -12,7 +12,7 @@ def closure():
     global args
     args = collections.defaultdict(str)
     def isident(s):
-        first = string.uppercase + '_'
+        first = string.ascii_uppercase + '_'
         body = string.digits + first
         if not s:
             return False
@@ -22,7 +22,7 @@ def closure():
             return False
         return True
     def asbool(s):
-        if   s.lower() == 'true':
+        if s.lower() == 'true':
             return True
         elif s.lower() == 'false':
             return False
@@ -35,7 +35,7 @@ def closure():
         if not k.startswith('PWNLIB_'):
             continue
         k = k[7:]
-        if   k == 'DEBUG':
+        if k == 'DEBUG':
             if asbool(v):
                 context.log_level = 'DEBUG'
         elif k == 'SILENT':
@@ -50,7 +50,7 @@ def closure():
     # save a copy of argv for the log file header (see below)
     argv = sys.argv[:]
     for arg in argv:
-        if   arg == 'DEBUG':
+        if arg == 'DEBUG':
             sys.argv.remove(arg)
             context.log_level = 'DEBUG'
         elif arg == 'SILENT':
@@ -87,7 +87,7 @@ def closure():
                 '=' * 78,
                 ' Started at %s ' % time.strftime(dfmt),
                 ' sys.argv = [',
-                ]
+            ]
             for arg in argv:
                 lines.append('   %r,' % arg)
             lines.append(' ]')

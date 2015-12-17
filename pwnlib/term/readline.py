@@ -5,7 +5,7 @@ from . import text
 
 cursor = text.reverse
 
-buffer_left, buffer_right = u'', u''
+buffer_left, buffer_right = '', ''
 saved_buffer = None
 history = []
 history_idx = None
@@ -78,7 +78,7 @@ def handle_keypress(trace):
 
 def clear():
     global buffer_left, buffer_right, history_idx, search_idx
-    buffer_left, buffer_right = u'', u''
+    buffer_left, buffer_right = '', ''
     history_idx = None
     search_idx = None
     redisplay()
@@ -90,7 +90,7 @@ def redisplay():
             suggestions = suggest_hook(buffer_left, buffer_right)
             if suggest_handle is None:
                 h = prompt_handle or buffer_handle
-                suggest_handle = term.output(before = h)
+                suggest_handle = term.output(before=h)
             s = fmt_suggestions(suggestions)
             suggest_handle.update(s)
         elif suggest_handle:
@@ -103,8 +103,8 @@ def redisplay():
                 ret = complete_hook(buffer_left, buffer_right)
                 if ret:
                     s = buffer_left + \
-                      text.underline(cursor(ret[0])) + \
-                      text.underline(ret[1:])
+                        text.underline(cursor(ret[0])) + \
+                        text.underline(ret[1:])
             s = s or buffer_left + cursor(' ')
             buffer_handle.update(s)
         else:
@@ -126,8 +126,8 @@ def self_insert(trace):
 
 def set_buffer(left, right):
     global buffer_left, buffer_right
-    buffer_left = unicode(left)
-    buffer_right = unicode(right)
+    buffer_left = left
+    buffer_right = right
     redisplay()
 
 def cancel_search(*_):
@@ -139,7 +139,7 @@ def cancel_search(*_):
 def commit_search():
     global search_idx
     if search_idx is not None and search_results:
-        set_buffer(history[search_results[search_idx][0]], u'')
+        set_buffer(history[search_results[search_idx][0]], '')
         search_idx = None
         redisplay()
 
@@ -167,7 +167,7 @@ def update_search_results():
 def search_history(*_):
     global buffer_left, buffer_right, history_idx, search_idx
     if search_idx is None:
-        buffer_left, buffer_right = buffer_left + buffer_right, u''
+        buffer_left, buffer_right = buffer_left + buffer_right, ''
         history_idx = None
         search_idx = 0
         update_search_results()
@@ -185,7 +185,7 @@ def history_prev(*_):
         history_idx = -1
     if history_idx < len(history) - 1:
         history_idx += 1
-        set_buffer(history[history_idx], u'')
+        set_buffer(history[history_idx], '')
 
 def history_next(*_):
     global history_idx, saved_buffer
@@ -198,7 +198,7 @@ def history_next(*_):
         saved_buffer = None
     else:
         history_idx -= 1
-        set_buffer(history[history_idx], u'')
+        set_buffer(history[history_idx], '')
 
 def backward_char(*_):
     global buffer_left, buffer_right
@@ -317,11 +317,11 @@ def forward_word(*_):
 
 def go_beginning(*_):
     commit_search()
-    set_buffer(u'', buffer_left + buffer_right)
+    set_buffer('', buffer_left + buffer_right)
 
 def go_end(*_):
     commit_search()
-    set_buffer(buffer_left + buffer_right, u'')
+    set_buffer(buffer_left + buffer_right, '')
 
 keymap = km.Keymap({
     '<nomatch>'   : self_insert,
@@ -351,7 +351,7 @@ keymap = km.Keymap({
     '<any>'       : handle_keypress,
     })
 
-def readline(_size = None, prompt = '', float = True, priority = 10):
+def readline(_size=None, prompt='', float=True, priority=10):
     # The argument  _size is unused, but is there for compatibility
     # with the existing readline
 
@@ -361,10 +361,10 @@ def readline(_size = None, prompt = '', float = True, priority = 10):
     show_suggestions = False
     eof = False
     if prompt:
-        prompt_handle = term.output(prompt, float = float, priority = priority)
+        prompt_handle = term.output(prompt, float=float, priority=priority)
     else:
         prompt_handle = None
-    buffer_handle = term.output(float = float, priority = priority)
+    buffer_handle = term.output(float=float, priority=priority)
     suggest_handle = None
     clear()
     if startup_hook:
@@ -402,22 +402,21 @@ def readline(_size = None, prompt = '', float = True, priority = 10):
 
 def init():
     # defer imports until initialization
-    import sys, __builtin__
-    from ..util import safeeval
+    import sys, builtins
 
     class Wrapper:
         def __init__(self, fd):
             self._fd = fd
-        def readline(self, size = None):
+        def readline(self, size=None):
             return readline(size)
         def __getattr__(self, k):
             return self._fd.__getattribute__(k)
     sys.stdin = Wrapper(sys.stdin)
 
-    def raw_input(prompt = '', float = True):
-        """raw_input(prompt = '', float = True)
+    def input(prompt='', float=True):
+        """input(prompt = '', float = True)
 
-        Replacement for the built-in `raw_input` using ``pwnlib``s readline
+        Replacement for the built-in `input` using ``pwnlib``s readline
         implementation.
 
         Arguments:
@@ -426,18 +425,4 @@ def init():
                          bottom of the screen when `term.term_mode` is enabled.
         """
         return readline(None, prompt, float)
-    __builtin__.raw_input = raw_input
-
-    def input(prompt = '', float = True):
-        """input(prompt = '', float = True)
-
-        Replacement for the built-in `input` using ``pwnlib``s readline
-        implementation, and `pwnlib.util.safeeval.expr` instead of `eval` (!).
-
-        Arguments:
-            prompt(str): The prompt to show to the user.
-            float(bool): If set to `True`, prompt and input will float to the
-                         bottom of the screen when `term.term_mode` is enabled.
-        """
-        return safeeval.const(readline(None, prompt, float))
-    __builtin__.input = input
+    builtins.input = input

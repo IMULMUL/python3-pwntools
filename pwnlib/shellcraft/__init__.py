@@ -120,7 +120,7 @@ class module(ModuleType):
     def eval(self, item):
         return constants.eval(item)
 
-    import registers
+    from . import registers
 
 # To prevent garbage collection
 tether = sys.modules[__name__]
