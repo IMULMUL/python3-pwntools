@@ -26,7 +26,7 @@ from . import termcap
 settings = None
 _graphics_mode = False
 
-fd = sys.stderr
+fd = sys.stderr.buffer
 
 def show_cursor():
     do('cnorm')
@@ -87,8 +87,8 @@ def resetterm():
         termios.tcsetattr(fd.fileno(), termios.TCSADRAIN, settings)
     show_cursor()
     do('rmkx')
-    fd.write(' \x08') # XXX: i don't know why this is needed...
-                      #      only necessary when suspending the process
+    fd.write(b' \x08') # XXX: i don't know why this is needed...
+                       #      only necessary when suspending the process
 
 def init():
     atexit.register(resetterm)
@@ -97,7 +97,7 @@ def init():
     signal.signal(signal.SIGTSTP, handler_sigstop)
     signal.signal(signal.SIGCONT, handler_sigcont)
     # we start with one empty cell at the current cursor position
-    put('\x1b[6n')
+    put(b'\x1b[6n')
     fd.flush()
     s = b''
     while True:
@@ -146,9 +146,9 @@ def init():
 
 def put(s):
     if isinstance(s, str):
-        fd.write(s)
-    else:
-        fd.write(s.decode('utf-8'))
+        s = s.encode('utf-8')
+
+    fd.write(s)
 
 def flush():
     fd.flush()
@@ -337,7 +337,7 @@ def render_cell(cell, clear_after=False):
                     col = 0
                     row += 1
                 if col < indent:
-                    put(' ' * (indent - col))
+                    put(b' ' * (indent - col))
                     col = indent
                 c = x[i]
                 put(c)
@@ -400,21 +400,21 @@ def render_cell(cell, clear_after=False):
                         row, col = saved_cursor
         elif t == LF:
             if clear_after and col <= width - 1:
-                put('\x1b[K') # clear line
-            put('\n')
+                put(b'\x1b[K') # clear line
+            put(b'\n')
             col = 0
             row += 1
         elif t == BS:
             if col > 0:
-                put('\x08')
+                put(b'\x08')
                 col -= 1
         elif t == CR:
-            # put('\r')
+            # put(b'\r')
             col = 0
         elif t == SOH:
-            put('\x01')
+            put(b'\x01')
         elif t == STX:
-            put('\x02')
+            put(b'\x02')
         elif t == OOB:
             put(x)
         if row >= height:
@@ -440,7 +440,7 @@ def render_from(i, force=False, clear_after=False):
         render_cell(c, clear_after=clear_after)
         e = c.end
     if clear_after and (e[0] < scroll or e[1] < width - 1):
-        put('\x1b[J')
+        put(b'\x1b[J')
     flush()
 
 def redraw():
@@ -475,7 +475,7 @@ def output(s='', float=False, priority=10, frozen=False,
             i = len(cells) - 1
             while cells[i].float and i > 0:
                 i -= 1
-        # put('xx %d\n' % i)
+        # put(b'xx %d\n' % i)
         cell = Cell()
         cell.content = parse(s)
         cell.frozen = frozen

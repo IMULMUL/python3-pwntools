@@ -380,7 +380,7 @@ def readline(_size=None, prompt='', float=True, priority=10):
                 if eof:
                     return ''
                 else:
-                    buffer = (buffer_left + buffer_right).encode('utf-8')
+                    buffer = buffer_left + buffer_right
                     if buffer:
                         history.insert(0, buffer)
                     return buffer + '\n'

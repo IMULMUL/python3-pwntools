@@ -12,7 +12,7 @@ from . import termcap
 try:    _fd = sys.stdin.fileno()
 except: _fd = open('/dev/null', 'r').fileno()
 
-def getch(timeout=None):
+def getch(timeout=0):
     while True:
         try:
             rfds, _wfds, _xfds = select.select([_fd], [], [], timeout)
@@ -34,7 +34,7 @@ def getraw(timeout=None):
         cs.append(c)
         if c is None: # EOF
             break
-        c = getch()
+        c = getch(0)
     return cs
 
 class Matcher:
@@ -205,7 +205,7 @@ def _init_ti_table():
             continue
         k = _name_to_key(fname)
         if k:
-            _ti_table.append((list(map(ord, seq)), k))
+            _ti_table.append((list(seq), k))
 
 # csi
 def _parse_csi(offset):
@@ -424,7 +424,7 @@ def _peek_simple():
                 k = Key(kc.TYPE_UNICODE)
                 if c0 == 0:
                     k.code = ' '
-                elif chr(c0 + 0x40) in string.uppercase:
+                elif chr(c0 + 0x40) in string.ascii_uppercase:
                     k.code = chr(c0 + 0x60)
                 else:
                     k.code = chr(c0 + 0x40)

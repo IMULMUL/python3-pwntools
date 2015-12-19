@@ -33,7 +33,7 @@ def can_init():
 
     # Check fancy REPLs
     mods = sys.modules.keys()
-    for repl in ['IPython', 'bpython', 'dreampielib']:
+    for repl in ('IPython', 'bpython', 'dreampielib'):
         if repl in mods:
             return False
 

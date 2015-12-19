@@ -2,7 +2,7 @@
 __all__ = ['spinners']
 
 def billboard(msg, window):
-    return [msg[i : i + window].ljust(window, ' ') for i in range(len(msg))]
+    return [msg[i: i + window].ljust(window, ' ') for i in range(len(msg))]
 
 spinners = [
     ['/.......','./......','../.....','.../....','..../...','...../..','....../.',
@@ -20,4 +20,4 @@ spinners = [
     ['▖', '▘', '▝', '▗'],
     ['.', 'o', 'O', '°', ' ', ' ', '°', 'O', 'o', '.', ' ', ' '],
     ['<', '<', '∧', '∧', '>', '>', 'v', 'v'],
-    ]
+]

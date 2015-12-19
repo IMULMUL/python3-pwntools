@@ -776,7 +776,7 @@ def bruteforce(func, alphabet, length, method = 'upto', start = None, databag = 
       if the search space was exhausted.
 
     Example:
-      >>> bruteforce(lambda x: x == 'hello', string.lowercase, length = 10)
+      >>> bruteforce(lambda x: x == 'hello', string.ascii_lowercase, length = 10)
       'hello'
       >>> bruteforce(lambda x: x == 'hello', 'hllo', 5) is None
       True
