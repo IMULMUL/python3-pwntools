@@ -30,7 +30,7 @@ def closure():
             return bool(int(s))
         else:
             raise ValueError('must be integer or boolean')
-    # parse environtment variables
+    # parse environment variables
     for k, v in os.environ.items():
         if not k.startswith('PWNLIB_'):
             continue
