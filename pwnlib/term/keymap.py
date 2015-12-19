@@ -66,7 +66,7 @@ class Keymap:
             elif desc == '<any>':
                 self.on_key(cb)
             else:
-                ms = map(key.Matcher, desc.split(' '))
+                ms = list(map(key.Matcher, desc.split(' ')))
                 if not ms:
                     return
                 t = self._top
@@ -77,7 +77,7 @@ class Keymap:
                 cbs.append(cb)
 
     def unregister(self, desc, cb=None):
-        ms = map(key.Matcher, desc.split(' '))
+        ms = list(map(key.Matcher, desc.split(' ')))
         if not ms:
             return
         t = self._top

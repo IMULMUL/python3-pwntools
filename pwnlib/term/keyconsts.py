@@ -142,7 +142,7 @@ KEY_NAMES = {
     KEY_KPCOMMA   : '<kp comma>',
     KEY_KPPERIOD  : '<kp period>',
     KEY_KPEQUALS  : '<kp equals>',
-    }
+}
 
 KEY_NAMES_REVERSE = {v:k for k, v in KEY_NAMES.items()}
 
@@ -298,7 +298,7 @@ STRNAMES = [
     'kspd',
     'kund',
     'kcuu1',
-    ]
+]
 
 STRFNAMES = [
     'a1',
@@ -450,7 +450,7 @@ STRFNAMES = [
     'suspend',
     'undo',
     'up',
-    ]
+]
 
 FUNCSYMS = {
     'backspace' : (KEY_DEL,       MOD_NONE ),
@@ -494,4 +494,4 @@ FUNCSYMS = {
     'suspend'   : (KEY_SUSPEND,   MOD_NONE ),
     'undo'      : (KEY_UNDO,      MOD_NONE ),
     'up'        : (KEY_UP,        MOD_NONE ),
-    }
+}

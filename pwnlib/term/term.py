@@ -235,10 +235,10 @@ def parse_utf8(buf, offset):
 
 def parse(s):
     global _graphics_mode
-    if isinstance(s, unicode):
+    if isinstance(s, str):
         s = s.encode('utf8')
     out = []
-    buf = map(ord, s)
+    buf = list(s)
     i = 0
     while True:
         if i >= len(buf):
@@ -246,12 +246,12 @@ def parse(s):
         x = None
         c = buf[i]
         if c >= 0x20 and c <= 0x7e:
-            x = (STR, [chr(c)])
+            x = (STR, [bytes([c])])
             i += 1
         elif c & 0xc0:
             j = parse_utf8(buf, i)
             if j:
-                x = (STR, [''.join(map(chr, buf[i : j]))])
+                x = (STR, [bytes(buf[i: j])])
                 i = j
         elif c == 0x1b and len(buf) > i + 1:
             c1 = buf[i + 1]
@@ -259,7 +259,7 @@ def parse(s):
                 ret = parse_csi(buf, i + 2)
                 if ret:
                     cmd, args, j = ret
-                    x = (CSI, (cmd, args, ''.join(map(chr, buf[i : j]))))
+                    x = (CSI, (cmd, args, bytes(buf[i: j])))
                     i = j
             elif c1 == ord(']'):
                 # XXX: this is a dirty hack:
@@ -269,10 +269,10 @@ def parse(s):
                 #  iteration of this terminal emulation/compatibility layer
                 #  related: https://unix.stackexchange.com/questions/5936/can-i-set-my-local-machines-terminal-colors-to-use-those-of-the-machine-i-ssh-i
                 try:
-                    j = s.index('\x07', i)
+                    j = s.index(b'\x07', i)
                 except:
                     try:
-                        j = s.index('\x1b\\', i)
+                        j = s.index(b'\x1b\\', i)
                     except:
                         j = 1
                 x = (OOB, s[i:j + 1])
@@ -301,7 +301,7 @@ def parse(s):
             x = (BS, None)
             i += 1
         elif c == 0x09:
-            x = (STR, ['    ']) # who the **** uses tabs anyway?
+            x = (STR, [b'    ']) # who the **** uses tabs anyway?
             i += 1
         elif c == 0x0a:
             x = (LF, None)
@@ -312,7 +312,7 @@ def parse(s):
         if _graphics_mode:
             continue
         if x is None:
-            x = (STR, [c for c in '\\x%02x' % c])
+            x = (STR, [bytes('\\x%02x' % c, 'utf-8')])
             i += 1
         if x[0] == STR and out and out[-1][0] == STR:
             out[-1][1].extend(x[1])

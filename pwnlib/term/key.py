@@ -12,7 +12,7 @@ from . import termcap
 try:    _fd = sys.stdin.fileno()
 except: _fd = open('/dev/null', 'r').fileno()
 
-def getch(timeout=0):
+def getch(timeout=None):
     while True:
         try:
             rfds, _wfds, _xfds = select.select([_fd], [], [], timeout)
@@ -205,7 +205,7 @@ def _init_ti_table():
             continue
         k = _name_to_key(fname)
         if k:
-            _ti_table.append((map(ord, seq), k))
+            _ti_table.append((list(map(ord, seq)), k))
 
 # csi
 def _parse_csi(offset):
@@ -271,7 +271,7 @@ def _csi_ss3(cmd, args):
     return k
 
 def _csi_u(cmd, args):
-    k = Key(kc.TYPE_UNICODE, unichr(args[0]))
+    k = Key(kc.TYPE_UNICODE, chr(args[0]))
     if len(args) > 1 and args[1]:
         k.mods |= args[1] - 1
     return k
