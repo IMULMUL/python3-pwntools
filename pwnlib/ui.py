@@ -1,5 +1,4 @@
 import time
-import types
 
 from . import term
 from .log import getLogger
@@ -18,7 +17,7 @@ def yesno(prompt, default = None):
       `True` if the answer was "yes", `False` if "no"
 """
 
-    if not isinstance(default, (bool, types.NoneType)):
+    if not isinstance(default, (bool, type(None))):
         raise ValueError('yesno(): default must be a boolean or None')
 
     if term.term_mode:
@@ -71,7 +70,7 @@ def options(prompt, opts, default = None):
       The users choice in the form of an integer.
 """
 
-    if not isinstance(default, (int, long, types.NoneType)):
+    if not isinstance(default, (int, type(None))):
         raise ValueError('options(): default must be a number or None')
 
     if term.term_mode:
@@ -154,7 +153,7 @@ def pause(n = None):
         else:
             log.info('Paused (press enter to continue)')
             raw_input('')
-    elif isinstance(n, (int, long)):
+    elif isinstance(n, int):
         with log.waitfor("Waiting") as l:
             for i in range(n, 0, -1):
                 l.status('%d... ' % i)

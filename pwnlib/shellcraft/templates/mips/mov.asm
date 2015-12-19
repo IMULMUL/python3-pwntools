@@ -28,7 +28,7 @@ def okay(s):
 
 %>
 .set noat
-%if not isinstance(src, (int, long)):
+%if not isinstance(src, int):
     %if dst == src:
         /* move ${dst}, ${src} is a no-op */
     %else:

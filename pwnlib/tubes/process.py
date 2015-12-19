@@ -200,10 +200,10 @@ class process(tube):
         # - Must be a list/tuple of strings
         # - Each string must not contain '\x00'
         #
-        if isinstance(argv, (str, unicode)):
+        if isinstance(argv, (bytes, str)):
             argv = [argv]
 
-        if not all(isinstance(arg, (str, unicode)) for arg in argv):
+        if not all(isinstance(arg, (bytes, str)) for arg in argv):
             log.error("argv must be strings: %r" % argv)
 
         # Create a duplicate so we can modify it
@@ -260,9 +260,9 @@ class process(tube):
         env = dict(env or os.environ)
 
         for k,v in env.items():
-            if not isinstance(k, (str, unicode)):
+            if not isinstance(k, (bytes, str)):
                 log.error('Environment keys must be strings: %r' % k)
-            if not isinstance(k, (str, unicode)):
+            if not isinstance(k, (bytes, str)):
                 log.error('Environment values must be strings: %r=%r' % (k,v))
             if '\x00' in k[:-1]:
                 log.error('Inappropriate nulls in env key: %r' % (k))

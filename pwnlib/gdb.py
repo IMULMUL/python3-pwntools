@@ -62,7 +62,7 @@ def debug(args, exe=None, execute=None, ssh=None, arch=None):
     Returns:
         A tube connected to the target process
     """
-    if isinstance(args, (str, unicode)):
+    if isinstance(args, (bytes, str)):
         args = [args]
 
     orig_args = args
@@ -182,7 +182,7 @@ def attach(target, execute = None, exe = None, arch = None):
 
     # let's see if we can find a pid to attach to
     pid = None
-    if   isinstance(target, (int, long)):
+    if   isinstance(target, int):
         # target is a pid, easy peasy
         pid = target
     elif isinstance(target, str):

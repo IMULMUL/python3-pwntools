@@ -36,7 +36,7 @@ class listen(sock):
             fam = socket.AF_INET
         elif fam == 6 or fam.lower() in ['ipv6', 'ip6', 'v6', '6']:
             fam = socket.AF_INET6
-        elif isinstance(fam, (int, long)):
+        elif isinstance(fam, int):
             pass
         else:
             log.error("remote(): family %r is not supported" % fam)
@@ -45,7 +45,7 @@ class listen(sock):
             typ = socket.SOCK_STREAM
         elif typ == "udp":
             typ = socket.SOCK_DGRAM
-        elif isinstance(typ, (int, long)):
+        elif isinstance(typ, int):
             pass
         else:
             log.error("remote(): type %r is not supported" % typ)

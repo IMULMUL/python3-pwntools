@@ -823,7 +823,7 @@ class ContextType(object):
         Can be a string or an iterable of strings.  In the latter case the first
         entry is the terminal and the rest are default arguments.
         """
-        if isinstance(value, (str, unicode)):
+        if isinstance(value, (bytes, str)):
             return [value]
         return value
 

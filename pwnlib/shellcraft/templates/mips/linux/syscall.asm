@@ -10,7 +10,7 @@ Args: [syscall_number, \*args]
 Any of the arguments can be expressions to be evaluated by :func:`pwnlib.constants.eval`.
 </%docstring>
 <%
-    if isinstance(syscall, (str, unicode)) and syscall.startswith('SYS_'):
+    if isinstance(syscall, (bytes, str)) and syscall.startswith('SYS_'):
         syscall_repr = syscall[4:] + "(%s)"
         args = []
     else:

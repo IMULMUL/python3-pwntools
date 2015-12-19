@@ -289,7 +289,7 @@ class tube(Timeout):
 
         """
         # Convert string into singleton tupple
-        if isinstance(delims, (str, unicode)):
+        if isinstance(delims, (bytes, str)):
             delims = (delims,)
 
         # Longest delimiter for tracking purposes
@@ -503,7 +503,7 @@ class tube(Timeout):
             >>> t.recvline_contains(('car', 'train'))
             'bicycle car train'
         """
-        if isinstance(items, (str,unicode)):
+        if isinstance(items, (bytes, str)):
             items = (items,)
 
         def pred(line):
@@ -542,7 +542,7 @@ class tube(Timeout):
                 'World'
         """
         # Convert string into singleton tupple
-        if isinstance(delims, (str, unicode)):
+        if isinstance(delims, (bytes, str)):
             delims = (delims,)
 
         return self.recvline_pred(lambda line: any(map(line.startswith, delims)),
@@ -574,7 +574,7 @@ class tube(Timeout):
                 'Kaboodle'
         """
         # Convert string into singleton tupple
-        if isinstance(delims, (str, unicode)):
+        if isinstance(delims, (bytes, str)):
             delims = (delims,)
 
         delims = tuple(delim + self.newline for delim in delims)
@@ -596,7 +596,7 @@ class tube(Timeout):
         all data is buffered and an empty string (``''``) is returned.
         """
 
-        if isinstance(regex, (str, unicode)):
+        if isinstance(regex, (bytes, str)):
             regex = re.compile(regex)
 
         if exact:
@@ -619,7 +619,7 @@ class tube(Timeout):
         all data is buffered and an empty string (``''``) is returned.
         """
 
-        if isinstance(regex, (str, unicode)):
+        if isinstance(regex, (bytes, str)):
             regex = re.compile(regex)
 
         if exact:

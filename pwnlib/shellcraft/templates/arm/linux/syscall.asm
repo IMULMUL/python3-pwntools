@@ -35,7 +35,7 @@ Example:
         swi #0
 </%docstring>
 <%
-  if isinstance(syscall, (str, unicode)) and syscall.startswith('SYS_'):
+  if isinstance(syscall, (bytes, str)) and syscall.startswith('SYS_'):
       syscall_repr = syscall[4:] + "(%s)"
       args = []
   else:

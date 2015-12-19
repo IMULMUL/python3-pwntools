@@ -591,7 +591,7 @@ class ssh(Timeout):
 
         argv      = argv or []
 
-        if isinstance(argv, (str, unicode)):
+        if isinstance(argv, (bytes, str)):
             argv = [argv]
 
         if not isinstance(argv, (list, tuple)):

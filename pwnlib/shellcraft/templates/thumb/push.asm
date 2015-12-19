@@ -47,7 +47,7 @@ Example:
 
 <%
   value_orig = value
-  if isinstance(value, (str, unicode)):
+  if isinstance(value, (bytes, str)):
     try:
       with ctx.local(arch = 'thumb'):
         value = constants.eval(value)
@@ -55,7 +55,7 @@ Example:
       pass
 %>
 
-% if isinstance(value, (int,long)):
+% if isinstance(value, int):
     /* push ${repr(value_orig)} */
     ${re.sub(r'^\s*/.*\n', '', thumb.pushstr(packing.pack(value), False), 1)}
 % else:

@@ -98,8 +98,8 @@ def pack(number, word_size = None, endianness = None, sign = None, **kwargs):
         endianness = context.endianness
         sign       = context.sign
 
-        if not isinstance(number, (int,long)):
-            raise ValueError("pack(): number must be of type (int,long) (got %r)" % type(number))
+        if not isinstance(number, int):
+            raise ValueError("pack(): number must be of type int (got %r)" % type(number))
 
         if sign not in [True, False]:
             raise ValueError("pack(): sign must be either True or False (got %r)" % sign)
@@ -117,7 +117,7 @@ def pack(number, word_size = None, endianness = None, sign = None, **kwargs):
                 if sign == False:
                     raise ValueError("pack(): number does not fit within word_size")
                 word_size = ((number + 1).bit_length() | 7) + 1
-        elif not isinstance(word_size, (int, long)) or word_size <= 0:
+        elif not isinstance(word_size, int) or word_size <= 0:
             raise ValueError("pack(): word_size must be a positive integer or the string 'all'")
 
         if sign == True:
@@ -192,7 +192,7 @@ def unpack(data, word_size = None, endianness = None, sign = None, **kwargs):
         # Verify that word_size make sense
         if word_size == 'all':
             word_size = len(data) * 8
-        elif not isinstance(word_size, (int, long)) or word_size <= 0:
+        elif not isinstance(word_size, int) or word_size <= 0:
             raise ValueError("unpack(): word_size must be a positive integer or the string 'all'")
 
         byte_size = (word_size + 7) / 8
@@ -480,11 +480,11 @@ def _flat(args, preprocessor, packer):
 
         if isinstance(arg, (list, tuple)):
             out.append(_flat(arg, preprocessor, packer))
-        elif isinstance(arg, str):
+        elif isinstance(arg, bytes):
             out.append(arg)
-        elif isinstance(arg, unicode):
+        elif isinstance(arg, str):
             out.append(arg.encode('utf8'))
-        elif isinstance(arg, (int, long)):
+        elif isinstance(arg, int):
             out.append(packer(arg))
         elif isinstance(arg, bytearray):
             out.append(str(arg))
@@ -601,7 +601,7 @@ def fit(pieces, **kwargs):
     # convert str keys to offsets
     pieces_ = dict()
     for k, v in pieces.items():
-        if isinstance(k, (int, long)):
+        if isinstance(k, int):
             pass
         elif isinstance(k, str):
             while k not in out:

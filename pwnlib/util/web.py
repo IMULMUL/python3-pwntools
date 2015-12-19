@@ -63,7 +63,7 @@ def wget(url, save=None, timeout=5, **kwargs):
 
         # Save to the target file if provided
         if save:
-            if not isinstance(save, (str, unicode)):
+            if not isinstance(save, (bytes, str)):
                 save = os.path.basename(url)
                 save = save or tempfile.NamedTemporaryFile(dir='.', delete=False).name
             with file(save,'wb+') as f:

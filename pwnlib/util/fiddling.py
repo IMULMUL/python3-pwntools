@@ -124,7 +124,7 @@ def bits(s, endian = 'big', zero = 0, one = 1):
                 out += byte
             else:
                 out += byte[::-1]
-    elif isinstance(s, (int, long)):
+    elif isinstance(s, int):
         if s == 0:
             out.append(zero)
         while s:
@@ -305,7 +305,7 @@ def xor(*args, **kwargs):
     if strs == []:
         return ''
 
-    if isinstance(cut, (int, long)):
+    if isinstance(cut, int):
         cut = cut
     elif cut == 'left':
         cut = len(strs[0])
@@ -407,15 +407,15 @@ def rol(n, k, word_size = None):
 
     word_size = word_size or context.word_size
 
-    if not isinstance(word_size, (int, long)) or word_size <= 0:
+    if not isinstance(word_size, int) or word_size <= 0:
         raise ValueError("rol(): 'word_size' must be a strictly positive integer")
 
-    if not isinstance(k, (int, long)):
+    if not isinstance(k, int):
         raise ValueError("rol(): 'k' must be an integer")
 
-    if isinstance(n, (str, unicode, list, tuple)):
+    if isinstance(n, (bytes, str, list, tuple)):
         return n[k % len(n):] + n[:k % len(n)]
-    elif isinstance(n, (int, long)):
+    elif isinstance(n, int):
         k = k % word_size
         n = (n << k) | (n >> (word_size - k))
         n &= (1 << word_size) - 1

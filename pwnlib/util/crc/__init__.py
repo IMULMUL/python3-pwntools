@@ -22,7 +22,7 @@ from .. import packing
 
 class BitPolynom(object):
     def __init__(self, n):
-        if not isinstance(n, (int, long)):
+        if not isinstance(n, int):
             raise TypeError("Polynomial must be called with an integer or a list")
         if n < 0:
             raise ValueError("Polynomials cannot be negative: %d" % n)

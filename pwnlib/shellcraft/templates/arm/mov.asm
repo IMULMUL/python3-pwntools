@@ -42,7 +42,7 @@ if not src in regs:
         src = constants.eval(src)
 
 %>
-%if not isinstance(src, (int, long)):
+%if not isinstance(src, int):
     %if dst == src:
     /* mov %{dest}, ${src} is a no-op */
     %else:

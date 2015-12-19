@@ -46,7 +46,7 @@ Example:
 <%
 all_regs = ['r' + str(n) for n in range(16)] + ['sp', 'fp', 'pc', 'lr']
 src_orig = src
-if isinstance(src, (str, unicode)):
+if isinstance(src, (bytes, str)):
     src = src.strip()
     if src.lower() in all_regs:
         src = src.lower()
@@ -61,7 +61,7 @@ if isinstance(src, (str, unicode)):
 %>
 % if dst == src:
   /* moving ${src} into ${dst}, but this is a no-op */
-% elif not isinstance(src, (int, long)):
+% elif not isinstance(src, int):
     mov ${dst}, ${src}
 % else:
   <%

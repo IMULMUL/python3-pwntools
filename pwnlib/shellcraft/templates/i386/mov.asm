@@ -138,7 +138,7 @@ else:
     % else:
     mov ${dest}, ${src}
     % endif
-% elif isinstance(src, (int, long)):
+% elif isinstance(src, int):
 ## Special case for zeroes
     % if src == 0:
         xor ${dest}, ${dest}

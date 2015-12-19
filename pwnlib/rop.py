@@ -41,7 +41,7 @@ class ROP(object):
         # Permit singular ROP(elf) vs ROP([elf])
         if isinstance(elfs, ELF):
             elfs = [elfs]
-        elif isinstance(elfs, (str, unicode)):
+        elif isinstance(elfs, (bytes, str)):
             elfs = [ELF(elfs)]
 
         self.elfs  = elfs
@@ -64,7 +64,7 @@ class ROP(object):
             for elf in self.elfs:
                 if resolvable in elf.symbols:
                     return elf.symbols[resolvable]
-        if isinstance(resolvable, (int,long)):
+        if isinstance(resolvable, int):
             return resolvable
         return None
 
@@ -92,10 +92,10 @@ class ROP(object):
     def _output_struct(self, value, output):
         next_index = len(output)
 
-        if isinstance(value, (int, long)):
+        if isinstance(value, int):
             return value
-        elif isinstance(value, (unicode, str)):
-            if isinstance(value, unicode):
+        elif isinstance(value, (bytes, str)):
+            if isinstance(value, str):
                 value = value.encode('utf8')
 
             while True:
@@ -165,7 +165,7 @@ class ROP(object):
         # the second-to-last call.
         if len(chain) > 1 and not chain[-1][2] and chain[-2][2]:
             # This optimization does not work if a raw string is on the stack
-            if not isinstance(chain[-1][0], (str, unicode)):
+            if not isinstance(chain[-1][0], (bytes, str)):
                 chain[-2][1] = [chain[-1][0]]
                 chain[-2][3] = 0
                 chain.pop()
@@ -216,7 +216,7 @@ class ROP(object):
             for i, l in enumerate(rop):
                 addrs[i] = addr
                 for v in l:
-                    if isinstance(v, (int, long, tuple)):
+                    if isinstance(v, (int, tuple)):
                         addr += self.align
                     else:
                         addr += len(v)
@@ -227,7 +227,7 @@ class ROP(object):
         out = []
         for l in rop:
             for v in l:
-                if isinstance(v, (int, long)):
+                if isinstance(v, int):
                     out.append((addr, v, False))
                     addr += self.align
                 elif isinstance(v, str):
@@ -267,7 +267,7 @@ class ROP(object):
         for addr, value, was_ref in rop:
             if isinstance(value, str):
                 line   = "0x%04x: %16r" % (addr, value.rstrip('\x00'))
-            elif isinstance(value, (int, long)):
+            elif isinstance(value, int):
                 if was_ref:
                     line = "0x%04x: %#16x (%+d)" % (
                         addr,

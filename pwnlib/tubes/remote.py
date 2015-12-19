@@ -73,7 +73,7 @@ class remote(sock):
     @staticmethod
     def _get_family(fam):
 
-        if isinstance(fam, (int, long)):
+        if isinstance(fam, int):
             pass
         elif fam == 'any':
             fam = socket.AF_UNSPEC
@@ -89,7 +89,7 @@ class remote(sock):
     @staticmethod
     def _get_type(typ):
 
-        if isinstance(typ, (int, long)):
+        if isinstance(typ, int):
             pass
         elif typ == "tcp":
             typ = socket.SOCK_STREAM

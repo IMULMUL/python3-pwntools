@@ -66,8 +66,8 @@ def group(n, lst, underfull_action = 'ignore', fill_value = None):
             fill_value = (fill_value,)
         elif isinstance(lst, list):
             fill_value = [fill_value]
-        elif isinstance(lst, (str, unicode)):
-            if not isinstance(fill_value, (str, unicode)):
+        elif isinstance(lst, (bytes, str)):
+            if not isinstance(fill_value, (bytes, str)):
                 raise ValueError("group(): cannot fill a string with a non-string")
         else:
             raise ValueError("group(): 'lst' must be either a tuple, list or string")
