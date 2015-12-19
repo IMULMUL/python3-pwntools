@@ -7,15 +7,15 @@ from pwn import *
 context.log_level = 0
 
 n = 1
-h = log.waitfor('spinners running', status = str(n))
+h = log.waitfor('spinners running', status=str(n))
 
 hs = []
-print 'type "q" to quit'
+print('type "q" to quit')
 while True:
-    s = raw_input('> ')
+    s = input('> ')
     if s == 'q':
         break
-    hs.append(log.waitfor(s, status = 'running'))
+    hs.append(log.waitfor(s, status='running'))
     n += 1
     h.status(str(n))
 

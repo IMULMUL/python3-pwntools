@@ -6,8 +6,8 @@ from pwn import *
 
 splash()
 
-h = log.waitfor("You wrote", status = "--")
+h = log.waitfor("You wrote", status="--")
 
 while True:
-    l = raw_input('> ')
+    l = input('> ')
     h.status(l.upper())
