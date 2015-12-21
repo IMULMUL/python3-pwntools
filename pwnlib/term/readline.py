@@ -242,7 +242,7 @@ def control_c(*_):
     elif buffer_left or buffer_right:
         clear()
     else:
-        raise KeyboardInterrupt
+        raise KeyboardInterrupt from None
 
 def control_d(*_):
     if buffer_left or buffer_right:
