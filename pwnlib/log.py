@@ -138,7 +138,7 @@ _msgtype_prefixes = {
 # in the `pwnlib.term.spinners` module
 _spinner_style = text.bold_blue
 
-class Progress(object):
+class Progress:
     """
     Progress logger used to generate log records associated with some running
     job.  Instances can be used as context managers which will automatically
@@ -219,7 +219,7 @@ class Progress(object):
         else:
             self.failure()
 
-class Logger(object):
+class Logger:
     """
     A class akin to the :class:`logging.LoggerAdapter` class.  All public
     methods defined on :class:`logging.Logger` instances are defined on this

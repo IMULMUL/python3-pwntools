@@ -52,7 +52,7 @@ class _defaultdict(dict):
     def __missing__(self, key):
         return self.default[key]
 
-class _DictStack(object):
+class _DictStack:
     """
     Manages a dictionary-like object, permitting saving and restoring from
     a stack of states via :func:`push` and :func:`pop`.
@@ -234,11 +234,11 @@ def _longest(d):
     """
     return collections.OrderedDict((k,d[k]) for k in sorted(d, key=len, reverse=True))
 
-def TlsProperty(object):
+class TlsProperty:
     def __get__(self, obj, objtype=None):
         return obj._tls
 
-class ContextType(object):
+class ContextType:
     r"""
     Class for specifying information about the target machine.
     Intended for use as a pseudo-singleton through the global
@@ -470,7 +470,7 @@ class ContextType(object):
             >>> print context.timeout
             1.0
         """
-        class LocalContext(object):
+        class LocalContext:
             def __enter__(a):
                 self._tls.push()
                 self.update(**{k:v for k,v in kwargs.items() if v is not None})

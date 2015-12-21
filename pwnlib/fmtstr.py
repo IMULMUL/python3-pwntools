@@ -9,7 +9,7 @@ from pwnlib.util.packing import *
 
 log = getLogger(__name__)
 
-class FmtStr(object):
+class FmtStr:
     def __init__(self, execute_fmt, offset = None, padlen = 0, numbwritten = 0):
         self.execute_fmt = execute_fmt
         self.offset = offset

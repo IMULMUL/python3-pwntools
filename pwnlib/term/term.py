@@ -165,7 +165,7 @@ def goto(arg):
 cells = []
 scroll = 0
 
-class Cell(object):
+class Cell:
     pass
 
 class Handle:

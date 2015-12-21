@@ -12,7 +12,7 @@ from .util import packing
 
 log = getLogger(__name__)
 
-class ROP(object):
+class ROP:
     """Class which simplifies the generation of ROP-chains.
 
     Example:

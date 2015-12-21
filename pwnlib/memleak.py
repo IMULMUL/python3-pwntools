@@ -4,7 +4,7 @@ from .util.packing import unpack
 
 log = getLogger(__name__)
 
-class MemLeak(object):
+class MemLeak:
     """MemLeak is a caching and heuristic tool for exploiting memory leaks.
 
     It can be used as a decorator, around functions of the form:
