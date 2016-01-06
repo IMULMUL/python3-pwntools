@@ -114,9 +114,9 @@ class _Tls_DictStack(threading.local, _DictStack):
 
         >>> t = pwnlib.context._Tls_DictStack({})
         >>> t['key'] = 'value'
-        >>> print t
+        >>> print(t)
         {'key': 'value'}
-        >>> def p(): print t
+        >>> def p(): print(t)
         >>> thread = threading.Thread(target=p)
         >>> _ = (thread.start(), thread.join())
         {}
@@ -170,9 +170,9 @@ class Thread(threading.Thread):
         >>> context.clear()
         >>> context.update(arch='arm')
         >>> def p():
-        ...     print context.arch
+        ...     print(context.arch)
         ...     context.arch = 'mips'
-        ...     print context.arch
+        ...     print(context.arch)
         >>> # Note that a normal Thread starts with a clean context
         >>> # (i386 is the default architecture)
         >>> t = threading.Thread(target=p)
@@ -180,7 +180,7 @@ class Thread(threading.Thread):
         i386
         mips
         >>> # Note that the main Thread's context is unchanged
-        >>> print context.arch
+        >>> print(context.arch)
         arm
         >>> # Note that a context-aware Thread receives a copy of the context
         >>> t = pwnlib.context.Thread(target=p)
@@ -188,7 +188,7 @@ class Thread(threading.Thread):
         arm
         mips
         >>> # Again, the main thread is unchanged
-        >>> print context.arch
+        >>> print(context.arch)
         arm
 
     Implementation Details:
@@ -206,7 +206,7 @@ class Thread(threading.Thread):
         super(Thread, self).__init__(*args, **kwargs)
         self.old = context.copy()
 
-    def __bootstrap(self):
+    def _bootstrap(self):
         """
         Implementation Details:
             This only works because the class is named ``Thread``.
@@ -214,7 +214,7 @@ class Thread(threading.Thread):
             differently.
         """
         context.update(**self.old)
-        super(Thread, self).__bootstrap()
+        super(Thread, self)._bootstrap()
 
 def _longest(d):
     """
@@ -227,12 +227,12 @@ def _longest(d):
     >>> data = {'a': 1, 'bb': 2, 'ccc': 3}
     >>> _longest(data) == data
     True
-    >>> for i in _longest(data): print i
+    >>> for i in _longest(data): print(i)
     ccc
     bb
     a
     """
-    return collections.OrderedDict((k,d[k]) for k in sorted(d, key=len, reverse=True))
+    return collections.OrderedDict((k, d[k]) for k in sorted(d, key=len, reverse=True))
 
 class TlsProperty:
     def __get__(self, obj, objtype=None):
@@ -273,7 +273,7 @@ class ContextType:
         >>> context.bits
         32
         >>> def nop():
-        ...   print pwnlib.asm.asm('nop').encode('hex')
+        ...   print(pwnlib.asm.asm('nop').encode('hex'))
         >>> nop()
         00f020e3
         >>> with context.local(arch = 'i386'):
@@ -318,7 +318,7 @@ class ContextType:
     }
 
     #: Valid values for :meth:`pwnlib.context.ContextType.os`
-    oses = sorted(('linux','freebsd','windows'))
+    oses = sorted(('linux', 'freebsd', 'windows'))
 
     big_32    = {'endian': 'big', 'bits': 32}
     big_64    = {'endian': 'big', 'bits': 64}
@@ -433,11 +433,11 @@ class ContextType:
         for arg in args:
             self.update(**arg)
 
-        for k,v in kwargs.items():
-            setattr(self,k,v)
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     def __repr__(self):
-        v = sorted("%s = %r" % (k,v) for k,v in self._tls._current.items())
+        v = sorted("%s = %r" % (k, v) for k, v in self._tls._current.items())
         return '%s(%s)' % (self.__class__.__name__, ', '.join(v))
 
     def local(self, **kwargs):
@@ -459,21 +459,21 @@ class ContextType:
             >>> context.timeout = 1
             >>> context.timeout == 1
             True
-            >>> print context.timeout
+            >>> print(context.timeout)
             1.0
             >>> with context.local(timeout = 2):
-            ...     print context.timeout
+            ...     print(context.timeout)
             ...     context.timeout = 3
-            ...     print context.timeout
+            ...     print(context.timeout)
             2.0
             3.0
-            >>> print context.timeout
+            >>> print(context.timeout)
             1.0
         """
         class LocalContext:
             def __enter__(a):
                 self._tls.push()
-                self.update(**{k:v for k,v in kwargs.items() if v is not None})
+                self.update(**{k: v for k, v in kwargs.items() if v is not None})
                 return self
 
             def __exit__(a, *b, **c):
@@ -572,17 +572,17 @@ class ContextType:
 
         # Attempt to perform convenience and legacy compatibility
         # transformations.
-        transform = {'x86':'i386', 'ppc': 'powerpc', 'x86_64': 'amd64'}
+        transform = {'x86': 'i386', 'ppc': 'powerpc', 'x86_64': 'amd64'}
         for k, v in transform.items():
             if arch.startswith(k):
-                arch = arch.replace(k,v,1)
+                arch = arch.replace(k, v, 1)
 
         try:
             defaults = ContextType.architectures[arch]
         except KeyError:
             raise AttributeError('AttributeError: arch must be one of %r' % sorted(ContextType.architectures))
 
-        for k,v in ContextType.architectures[arch].items():
+        for k, v in ContextType.architectures[arch].items():
             if k not in self._tls:
                 self._tls[k] = v
 
@@ -633,7 +633,7 @@ class ContextType:
 
         """
         # Cyclic imports... sorry Idolf.
-        from ..elf     import ELF
+        from ..elf import ELF
 
         e = ELF(binary)
 
@@ -661,10 +661,11 @@ class ContextType:
             ...
             AttributeError: bits must be >= 0 (0)
         """
-        return self.bits/8
+        return self.bits // 8
+
     @bytes.setter
     def bytes(self, value):
-        self.bits = value*8
+        self.bits = value * 8
 
 
     @_validator
@@ -729,15 +730,19 @@ class ContextType:
             AttributeError: log_level must be an integer or one of ['CRITICAL', 'DEBUG', 'ERROR', 'INFO', 'NOTSET', 'WARN', 'WARNING']
         """
         # If it can be converted into an int, success
-        try:                    return int(value)
-        except ValueError:  pass
+        try:
+            return int(value)
+        except ValueError:
+            pass
 
         # If it is defined in the logging module, success
-        try:                    return getattr(logging, value.upper())
-        except AttributeError:  pass
+        try:
+            return getattr(logging, value.upper())
+        except AttributeError:
+            pass
 
         # Otherwise, fail
-        level_names = filter(lambda x: isinstance(x,str), logging._levelNames)
+        level_names = (v.lower() for v in logging._levelToName.values())
         permitted = sorted(level_names)
         raise AttributeError('log_level must be an integer or one of %r' % permitted)
 
@@ -795,8 +800,10 @@ class ContextType:
             ...
             AttributeError: signed must be one of ['no', 'signed', 'unsigned', 'yes'] or a non-string truthy value
         """
-        try:             signed = ContextType.signednesses[signed]
-        except KeyError: pass
+        try:
+            signed = ContextType.signednesses[signed]
+        except KeyError:
+            pass
 
         if isinstance(signed, str):
             raise AttributeError('signed must be one of %r or a non-string truthy value' % sorted(ContextType.signednesses))
@@ -859,6 +866,7 @@ class ContextType:
             True
         """
         return self.endian
+
     @endianness.setter
     def endianness(self, value):
         self.endian = value
