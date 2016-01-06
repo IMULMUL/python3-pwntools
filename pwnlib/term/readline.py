@@ -424,6 +424,11 @@ def init():
             float(bool): If set to `True`, prompt and input will float to the
                          bottom of the screen when `term.term_mode` is enabled.
         """
-        line = readline(None, prompt, float)
-        return line[:-1] # strip trailing '\n'
+        s = readline(None, prompt, float)
+
+        if s:
+            return s[:-1] # strip trailing '\n'
+        else:
+            raise EOFError
+
     builtins.input = input
