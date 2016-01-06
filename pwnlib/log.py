@@ -245,14 +245,14 @@ class Logger:
     def __init__(self, logger):
         self._logger = logger
 
-    def _log(self, level, msg, args, kwargs, msgtype, progress = None):
+    def _log(self, level, msg, args, kwargs, msgtype, progress=None):
         extra = kwargs.get('extra', {})
         extra.setdefault('pwnlib_msgtype', msgtype)
         extra.setdefault('pwnlib_progress', progress)
         kwargs['extra'] = extra
         self._logger.log(level, msg, *args, **kwargs)
 
-    def progress(self, message, status = '', *args, **kwargs):
+    def progress(self, message, status='', *args, **kwargs):
         """progress(message, status = '', *args, level = logging.INFO, **kwargs) -> Progress
 
         Creates a new progress logger which creates log records with log level
@@ -449,7 +449,7 @@ class ConsoleHandler(logging.StreamHandler):
 
     This handler outputs to ``sys.stderr``.
     """
-    def __init__(self, log_level = 'context'):
+    def __init__(self, log_level='context'):
         super(ConsoleHandler, self).__init__()
         self.level = log_level
         self.setFormatter(Formatter())
@@ -481,7 +481,6 @@ class ConsoleHandler(logging.StreamHandler):
             return
         record.pwnlib_printed = True
 
-
         # if the record originates from a `Progress` object and term handling
         # is enabled we can have animated spinners! so check that
         if progress is None or not term.term_mode:
@@ -511,7 +510,7 @@ class ConsoleHandler(logging.StreamHandler):
                     state = (state + 1) % len(states)
                     if stop.wait(0.1):
                         break
-            t = Thread(target = spin)
+            t = Thread(target=spin)
             t.daemon = True
             t.start()
             progress._spinner_handle = spinner_handle
