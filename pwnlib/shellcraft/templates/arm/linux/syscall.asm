@@ -13,7 +13,7 @@ Any of the arguments can be expressions to be evaluated by :func:`pwnlib.constan
 
 Example:
 
-    >>> print shellcraft.arm.linux.syscall(11, 1, 'sp', 2, 0).rstrip()
+    >>> print(shellcraft.arm.linux.syscall(11, 1, 'sp', 2, 0).rstrip())
         /* call syscall(11, 1, 'sp', 2, 0) */
         /* Set r0 = 1 = 0x1 */
         mov r0, #1
@@ -25,7 +25,7 @@ Example:
         /* Set r7 = 11 = 0xb */
         mov r7, #11
         swi #0
-    >>> print shellcraft.arm.linux.syscall('SYS_exit', 0).rstrip()
+    >>> print(shellcraft.arm.linux.syscall('SYS_exit', 0).rstrip())
         /* call exit(0) */
         /* Set r0 = 0 = 0x0 */
         eor r0, r0

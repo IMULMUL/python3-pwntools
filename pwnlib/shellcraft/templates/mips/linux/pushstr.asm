@@ -10,7 +10,7 @@ Thin wrapper around :func:`pwnlib.shellcraft.mips.pushstr`, which sets
 
 Example:
 
-    >>> print pwnlib.shellcraft.mips.linux.pushstr('Hello, World').rstrip()
+    >>> print(pwnlib.shellcraft.mips.linux.pushstr('Hello, World').rstrip())
         /* push 'Hello, World\x00' */
         .set noat
         slti $at, $zero, -1

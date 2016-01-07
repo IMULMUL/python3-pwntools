@@ -11,7 +11,7 @@ Any of the arguments can be expressions to be evaluated by :func:`pwnlib.constan
 
 Example:
 
-        >>> print pwnlib.shellcraft.i386.linux.syscall('SYS_execve', 1, 'esp', 2, 0).rstrip()
+        >>> print(pwnlib.shellcraft.i386.linux.syscall('SYS_execve', 1, 'esp', 2, 0).rstrip())
             /* call execve(1, 'esp', 2, 0) */
             push 0x1
             pop ebx
@@ -22,7 +22,7 @@ Example:
             push 0xb
             pop eax
             int 0x80
-        >>> print pwnlib.shellcraft.i386.linux.syscall('SYS_execve', 2, 1, 0, 20).rstrip()
+        >>> print(pwnlib.shellcraft.i386.linux.syscall('SYS_execve', 2, 1, 0, 20).rstrip())
             /* call execve(2, 1, 0, 20) */
             push 0x2
             pop ebx
@@ -34,26 +34,26 @@ Example:
             pop eax
             cdq /* Set edx to 0, eax is known to be positive */
             int 0x80
-        >>> print pwnlib.shellcraft.i386.linux.syscall().rstrip()
+        >>> print(pwnlib.shellcraft.i386.linux.syscall().rstrip())
             /* call syscall() */
             int 0x80
-        >>> print pwnlib.shellcraft.i386.linux.syscall('eax', 'ebx', 'ecx').rstrip()
+        >>> print(pwnlib.shellcraft.i386.linux.syscall('eax', 'ebx', 'ecx').rstrip())
             /* call syscall('eax', 'ebx', 'ecx') */
             /* moving ebx into ebx, but this is a no-op */
             /* moving ecx into ecx, but this is a no-op */
             /* moving eax into eax, but this is a no-op */
             int 0x80
-        >>> print pwnlib.shellcraft.i386.linux.syscall('ebp', None, None, 1).rstrip()
+        >>> print(pwnlib.shellcraft.i386.linux.syscall('ebp', None, None, 1).rstrip())
             /* call syscall('ebp', ?, ?, 1) */
             push 0x1
             pop edx
             mov eax, ebp
             int 0x80
-        >>> print pwnlib.shellcraft.i386.linux.syscall(
+        >>> print(pwnlib.shellcraft.i386.linux.syscall(
         ...               'SYS_mmap2', 0, 0x1000,
         ...               'PROT_READ | PROT_WRITE | PROT_EXEC',
         ...               'MAP_PRIVATE | MAP_ANONYMOUS',
-        ...               -1, 0).rstrip()
+        ...               -1, 0).rstrip())
             /* call mmap2(0, 4096, 'PROT_READ | PROT_WRITE | PROT_EXEC', 'MAP_PRIVATE | MAP_ANONYMOUS', -1, 0) */
             xor ebx, ebx
             xor ecx, ecx /* mov ecx, 0x1000 */

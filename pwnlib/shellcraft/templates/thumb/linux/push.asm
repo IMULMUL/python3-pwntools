@@ -10,7 +10,7 @@ Thin wrapper around :func:`pwnlib.shellcraft.thumb.push`, which sets
 
 Example:
 
-    >>> print pwnlib.shellcraft.thumb.linux.push('SYS_execve').rstrip()
+    >>> print(pwnlib.shellcraft.thumb.linux.push('SYS_execve').rstrip())
         /* push 'SYS_execve' */
         mov r1, #11
         push {r1}

@@ -240,7 +240,7 @@ class Module(types.ModuleType):
             data(str): The data to checksum.
 
         Example:
-            >>> print %s('123456789')
+            >>> print(%s('123456789'))
             %d
     """ % (name, name, polynom, width, init, refin, refout, xorout, extra_doc, name, check)
 
@@ -256,7 +256,7 @@ class Module(types.ModuleType):
             data(str): The data to checksum.
 
         Example:
-            >>> print cksum('123456789')
+            >>> print(cksum('123456789'))
             930766865
         """
 

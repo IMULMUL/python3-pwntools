@@ -499,7 +499,7 @@ class ssh(Timeout):
             ...         password='demopass')
             >>> sh = s.shell('/bin/sh')
             >>> sh.sendline('echo Hello; exit')
-            >>> print 'Hello' in sh.recvall()
+            >>> print('Hello' in sh.recvall())
             True
         """
         return self.run(shell, tty, timeout = timeout)
@@ -576,7 +576,7 @@ class ssh(Timeout):
             True
             >>> s.process(['pwd'], cwd='/tmp').recvall()
             '/tmp\n'
-            >>> p = s.process(['python','-c','import os; print os.read(2, 1024)'], stderr=0)
+            >>> p = s.process(['python2','-c','import os; print os.read(2, 1024)'], stderr=0)
             >>> p.send('hello')
             >>> p.recv()
             'hello\n'
@@ -724,9 +724,9 @@ os.execve(exe, argv, env)
             ...         password='demopass')
             >>> py = s.run('python -i')
             >>> _ = py.recvuntil('>>> ')
-            >>> py.sendline('print 2+2')
+            >>> py.sendline('print(2+2)')
             >>> py.sendline('exit')
-            >>> print repr(py.recvline())
+            >>> print(repr(py.recvline()))
             '4\n'
         """
 
@@ -749,7 +749,7 @@ os.execve(exe, argv, env)
             >>> s =  ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
-            >>> print s.run_to_end('echo Hello; exit 17')
+            >>> print(s.run_to_end('echo Hello; exit 17'))
             ('Hello\n', 17)
             """
 
@@ -777,7 +777,7 @@ os.execve(exe, argv, env)
             >>> a = s.connect_remote(s.host, l.lport)
             >>> b = l.wait_for_connection()
             >>> a.sendline('Hello')
-            >>> print repr(b.recvline())
+            >>> print(repr(b.recvline()))
             'Hello\n'
         """
 
@@ -801,7 +801,7 @@ os.execve(exe, argv, env)
             >>> a = remote(s.host, l.port)
             >>> b = l.wait_for_connection()
             >>> a.sendline('Hello')
-            >>> print repr(b.recvline())
+            >>> print(repr(b.recvline()))
             'Hello\n'
         """
 
@@ -815,7 +815,7 @@ os.execve(exe, argv, env)
             >>> s =  ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
-            >>> print s['echo hello']
+            >>> print(s['echo hello'])
             hello
         """
         return self.__getattr__(attr)()
@@ -828,7 +828,7 @@ os.execve(exe, argv, env)
             >>> s =  ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
-            >>> print repr(s('echo hello'))
+            >>> print(repr(s('echo hello')))
             'hello'
         """
         return self.__getattr__(attr)()
@@ -1099,11 +1099,11 @@ os.execve(exe, argv, env)
             ...         user='travis',
             ...         password='demopass')
             >>> s.upload_data('Hello, world', '/tmp/upload_foo')
-            >>> print file('/tmp/upload_foo').read()
+            >>> print(open('/tmp/upload_foo').read())
             Hello, world
             >>> s.sftp = False
             >>> s.upload_data('Hello, world', '/tmp/upload_bar')
-            >>> print file('/tmp/upload_bar').read()
+            >>> print(open('/tmp/upload_bar').read())
             Hello, world
         """
         # If a relative path was provided, prepend the cwd

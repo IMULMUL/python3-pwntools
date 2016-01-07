@@ -696,7 +696,7 @@ class tube(Timeout):
 
         Examples:
 
-            >>> def p(x): print repr(x)
+            >>> def p(x): print(repr(x))
             >>> t = tube()
             >>> t.send_raw = p
             >>> t.send('hello')
@@ -721,7 +721,7 @@ class tube(Timeout):
 
         Examples:
 
-            >>> def p(x): print repr(x)
+            >>> def p(x): print(repr(x))
             >>> t = tube()
             >>> t.send_raw = p
             >>> t.sendline('hello')
@@ -885,7 +885,7 @@ class tube(Timeout):
 
         Examples:
 
-            >>> def p(x): print x
+            >>> def p(x): print(x)
             >>> def recvone(n, data=['data']):
             ...     while data: return data.pop()
             ...     raise EOFError
@@ -941,7 +941,7 @@ class tube(Timeout):
 
         Examples:
 
-            >>> def p(x): print x
+            >>> def p(x): print(x)
             >>> def recvone(n, data=['data']):
             ...     while data: return data.pop()
             ...     raise EOFError
@@ -1100,7 +1100,7 @@ class tube(Timeout):
 
         Examples:
 
-            >>> def p(x): print x
+            >>> def p(x): print(x)
             >>> t = tube()
             >>> t.shutdown_raw = p
             >>> _=map(t.shutdown, ('in', 'read', 'recv', 'out', 'write', 'send'))
@@ -1133,7 +1133,7 @@ class tube(Timeout):
 
         Doctest:
 
-            >>> def p(x): print x
+            >>> def p(x): print(x)
             >>> t = tube()
             >>> t.connected_raw = p
             >>> _=map(t.connected, ('any', 'in', 'read', 'recv', 'out', 'write', 'send'))
@@ -1164,7 +1164,7 @@ class tube(Timeout):
             .. doctest::
 
                 >>> t = tube()
-                >>> def p(x): print x
+                >>> def p(x): print(x)
                 >>> t.close = lambda: p("Closed!")
                 >>> with t: pass
                 Closed!

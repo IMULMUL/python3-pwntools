@@ -20,8 +20,8 @@ Arguments:
 Examples:
 
     >>> with context.local(arch='i386', os='linux'):
-    ...     print enhex(asm(shellcraft.connect('localhost', 0x1000)))
-    ...     print enhex(asm(shellcraft.connect('localhost', 0x1000, 'ipv6')))
+    ...     print(enhex(asm(shellcraft.connect('localhost', 0x1000))))
+    ...     print(enhex(asm(shellcraft.connect('localhost', 0x1000, 'ipv6'))))
     6a01fe0c246a016a026a015b89e16a665899cd8089c568010101028134247e01010368010101018134240301110189e16a1051556a035b89e16a6658cd80
     6a01fe0c246a016a0bfe0c246a015b89e16a665899cd8089c56801010102813424010101036a01fe0c246a01fe0c246a01fe0c246aff68010101018134240b01110189e16a1c51556a035b89e16a6658cd80
 

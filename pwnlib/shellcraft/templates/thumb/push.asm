@@ -20,26 +20,26 @@ Args:
 
 Example:
 
-    >>> print pwnlib.shellcraft.thumb.push(0).rstrip()
+    >>> print(pwnlib.shellcraft.thumb.push(0).rstrip())
         /* push 0 */
         eor r1, r1
         push {r1}
-    >>> print pwnlib.shellcraft.thumb.push(1).rstrip()
+    >>> print(pwnlib.shellcraft.thumb.push(1).rstrip())
         /* push 1 */
         mov r1, #1
         push {r1}
-    >>> print pwnlib.shellcraft.thumb.push(256).rstrip()
+    >>> print(pwnlib.shellcraft.thumb.push(256).rstrip())
         /* push 256 */
         mov r1, #1
         lsl r1, #8
         push {r1}
     >>> with context.local(os = 'linux'):
-    ...     print pwnlib.shellcraft.thumb.push('SYS_execve').rstrip()
+    ...     print(pwnlib.shellcraft.thumb.push('SYS_execve').rstrip())
         /* push 'SYS_execve' */
         mov r1, #11
         push {r1}
     >>> with context.local(os = 'freebsd'):
-    ...     print pwnlib.shellcraft.thumb.push('SYS_execve').rstrip()
+    ...     print(pwnlib.shellcraft.thumb.push('SYS_execve').rstrip())
         /* push 'SYS_execve' */
         mov r1, #59
         push {r1}

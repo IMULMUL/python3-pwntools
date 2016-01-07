@@ -27,7 +27,7 @@ Examples:
     '\xff'
     >>> p(0x1ff)
     '\xff\x01'
-    >>> with context.local(endian='big'): print repr(p(0x1ff))
+    >>> with context.local(endian='big'): print(repr(p(0x1ff)))
     '\xff\x01'
 """
 import struct

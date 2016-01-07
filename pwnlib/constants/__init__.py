@@ -30,13 +30,13 @@ what happens in :mod:`pwnlib.shellcraft`.
 Example:
 
     >>> with context.local(os = 'freebsd'):
-    ...     print int(constants.SYS_stat)
+    ...     print(int(constants.SYS_stat))
     188
     >>> with context.local(os = 'linux', arch = 'i386'):
-    ...     print int(constants.SYS_stat)
+    ...     print(int(constants.SYS_stat))
     106
     >>> with context.local(os = 'linux', arch = 'amd64'):
-    ...     print int(constants.SYS_stat)
+    ...     print(int(constants.SYS_stat))
     4
 
 """
@@ -55,13 +55,13 @@ class ConstantsModule(ModuleType):
     current context arch / os.
 
         >>> with context.local(arch = 'i386', os = 'linux'):
-        ...    print constants.SYS_execve + constants.PROT_WRITE
+        ...    print(constants.SYS_execve + constants.PROT_WRITE)
         13
         >>> with context.local(arch = 'amd64', os = 'linux'):
-        ...    print constants.SYS_execve + constants.PROT_WRITE
+        ...    print(constants.SYS_execve + constants.PROT_WRITE)
         61
         >>> with context.local(arch = 'amd64', os = 'linux'):
-        ...    print constants.SYS_execve + constants.PROT_WRITE
+        ...    print(constants.SYS_execve + constants.PROT_WRITE)
         61
         >>> False
         True
@@ -122,13 +122,13 @@ class ConstantsModule(ModuleType):
         Example:
 
             >>> with context.local(arch = 'i386', os = 'linux'):
-            ...    print constants.eval('SYS_execve + PROT_WRITE')
+            ...    print(constants.eval('SYS_execve + PROT_WRITE'))
             13
             >>> with context.local(arch = 'amd64', os = 'linux'):
-            ...    print constants.eval('SYS_execve + PROT_WRITE')
+            ...    print(constants.eval('SYS_execve + PROT_WRITE'))
             61
             >>> with context.local(arch = 'amd64', os = 'linux'):
-            ...    print constants.eval('SYS_execve + PROT_WRITE')
+            ...    print(constants.eval('SYS_execve + PROT_WRITE'))
             61
         """
         if not isinstance(string, str):

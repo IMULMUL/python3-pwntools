@@ -10,7 +10,7 @@ Thin wrapper around :func:`pwnlib.shellcraft.i386.mov`, which sets
 
 Example:
 
-    >>> print pwnlib.shellcraft.i386.linux.mov('eax', 'SYS_execve').rstrip()
+    >>> print(pwnlib.shellcraft.i386.linux.mov('eax', 'SYS_execve').rstrip())
         push 0xb
         pop eax
 

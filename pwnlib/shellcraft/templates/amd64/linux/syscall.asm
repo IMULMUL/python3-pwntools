@@ -11,7 +11,7 @@ Any of the arguments can be expressions to be evaluated by :func:`pwnlib.constan
 
 Example:
 
-        >>> print pwnlib.shellcraft.amd64.linux.syscall('SYS_execve', 1, 'rsp', 2, 0).rstrip()
+        >>> print(pwnlib.shellcraft.amd64.linux.syscall('SYS_execve', 1, 'rsp', 2, 0).rstrip())
             /* call execve(1, 'rsp', 2, 0) */
             push 0x1
             pop rdi
@@ -22,7 +22,7 @@ Example:
             push 0x3b
             pop rax
             syscall
-        >>> print pwnlib.shellcraft.amd64.linux.syscall('SYS_execve', 2, 1, 0, -1).rstrip()
+        >>> print(pwnlib.shellcraft.amd64.linux.syscall('SYS_execve', 2, 1, 0, -1).rstrip())
             /* call execve(2, 1, 0, -1) */
             push 0x2
             pop rdi
@@ -34,26 +34,26 @@ Example:
             pop rax
             cdq /* Set rdx to 0, rax is known to be positive */
             syscall
-        >>> print pwnlib.shellcraft.amd64.linux.syscall().rstrip()
+        >>> print(pwnlib.shellcraft.amd64.linux.syscall().rstrip())
             /* call syscall() */
             syscall
-        >>> print pwnlib.shellcraft.amd64.linux.syscall('rax', 'rdi', 'rsi').rstrip()
+        >>> print(pwnlib.shellcraft.amd64.linux.syscall('rax', 'rdi', 'rsi').rstrip())
             /* call syscall('rax', 'rdi', 'rsi') */
             /* moving rdi into rdi, but this is a no-op */
             /* moving rsi into rsi, but this is a no-op */
             /* moving rax into rax, but this is a no-op */
             syscall
-        >>> print pwnlib.shellcraft.amd64.linux.syscall('rbp', None, None, 1).rstrip()
+        >>> print(pwnlib.shellcraft.amd64.linux.syscall('rbp', None, None, 1).rstrip())
             /* call syscall('rbp', ?, ?, 1) */
             push 0x1
             pop rdx
             mov rax, rbp
             syscall
-        >>> print pwnlib.shellcraft.amd64.linux.syscall(
+        >>> print(pwnlib.shellcraft.amd64.linux.syscall(
         ...               'SYS_mmap', 0, 0x1000,
         ...               'PROT_READ | PROT_WRITE | PROT_EXEC',
         ...               'MAP_PRIVATE | MAP_ANONYMOUS',
-        ...               -1, 0).rstrip()
+        ...               -1, 0).rstrip())
             /* call mmap(0, 4096, 'PROT_READ | PROT_WRITE | PROT_EXEC', 'MAP_PRIVATE | MAP_ANONYMOUS', -1, 0) */
             xor edi, edi
             mov esi, 0x1010101

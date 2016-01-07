@@ -19,12 +19,12 @@ on the value of `context.os`.
 
 Examples:
 
-    >>> print shellcraft.arm.mov('r0','r1').rstrip()
+    >>> print(shellcraft.arm.mov('r0','r1').rstrip())
         mov r0, r1
-    >>> print shellcraft.arm.mov('r0', 5).rstrip()
+    >>> print(shellcraft.arm.mov('r0', 5).rstrip())
         /* Set r0 = 5 = 0x5 */
         mov r0, #5
-    >>> print shellcraft.arm.mov('r0', '0x34532').rstrip()
+    >>> print(shellcraft.arm.mov('r0', '0x34532').rstrip())
         /* Set r0 = 214322 = 0x34532 */
         movw r0, #17714
         movt r0, #3

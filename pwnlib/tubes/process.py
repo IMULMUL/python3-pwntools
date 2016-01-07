@@ -55,9 +55,9 @@ class process(tube):
 
     Examples:
 
-        >>> p = process(which('python'))
-        >>> p.sendline("print 'Hello world'")
-        >>> p.sendline("print 'Wow, such data'");
+        >>> p = process(which('python3'))
+        >>> p.sendline("print('Hello world')")
+        >>> p.sendline("print('Wow, such data')");
         >>> '' == p.recv(timeout=0.01)
         True
         >>> p.shutdown('send')
@@ -96,7 +96,7 @@ class process(tube):
         >>> p.recv()
         '\x00\x00\x00\x00\x00\x00\x00\x00'
 
-        >>> p = process(['python','-c','import os; print os.read(2,1024)'],
+        >>> p = process(['python2','-c','import os; print os.read(2,1024)'],
         ...             preexec_fn = lambda: os.dup2(0,2))
         >>> p.sendline('hello')
         >>> p.recvline()

@@ -10,7 +10,7 @@ Thin wrapper around :func:`pwnlib.shellcraft.amd64.push`, which sets
 
 Example:
 
-    >>> print pwnlib.shellcraft.amd64.linux.push('SYS_execve').rstrip()
+    >>> print(pwnlib.shellcraft.amd64.linux.push('SYS_execve').rstrip())
         /* push 'SYS_execve' */
         push 0x3b
 

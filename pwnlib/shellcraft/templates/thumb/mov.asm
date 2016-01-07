@@ -17,29 +17,29 @@
 
 Example:
 
-   >>> print shellcraft.thumb.mov('r1','r2').rstrip()
+   >>> print(shellcraft.thumb.mov('r1','r2').rstrip())
        mov r1, r2
-   >>> print shellcraft.thumb.mov('r1', 0).rstrip()
+   >>> print(shellcraft.thumb.mov('r1', 0).rstrip())
        eor r1, r1
-   >>> print shellcraft.thumb.mov('r1', 10).rstrip()
+   >>> print(shellcraft.thumb.mov('r1', 10).rstrip())
        mov r1, #10
-   >>> print shellcraft.thumb.mov('r1', 17).rstrip()
+   >>> print(shellcraft.thumb.mov('r1', 17).rstrip())
        mov r1, #17
-   >>> print shellcraft.thumb.mov('r1', 'r1').rstrip()
+   >>> print(shellcraft.thumb.mov('r1', 'r1').rstrip())
        /* moving r1 into r1, but this is a no-op */
-   >>> print shellcraft.thumb.mov('r1', 0xdead00ff).rstrip()
+   >>> print(shellcraft.thumb.mov('r1', 0xdead00ff).rstrip())
        ldr r1, value_...
        b value_..._after
    value_...: .word 3735879935
    value_..._after:
    >>> with context.local(os = 'linux'):
-   ...     print shellcraft.thumb.mov('r1', 'SYS_execve').rstrip()
+   ...     print(shellcraft.thumb.mov('r1', 'SYS_execve').rstrip())
        mov r1, #SYS_execve
    >>> with context.local(os = 'freebsd'):
-   ...     print shellcraft.thumb.mov('r1', 'SYS_execve').rstrip()
+   ...     print(shellcraft.thumb.mov('r1', 'SYS_execve').rstrip())
        mov r1, #SYS_execve
    >>> with context.local(os = 'linux'):
-   ...     print shellcraft.thumb.mov('r1', 'PROT_READ | PROT_WRITE | PROT_EXEC').rstrip()
+   ...     print(shellcraft.thumb.mov('r1', 'PROT_READ | PROT_WRITE | PROT_EXEC').rstrip())
        mov r1, #7
 
 </%docstring>

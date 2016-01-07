@@ -23,56 +23,56 @@ on the value of `context.os`.
 
 Example:
 
-    >>> print shellcraft.i386.mov('eax','ebx').rstrip()
+    >>> print(shellcraft.i386.mov('eax','ebx').rstrip())
         mov eax, ebx
-    >>> print shellcraft.i386.mov('eax', 0).rstrip()
+    >>> print(shellcraft.i386.mov('eax', 0).rstrip())
         xor eax, eax
-    >>> print shellcraft.i386.mov('ax', 0).rstrip()
+    >>> print(shellcraft.i386.mov('ax', 0).rstrip())
         xor ax, ax
-    >>> print shellcraft.i386.mov('ax', 17).rstrip()
+    >>> print(shellcraft.i386.mov('ax', 17).rstrip())
         xor ax, ax
         mov al, 0x11
-    >>> print shellcraft.i386.mov('edi', ord('\n')).rstrip()
+    >>> print(shellcraft.i386.mov('edi', ord('\n')).rstrip())
         push 9 /* mov edi, '\n' */
         pop edi
         inc edi
-    >>> print shellcraft.i386.mov('al', 'ax').rstrip()
+    >>> print(shellcraft.i386.mov('al', 'ax').rstrip())
         /* moving ax into al, but this is a no-op */
-    >>> print shellcraft.i386.mov('al','ax').rstrip()
+    >>> print(shellcraft.i386.mov('al','ax').rstrip())
         /* moving ax into al, but this is a no-op */
-    >>> print shellcraft.i386.mov('esp', 'esp').rstrip()
+    >>> print(shellcraft.i386.mov('esp', 'esp').rstrip())
         /* moving esp into esp, but this is a no-op */
-    >>> print shellcraft.i386.mov('ax', 'bl').rstrip()
+    >>> print(shellcraft.i386.mov('ax', 'bl').rstrip())
         movzx ax, bl
-    >>> print shellcraft.i386.mov('eax', 1).rstrip()
+    >>> print(shellcraft.i386.mov('eax', 1).rstrip())
         push 0x1
         pop eax
-    >>> print shellcraft.i386.mov('eax', 1, stack_allowed=False).rstrip()
+    >>> print(shellcraft.i386.mov('eax', 1, stack_allowed=False).rstrip())
         xor eax, eax
         mov al, 0x1
-    >>> print shellcraft.i386.mov('eax', 0xdead00ff).rstrip()
+    >>> print(shellcraft.i386.mov('eax', 0xdead00ff).rstrip())
         mov eax, 0x1010101 /* mov eax, 0xdead00ff */
         xor eax, 0xdfac01fe
-    >>> print shellcraft.i386.mov('eax', 0xc0).rstrip()
+    >>> print(shellcraft.i386.mov('eax', 0xc0).rstrip())
         xor eax, eax
         mov al, 0xc0
-    >>> print shellcraft.i386.mov('eax', 0xc000).rstrip()
+    >>> print(shellcraft.i386.mov('eax', 0xc000).rstrip())
         xor eax, eax /* mov eax, 0xc000 */
         mov ah, 0xc0
-    >>> print shellcraft.i386.mov('edi', 0xc000).rstrip()
+    >>> print(shellcraft.i386.mov('edi', 0xc000).rstrip())
         mov edi, 0x1010101 /* mov edi, 0xc000 */
         xor edi, 0x101c101
-    >>> print shellcraft.i386.mov('eax', 0xc0c0).rstrip()
+    >>> print(shellcraft.i386.mov('eax', 0xc0c0).rstrip())
         xor eax, eax
         mov ax, 0xc0c0
-    >>> print shellcraft.i386.mov('eax', 'SYS_execve').rstrip()
+    >>> print(shellcraft.i386.mov('eax', 'SYS_execve').rstrip())
         push 0xb
         pop eax
     >>> with context.local(os = 'freebsd'):
-    ...     print shellcraft.i386.mov('eax', 'SYS_execve').rstrip()
+    ...     print(shellcraft.i386.mov('eax', 'SYS_execve').rstrip())
         push 0x3b
         pop eax
-    >>> print shellcraft.i386.mov('eax', 'PROT_READ | PROT_WRITE | PROT_EXEC').rstrip()
+    >>> print(shellcraft.i386.mov('eax', 'PROT_READ | PROT_WRITE | PROT_EXEC').rstrip())
         push 0x7
         pop eax
 
