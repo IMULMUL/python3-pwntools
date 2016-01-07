@@ -216,6 +216,6 @@ You can even patch and save the files.
     'ELF'
     >>> e.asm(e.address, 'ret')
     >>> e.save('/tmp/quiet-cat')
-    >>> disasm(file('/tmp/quiet-cat','rb').read(1))
+    >>> disasm(open('/tmp/quiet-cat', 'rb').read(1))
     '   0:   c3                      ret'
 

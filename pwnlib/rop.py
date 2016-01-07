@@ -367,10 +367,10 @@ class ROP:
 
         if os.path.exists(filename):
             log.info_once("Loaded cached gadgets for %r @ %#x" % (elf.file.name, elf.address))
-            return eval(file(filename).read())
+            return eval(open(filename).read())
 
     def __cache_save(self, elf, data):
-        file(self.__get_cachefile_name(elf),'w+').write(repr(data))
+        open(self.__get_cachefile_name(elf), 'w+').write(repr(data))
 
     def __load(self):
         """Load all ROP gadgets for the selected ELF files"""

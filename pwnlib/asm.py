@@ -483,7 +483,7 @@ def asm(shellcode, vma = 0, **kwargs):
                                 '--entry=%#x' % vma,
                                 '-o', step3, step2])
 
-            elif file(step2,'rb').read(4) == '\x7fELF':
+            elif open(step2, 'rb').read(4) == b'\x7fELF':
                 # Sanity check for seeing if the output has relocations
                 relocs = subprocess.check_output(
                     [which_binutils('readelf'), '-r', step2]

@@ -423,7 +423,7 @@ class ssh(Timeout):
 
             if os.path.exists(config_file):
                 ssh_config  = paramiko.SSHConfig()
-                ssh_config.parse(file(config_file))
+                ssh_config.parse(open(config_file))
                 host_config = ssh_config.lookup(host)
                 if 'hostname' in host_config:
                     self.host = host = host_config['hostname']
@@ -1007,7 +1007,7 @@ os.execve(exe, argv, env)
 
 
         Examples:
-            >>> with file('/tmp/bar','w+') as f:
+            >>> with open('/tmp/bar', 'w+') as f:
             ...     f.write('Hello, world')
             >>> s =  ssh(host='example.pwnme',
             ...         user='travis',

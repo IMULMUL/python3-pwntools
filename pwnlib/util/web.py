@@ -27,7 +27,7 @@ def wget(url, save=None, timeout=5, **kwargs):
       'User-agent: *\\nDisallow: /deny\\n'
       >>> with context.local(log_level='ERROR'):
       ...     _ = wget(url, True)
-      >>> result == file('robots.txt').read()
+      >>> result == open('robots.txt', 'r').read()
       True
     """
     import requests
@@ -66,7 +66,7 @@ def wget(url, save=None, timeout=5, **kwargs):
             if not isinstance(save, (bytes, str)):
                 save = os.path.basename(url)
                 save = save or tempfile.NamedTemporaryFile(dir='.', delete=False).name
-            with file(save,'wb+') as f:
+            with open(save, 'wb+') as f:
                 f.write(total_data)
                 w.success('Saved %r (%s)' % (f.name, size(total_data)))
         else:

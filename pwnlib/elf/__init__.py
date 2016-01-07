@@ -71,7 +71,7 @@ class ELF(ELFFile):
         # elftools uses the backing file for all reads and writes
         # in order to permit writing without being able to write to disk,
         # mmap() the file.
-        self.file = open(path,'rb')
+        self.file = open(path, 'rb')
         self.mmap = mmap.mmap(self.file.fileno(), 0, access=mmap.ACCESS_COPY)
 
         super(ELF,self).__init__(self.mmap)
@@ -509,14 +509,14 @@ class ELF(ELFFile):
 
         >>> bash = ELF(which('bash'))
         >>> bash.save('/tmp/bash_copy')
-        >>> copy = file('/tmp/bash_copy')
-        >>> bash = file(which('bash'))
+        >>> copy = open('/tmp/bash_copy', 'rb')
+        >>> bash = open(which('bash'), 'rb')
         >>> bash.read() == copy.read()
         True
         """
         old = self.stream.tell()
 
-        with open(path,'wb+') as fd:
+        with open(path, 'wb+') as fd:
             self.stream.seek(0)
             fd.write(self.get_data())
 
@@ -526,7 +526,7 @@ class ELF(ELFFile):
         """Retrieve the raw data from the ELF file.
 
         >>> bash = ELF(which('bash'))
-        >>> fd   = open(which('bash'))
+        >>> fd   = open(which('bash'), 'rb')
         >>> bash.get_data() == fd.read()
         True
         """
