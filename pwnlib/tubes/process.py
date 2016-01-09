@@ -58,7 +58,7 @@ class process(tube):
         >>> p = process(which('python3'))
         >>> p.sendline("print('Hello world')")
         >>> p.sendline("print('Wow, such data')");
-        >>> '' == p.recv(timeout=0.01)
+        >>> b'' == p.recv(timeout=0.01)
         True
         >>> p.shutdown('send')
         >>> p.proc.stdin.closed
@@ -66,27 +66,27 @@ class process(tube):
         >>> p.connected('send')
         False
         >>> p.recvline()
-        'Hello world\n'
+        b'Hello world\n'
         >>> p.recvuntil(',')
-        'Wow,'
+        b'Wow,'
         >>> p.recvregex('.*data')
-        ' such data'
+        b' such data'
         >>> p.recv()
-        '\n'
+        b'\n'
         >>> p.recv() # doctest: +ELLIPSIS
         Traceback (most recent call last):
         ...
         EOFError
 
         >>> p = process('cat')
-        >>> d = open('/dev/urandom').read(4096)
+        >>> d = open('/dev/urandom', 'rb').read(4096)
         >>> p.recv(timeout=0.1)
-        ''
+        b''
         >>> p.write(d)
         >>> p.recvrepeat(0.1) == d
         True
         >>> p.recv(timeout=0.1)
-        ''
+        b''
         >>> p.shutdown('send')
         >>> p.wait_for_close()
         >>> p.poll()
@@ -94,17 +94,17 @@ class process(tube):
 
         >>> p = process('cat /dev/zero | head -c8', shell=True, stderr=open('/dev/null', 'w+'))
         >>> p.recv()
-        '\x00\x00\x00\x00\x00\x00\x00\x00'
+        b'\x00\x00\x00\x00\x00\x00\x00\x00'
 
-        >>> p = process(['python2','-c','import os; print os.read(2,1024)'],
-        ...             preexec_fn = lambda: os.dup2(0,2))
+        >>> p = process(['python2', '-c', 'import os; print os.read(2,1024)'],
+        ...             preexec_fn = lambda: os.dup2(0, 2))
         >>> p.sendline('hello')
         >>> p.recvline()
-        'hello\n'
+        b'hello\n'
 
-        >>> p = process(['python','-c','open("/dev/tty","wb").write("stack smashing detected")'])
+        >>> p = process(['python2', '-c', 'open("/dev/tty","wb").write("stack smashing detected")'])
         >>> p.recv()
-        'stack smashing detected'
+        b'stack smashing detected'
     """
 
     #: `subprocess.Popen` object
@@ -129,16 +129,16 @@ class process(tube):
     _stop_noticed = False
 
     def __init__(self, argv,
-                 shell = False,
-                 executable = None,
-                 cwd = None,
-                 env = None,
-                 timeout = Timeout.default,
-                 stdin  = PIPE,
-                 stdout = PTY,
-                 stderr = STDOUT,
-                 close_fds = True,
-                 preexec_fn = lambda: None):
+                 shell=False,
+                 executable=None,
+                 cwd=None,
+                 env=None,
+                 timeout=Timeout.default,
+                 stdin=PIPE,
+                 stdout=PTY,
+                 stderr=STDOUT,
+                 close_fds=True,
+                 preexec_fn=lambda: None):
         super(process, self).__init__(timeout)
 
         if not shell:
@@ -158,20 +158,20 @@ class process(tube):
             if self.argv != [self.executable]: message += ' argv=%r ' % self.argv
             if self.env  != os.environ:        message += ' env=%r ' % self.env
 
-        with log.progress(message) as p:
-            self.proc = subprocess.Popen(args = argv,
-                                         shell = shell,
-                                         executable = executable,
-                                         cwd = cwd,
-                                         env = env,
-                                         stdin = stdin,
-                                         stdout = stdout,
-                                         stderr = stderr,
-                                         close_fds = close_fds,
-                                         preexec_fn = self.preexec_fn)
+        with log.progress(message):
+            self.proc = subprocess.Popen(args=argv,
+                                         shell=shell,
+                                         executable=executable,
+                                         cwd=cwd,
+                                         env=env,
+                                         stdin=stdin,
+                                         stdout=stdout,
+                                         stderr=stderr,
+                                         close_fds=close_fds,
+                                         preexec_fn=self.preexec_fn)
 
         if master:
-            self.proc.stdout = os.fdopen(master)
+            self.proc.stdout = os.fdopen(master, 'rb')
             os.close(stdout)
 
         # Set in non-blocking mode so that a call to call recv(1000) will
@@ -191,7 +191,6 @@ class process(tube):
 
         Mostly to make Python happy, but also to prevent common pitfalls.
         """
-
         cwd = cwd or os.path.curdir
 
         #
@@ -210,10 +209,11 @@ class process(tube):
         argv = list(argv or [])
 
         for i, arg in enumerate(argv):
-            if '\x00' in arg[:-1]:
+            null_byte = b'\x00' if isinstance(arg, bytes) else '\x00'
+            if null_byte in arg[:-1]:
                 log.error('Inappropriate nulls in argv[%i]: %r' % (i, arg))
 
-            argv[i] = arg.rstrip('\x00')
+            argv[i] = arg.rstrip(null_byte)
 
         #
         # Validate executable
@@ -243,7 +243,7 @@ class process(tube):
             executable = os.path.join(cwd, executable)
 
         if not os.path.exists(executable):
-            log.error("%r does not exist"  % executable)
+            log.error("%r does not exist" % executable)
         if not os.path.isfile(executable):
             log.error("%r is not a file" % executable)
         if not os.access(executable, os.X_OK):
@@ -259,17 +259,20 @@ class process(tube):
         # Create a duplicate so we can modify it safely
         env = dict(env or os.environ)
 
-        for k,v in env.items():
+        for k, v in env.items():
             if not isinstance(k, (bytes, str)):
                 log.error('Environment keys must be strings: %r' % k)
             if not isinstance(k, (bytes, str)):
-                log.error('Environment values must be strings: %r=%r' % (k,v))
-            if '\x00' in k[:-1]:
-                log.error('Inappropriate nulls in env key: %r' % (k))
-            if '\x00' in v[:-1]:
+                log.error('Environment values must be strings: %r=%r' % (k, v))
+
+            k_null_byte = b'\x00' if isinstance(k, bytes) else '\x00'
+            v_null_byte = b'\x00' if isinstance(v, bytes) else '\x00'
+            if k_null_byte in k[:-1]:
+                log.error('Inappropriate nulls in env key: %r' % k)
+            if v_null_byte in v[:-1]:
                 log.error('Inappropriate nulls in env value: %r=%r' % (k, v))
 
-            env[k.rstrip('\x00')] = v.rstrip('\x00')
+            env[k.rstrip(k_null_byte)] = v.rstrip(v_null_byte)
 
         return executable, argv, env
 
@@ -298,7 +301,6 @@ class process(tube):
 
         return stdin, stdout, stderr, master
 
-
     def kill(self):
         """kill()
 
@@ -314,14 +316,14 @@ class process(tube):
         process has not yet finished and the exit code otherwise.
         """
         self.proc.poll()
-        if self.proc.returncode != None and not self._stop_noticed:
+        if self.proc.returncode is not None and not self._stop_noticed:
             self._stop_noticed = True
             log.info("Program %r stopped with exit code %d" % (self.program, self.proc.returncode))
 
         return self.proc.returncode
 
-    def communicate(self, stdin = None):
-        """communicate(stdin = None) -> str
+    def communicate(self, stdin=None):
+        """communicate(stdin=None) -> bytes tuple
 
         Calls :meth:`subprocess.Popen.communicate` method on the process.
         """
@@ -338,12 +340,12 @@ class process(tube):
             raise EOFError
 
         if not self.can_recv_raw(self.timeout):
-            return ''
+            return b''
 
         # This will only be reached if we either have data,
         # or we have reached an EOF. In either case, it
         # should be safe to read without expecting it to block.
-        data = ''
+        data = b''
 
         try:
             data = self.proc.stdout.read(numb)
@@ -378,7 +380,7 @@ class process(tube):
             return False
 
         try:
-            if timeout == None:
+            if timeout is None:
                 return select.select([self.proc.stdout], [], []) == ([self.proc.stdout], [], [])
 
             return select.select([self.proc.stdout], [], [], timeout) == ([self.proc.stdout], [], [])
@@ -393,7 +395,7 @@ class process(tube):
 
     def connected_raw(self, direction):
         if direction == 'any':
-            return self.poll() == None
+            return self.poll() is None
         elif direction == 'send':
             return not self.proc.stdin.closed
         elif direction == 'recv':
@@ -406,7 +408,7 @@ class process(tube):
         # First check if we are already dead
         self.poll()
 
-        #close file descriptors
+        # close file descriptors
         if self.proc.stdin is not None:
             self.proc.stdin.close()
         if self.proc.stderr is not None:
@@ -417,12 +419,11 @@ class process(tube):
         if not self._stop_noticed:
             try:
                 self.proc.kill()
-                self.proc.wait() #avoid leaving zombies around
+                self.proc.wait() # avoid leaving zombies around
                 self._stop_noticed = True
                 log.info('Stopped program %r' % self.program)
             except OSError:
                 pass
-
 
     def fileno(self):
         if not self.connected():

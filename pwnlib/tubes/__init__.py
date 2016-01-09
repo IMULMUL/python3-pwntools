@@ -2,7 +2,7 @@
 
 This is our library for talking to sockets, processes, ssh connections etc.
 Our goal is to be able to use the same API for e.g. remote TCP servers, local
-TTY-programs and programs run over over SSH.
+TTY-programs and programs running over SSH.
 
 It is organized such that the majority of the functionality is implemented
 in :class:`pwnlib.tubes.tube`. The remaining classes should only implement
