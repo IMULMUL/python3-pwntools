@@ -40,12 +40,9 @@ __all__ = [
     'cycle'                                  ,
     'dropwhile'                              ,
     'groupby'                                ,
-    'ifilter'                                ,
-    'ifilterfalse'                           ,
-    'imap'                                   ,
+    'filterfalse'                           ,
     'islice'                                 ,
-    'izip'                                   ,
-    'izip_longest'                           ,
+    'zip_longest'                           ,
     'permutations'                           ,
     'product'                                ,
     'repeat'                                 ,
@@ -94,7 +91,7 @@ def take(n, iterable):
     """
     return list(islice(iterable, n))
 
-def tabulate(func, start = 0):
+def tabulate(func, start=0):
     """tabulate(func, start = 0) -> iterator
 
     Arguments:
@@ -107,10 +104,10 @@ def tabulate(func, start = 0):
     Examples:
       >>> take(2, tabulate(str))
       ['0', '1']
-      >>> take(5, tabulate(lambda x: x**2, start = 1))
+      >>> take(5, tabulate(lambda x: x**2, start=1))
       [1, 4, 9, 16, 25]
     """
-    return imap(func, count(start))
+    return map(func, count(start))
 
 def consume(n, iterator):
     """consume(n, iterator)
@@ -128,7 +125,7 @@ def consume(n, iterator):
     Examples:
       >>> i = count()
       >>> consume(5, i)
-      >>> i.next()
+      >>> next(i)
       5
       >>> i = iter([1, 2, 3, 4, 5])
       >>> consume(2, i)
@@ -138,13 +135,13 @@ def consume(n, iterator):
     # Use functions that consume iterators at C speed.
     if n is None:
         # feed the entire iterator into a zero-length deque
-        collections.deque(iterator, maxlen = 0)
+        collections.deque(iterator, maxlen=0)
     else:
         # advance to the empty slice starting at position n
         next(islice(iterator, n, n), None)
 
-def nth(n, iterable, default = None):
-    """nth(n, iterable, default = None) -> object
+def nth(n, iterable, default=None):
+    """nth(n, iterable, default=None) -> object
 
     Returns the element at index `n` in `iterable`.  If `iterable` is a
     iterator it will be advanced.
@@ -171,8 +168,8 @@ def nth(n, iterable, default = None):
     """
     return next(islice(iterable, n, None), default)
 
-def quantify(iterable, pred = bool):
-    """quantify(iterable, pred = bool) -> int
+def quantify(iterable, pred=bool):
+    """quantify(iterable, pred=bool) -> int
 
     Count how many times the predicate `pred` is :const:`True`.
 
@@ -191,10 +188,10 @@ def quantify(iterable, pred = bool):
       >>> quantify(['1', 'two', '3', '42'], str.isdigit)
       3
     """
-    return sum(imap(pred, iterable))
+    return sum(map(pred, iterable))
 
-def pad(iterable, value = None):
-    """pad(iterable, value = None) -> iterator
+def pad(iterable, value=None):
+    """pad(iterable, value=None) -> iterator
 
     Pad an `iterable` with `value`, i.e. returns an iterator whoose elements are
     first the elements of `iterable` then `value` indefinitely.
@@ -258,7 +255,7 @@ def dotproduct(x, y):
       ... # 1 * 4 + 2 * 5 + 3 * 6 == 32
       32
     """
-    return sum(imap(operator.mul, x, y))
+    return sum(map(operator.mul, x, y))
 
 def flatten(xss):
     """flatten(xss) -> iterator
@@ -345,10 +342,10 @@ def pairwise(iterable):
     """
     a, b = tee(iterable)
     next(b, None)
-    return izip(a, b)
+    return zip(a, b)
 
-def group(n, iterable, fill_value = None):
-    """group(n, iterable, fill_value = None) -> iterator
+def group(n, iterable, fill_value=None):
+    """group(n, iterable, fill_value=None) -> iterator
 
     Similar to :func:`pwnlib.util.lists.group`, but returns an iterator and uses
     :mod:`itertools` fast build-in functions.
@@ -371,7 +368,7 @@ def group(n, iterable, fill_value = None):
       ['ABC', 'DEF', 'Gxx']
     """
     args = [iter(iterable)] * n
-    return izip_longest(fillvalue = fill_value, *args)
+    return zip_longest(fillvalue=fill_value, *args)
 
 def roundrobin(*iterables):
     """roundrobin(*iterables)
@@ -393,7 +390,7 @@ def roundrobin(*iterables):
     """
     # Recipe credited to George Sakkis
     pending = len(iterables)
-    nexts = cycle(iter(it).next for it in iterables)
+    nexts = cycle(iter(it).__next__ for it in iterables)
     while pending:
         try:
             for next in nexts:
@@ -402,8 +399,8 @@ def roundrobin(*iterables):
             pending -= 1
             nexts = cycle(islice(nexts, pending))
 
-def powerset(iterable, include_empty = True):
-    """powerset(iterable, include_empty = True) -> iterator
+def powerset(iterable, include_empty=True):
+    """powerset(iterable, include_empty=True) -> iterator
 
     The powerset of an iterable.
 
@@ -417,7 +414,7 @@ def powerset(iterable, include_empty = True):
     Examples:
       >>> list(powerset(range(3)))
       [(), (0,), (1,), (2,), (0, 1), (0, 2), (1, 2), (0, 1, 2)]
-      >>> list(powerset(range(2), include_empty = False))
+      >>> list(powerset(range(2), include_empty=False))
       [(0,), (1,), (0, 1)]
     """
     s = list(iterable)
@@ -426,8 +423,8 @@ def powerset(iterable, include_empty = True):
         next(i)
     return i
 
-def unique_everseen(iterable, key = None):
-    """unique_everseen(iterable, key = None) -> iterator
+def unique_everseen(iterable, key=None):
+    """unique_everseen(iterable, key=None) -> iterator
 
     Get unique elements, preserving order. Remember all elements ever seen.  If
     `key` is not :const:`None` then for each element ``elm`` in `iterable` the
@@ -451,7 +448,7 @@ def unique_everseen(iterable, key = None):
     seen = set()
     seen_add = seen.add
     if key is None:
-        for element in ifilterfalse(seen.__contains__, iterable):
+        for element in filterfalse(seen.__contains__, iterable):
             seen_add(element)
             yield element
     else:
@@ -461,8 +458,8 @@ def unique_everseen(iterable, key = None):
                 seen_add(k)
                 yield element
 
-def unique_justseen(iterable, key = None):
-    """unique_everseen(iterable, key = None) -> iterator
+def unique_justseen(iterable, key=None):
+    """unique_everseen(iterable, key=None) -> iterator
 
     Get unique elements, preserving order. Remember only the elements just seen.
     If `key` is not :const:`None` then for each element ``elm`` in `iterable`
@@ -483,10 +480,10 @@ def unique_justseen(iterable, key = None):
       >>> ''.join(unique_justseen('ABBCcAD', str.lower))
       'ABCAD'
     """
-    return imap(next, imap(operator.itemgetter(1), groupby(iterable, key)))
+    return map(next, map(operator.itemgetter(1), groupby(iterable, key)))
 
-def unique_window(iterable, window, key = None):
-    """unique_everseen(iterable, window, key = None) -> iterator
+def unique_window(iterable, window, key=None):
+    """unique_everseen(iterable, window, key=None) -> iterator
 
     Get unique elements, preserving order. Remember only the last `window`
     elements seen.  If `key` is not :const:`None` then for each element ``elm``
@@ -510,7 +507,7 @@ def unique_window(iterable, window, key = None):
       >>> ''.join(unique_window('ABBCcAD', 4, str.lower))
       'ABCAD'
     """
-    seen = collections.deque(maxlen = window)
+    seen = collections.deque(maxlen=window)
     seen_add = seen.append
     if key is None:
         for element in iterable:
@@ -543,13 +540,13 @@ def iter_except(func, exception):
     Examples:
       >>> s = {1, 2, 3}
       >>> i = iter_except(s.pop, KeyError)
-      >>> i.next()
+      >>> next(i)
       1
-      >>> i.next()
+      >>> next(i)
       2
-      >>> i.next()
+      >>> next(i)
       3
-      >>> i.next()
+      >>> next(i)
       Traceback (most recent call last):
           ...
       StopIteration
@@ -583,11 +580,11 @@ def random_product(*args, **kwargs):
     if kwargs != {}:
         raise TypeError('random_product() does not support argument %s' % kwargs.popitem())
 
-    pools = map(tuple, args) * repeat
+    pools = list(map(tuple, args)) * repeat
     return tuple(random.choice(pool) for pool in pools)
 
-def random_permutation(iterable, r = None):
-    """random_product(iterable, r = None) -> tuple
+def random_permutation(iterable, r=None):
+    """random_product(iterable, r=None) -> tuple
 
     Arguments:
       iterable:  An iterable.
@@ -595,12 +592,12 @@ def random_permutation(iterable, r = None):
         `iterable`.
 
     Returns:
-      A random element from ``itertools.permutations(iterable, r = r)``.
+      A random element from ``itertools.permutations(iterable, r=r)``.
 
     Examples:
       >>> random_permutation(range(2)) in {(0, 1), (1, 0)}
       True
-      >>> random_permutation(range(10), r = 2) in permutations(range(10), r = 2)
+      >>> random_permutation(range(10), r=2) in permutations(range(10), r=2)
       True
     """
     pool = tuple(iterable)
@@ -615,7 +612,7 @@ def random_combination(iterable, r):
       r(int):  Size of the combination.
 
     Returns:
-      A random element from ``itertools.combinations(iterable, r = r)``.
+      A random element from ``itertools.combinations(iterable, r=r)``.
 
     Examples:
       >>> random_combination(range(2), 2)
@@ -669,12 +666,12 @@ def lookahead(n, iterable):
       >>> i = count()
       >>> lookahead(4, i)
       4
-      >>> i.next()
+      >>> next(i)
       0
       >>> i = count()
       >>> nth(4, i)
       4
-      >>> i.next()
+      >>> next(i)
       5
       >>> lookahead(4, i)
       10
@@ -701,7 +698,7 @@ def lexicographic(alphabet):
       ['', '0', '1', '00', '01', '10', '11', '000']
     """
     for n in count():
-        for e in product(alphabet, repeat = n):
+        for e in product(alphabet, repeat=n):
             yield e
 
 def chained(func):
@@ -749,9 +746,9 @@ def exp(s, n):
     """
     return product(*[s]*n)
 
-def bruteforce(func, alphabet, length, method = 'upto', start = None, databag = None):
+def bruteforce(func, alphabet, length, method='upto', start=None, databag=None):
 
-    """bruteforce(func, alphabet, length, method = 'upto', start = None)
+    """bruteforce(func, alphabet, length, method='upto', start=None)
 
     Bruteforce `func` to return :const:`True`.  `func` should take a string
     input and return a :func:`bool`.  `func` will be called with strings from
@@ -782,18 +779,18 @@ def bruteforce(func, alphabet, length, method = 'upto', start = None, databag = 
       True
     """
 
-    if   method == 'upto' and length > 1:
-        iterator = product(alphabet, repeat = 1)
+    if method == 'upto' and length > 1:
+        iterator = product(alphabet, repeat=1)
         for i in range(2, length + 1):
-            iterator = chain(iterator, product(alphabet, repeat = i))
+            iterator = chain(iterator, product(alphabet, repeat=i))
 
     elif method == 'downfrom' and length > 1:
-        iterator = product(alphabet, repeat = length)
+        iterator = product(alphabet, repeat=length)
         for i in range(length - 1, 1, -1):
-            iterator = chain(iterator, product(alphabet, repeat = i))
+            iterator = chain(iterator, product(alphabet, repeat=i))
 
     elif method == 'fixed':
-        iterator = product(alphabet, repeat = length)
+        iterator = product(alphabet, repeat=length)
 
     else:
         raise TypeError('bruteforce(): unknown method')
@@ -828,7 +825,7 @@ def bruteforce(func, alphabet, length, method = 'upto', start = None, databag = 
 
     h = log.waitfor('Bruteforcing')
     cur_iteration = 0
-    if start != None:
+    if start is not None:
         consume(i, iterator)
     for e in iterator:
         cur = ''.join(e)
@@ -844,15 +841,14 @@ def bruteforce(func, alphabet, length, method = 'upto', start = None, databag = 
         if res:
             h.success('Found key: "%s"' % cur)
             return cur
-        if start != None:
+        if start is not None:
             consume(N - 1, iterator)
 
     h.failure('No matches found')
 
 
-
-def mbruteforce(func, alphabet, length, method = 'upto', start = None, threads = None):
-    """mbruteforce(func, alphabet, length, method = 'upto', start = None, threads = None)
+def mbruteforce(func, alphabet, length, method='upto', start=None, threads=None):
+    """mbruteforce(func, alphabet, length, method='upto', start=None, threads=None)
 
     Same functionality as bruteforce(), but multithreaded.
 
@@ -868,10 +864,10 @@ def mbruteforce(func, alphabet, length, method = 'upto', start = None, threads =
         context.log_level = oldloglevel
         databag["result"] = res
 
-    if start == None:
+    if start is None:
         start = (1, 1)
 
-    if threads == None:
+    if threads is None:
         try:
             threads = multiprocessing.cpu_count()
         except NotImplementedError:
@@ -891,7 +887,7 @@ def mbruteforce(func, alphabet, length, method = 'upto', start = None, threads =
         shareddata[i]['items_done'] = 0
         shareddata[i]['items_total'] = 0
 
-        chunkid = (i2-1) + (i * N2) + 1
+        chunkid = (i2 - 1) + (i * N2) + 1
 
         processes[i] = multiprocessing.Process(target=bruteforcewrap,
                 args=(func, alphabet, length, method, (chunkid, totalchunks),
@@ -903,9 +899,9 @@ def mbruteforce(func, alphabet, length, method = 'upto', start = None, threads =
     while not done:
         # log status
         current_item_list = ",".join(["\"%s\"" % x["current_item"]
-                                for x in shareddata if x != None])
-        items_done = sum([x["items_done"] for x in shareddata if x != None])
-        items_total = sum([x["items_total"] for x in shareddata if x != None])
+                                for x in shareddata if x is not None])
+        items_done = sum([x["items_done"] for x in shareddata if x is not None])
+        items_total = sum([x["items_total"] for x in shareddata if x is not None])
 
         progress = 100.0 * items_done / items_total if items_total != 0 else 0.0
 
@@ -913,14 +909,14 @@ def mbruteforce(func, alphabet, length, method = 'upto', start = None, threads =
 
         # handle finished threads
         for i in range(threads):
-            if processes[i] and processes[i].exitcode != None:
+            if processes[i] and processes[i].exitcode is not None:
                 # thread has terminated
                 res = shareddata[i]["result"]
                 processes[i].join()
                 processes[i] = None
 
                 # if successful, kill all other threads and return success
-                if res != None:
+                if res is not None:
                     for i in range(threads):
                         if processes[i] != None:
                             processes[i].terminate()
@@ -929,7 +925,7 @@ def mbruteforce(func, alphabet, length, method = 'upto', start = None, threads =
                     h.success('Found key: "%s"' % res)
                     return res
 
-                if all([x == None for x in processes]):
+                if all(x is None for x in processes):
                     done = True
         time.sleep(0.3)
     h.failure('No matches found')

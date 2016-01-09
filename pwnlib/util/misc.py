@@ -38,19 +38,19 @@ def align_down(alignment, x):
 
 
 def binary_ip(host):
-    """binary_ip(host) -> str
+    """binary_ip(host) -> bytes
 
     Resolve host and return IP as four byte string.
 
     Example:
         >>> binary_ip("127.0.0.1")
-        '\\x7f\\x00\\x00\\x01'
+        b'\\x7f\\x00\\x00\\x01'
     """
     return socket.inet_aton(socket.gethostbyname(host))
 
 
-def size(n, abbriv = 'B', si = False):
-    """size(n, abbriv = 'B', si = False) -> str
+def size(n, abbriv='B', si=False):
+    """size(n, abbriv='B', si=False) -> str
 
     Convert the length of a bytestream to human readable form.
 
@@ -70,7 +70,7 @@ def size(n, abbriv = 'B', si = False):
         >>> [size(1024 ** n) for n in range(7)]
         ['1B', '1.00KB', '1.00MB', '1.00GB', '1.00TB', '1.00PB', '1024.00PB']
     """
-    if isinstance(n, str):
+    if isinstance(n, (bytes, str)):
         n = len(n)
 
     base = 1000.0 if si else 1024.0
@@ -101,7 +101,7 @@ def read(path, count=-1, skip=0):
         return fd.read(count)
 
 
-def write(path, data = '', create_dir = False, mode = 'w'):
+def write(path, data='', create_dir=False, mode='w'):
     """Create new file or truncate existing to zero length and write data."""
     path = os.path.expanduser(os.path.expandvars(path))
     if create_dir:
@@ -110,8 +110,8 @@ def write(path, data = '', create_dir = False, mode = 'w'):
     with open(path, mode) as f:
         f.write(data)
 
-def which(name, all = False):
-    """which(name, flags = os.X_OK, all = False) -> str or str set
+def which(name, all=False):
+    """which(name, flags=os.X_OK, all=False) -> str or str set
 
     Works as the system command ``which``; searches $PATH for ``name`` and
     returns a full path if found.
@@ -156,8 +156,8 @@ def which(name, all = False):
     else:
         return None
 
-def run_in_new_terminal(command, terminal = None, args = None):
-    """run_in_new_terminal(command, terminal = None) -> None
+def run_in_new_terminal(command, terminal=None, args=None):
+    """run_in_new_terminal(command, terminal=None) -> None
 
     Run a command in a new terminal.
 

@@ -4,8 +4,8 @@ from . import packing
 
 
 # Taken from https://en.wikipedia.org/wiki/De_Bruijn_sequence but changed to a generator
-def de_bruijn(alphabet = string.ascii_lowercase, n = 4):
-    """de_bruijn(alphabet = string.ascii_lowercase, n = 4) -> generator
+def de_bruijn(alphabet=string.ascii_lowercase, n=4):
+    """de_bruijn(alphabet=string.ascii_lowercase, n=4) -> generator
 
     Generator for a sequence of unique substrings of length `n`. This is implemented using a
     De Bruijn Sequence over the given `alphabet`.
@@ -33,10 +33,10 @@ def de_bruijn(alphabet = string.ascii_lowercase, n = 4):
                 for c in db(t + 1, t):
                     yield c
 
-    return db(1,1)
+    return db(1, 1)
 
-def cyclic(length = None, alphabet = string.ascii_lowercase, n = 4):
-    """cyclic(length = None, alphabet = string.ascii_lowercase, n = 4) -> list/str
+def cyclic(length=None, alphabet=string.ascii_lowercase, n=4):
+    """cyclic(length=None, alphabet=string.ascii_lowercase, n=4) -> list/str
 
     A simple wrapper over :func:`de_bruijn`. This function returns a
     at most `length` elements.
@@ -61,7 +61,7 @@ def cyclic(length = None, alphabet = string.ascii_lowercase, n = 4):
 
     out = []
     for ndx, c in enumerate(de_bruijn(alphabet, n)):
-        if length != None and ndx >= length:
+        if length is not None and ndx >= length:
             break
         else:
             out.append(c)
@@ -71,8 +71,8 @@ def cyclic(length = None, alphabet = string.ascii_lowercase, n = 4):
     else:
         return out
 
-def cyclic_find(subseq, alphabet = string.ascii_lowercase, n = None):
-    """cyclic_find(subseq, alphabet = string.ascii_lowercase, n = None) -> int
+def cyclic_find(subseq, alphabet=string.ascii_lowercase, n=None):
+    """cyclic_find(subseq, alphabet=string.ascii_lowercase, n=None) -> int
 
     Calculates the position of a substring into a De Bruijn sequence.
 

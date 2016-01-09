@@ -1,8 +1,8 @@
 import collections
 
 
-def partition(lst, f, save_keys = False):
-    """partition(lst, f, save_keys = False) -> list
+def partition(lst, f, save_keys=False):
+    """partition(lst, f, save_keys=False) -> list
 
     Partitions an iterable into sublists using a function to specify which
     group they belong to.
@@ -31,8 +31,8 @@ def partition(lst, f, save_keys = False):
     else:
         return d.values()
 
-def group(n, lst, underfull_action = 'ignore', fill_value = None):
-    """group(n, lst, underfull_action = 'ignore', fill_value = None) -> list
+def group(n, lst, underfull_action='ignore', fill_value=None):
+    """group(n, lst, underfull_action='ignore', fill_value=None) -> list
 
     Split sequence into subsequences of given size. If the values cannot be
     evenly distributed among into groups, then the last group will either be
@@ -74,7 +74,7 @@ def group(n, lst, underfull_action = 'ignore', fill_value = None):
 
     out = []
     for i in range(0, len(lst), n):
-        out.append(lst[i:i+n])
+        out.append(lst[i:i + n])
 
     if out and len(out[-1]) < n:
         if underfull_action == 'ignore':
@@ -135,7 +135,7 @@ def ordlist(s):
       >>> ordlist("hello")
       [104, 101, 108, 108, 111]
     """
-    return map(ord, s)
+    return list(map(ord, s))
 
 def unordlist(cs):
     """unordlist(cs) -> str
@@ -156,11 +156,11 @@ def findall(haystack, needle):
 
     Example:
       >>> foo = findall([1,2,3,4,4,3,4,2,1], 4)
-      >>> foo.next()
+      >>> next(foo)
       3
-      >>> foo.next()
+      >>> next(foo)
       4
-      >>> foo.next()
+      >>> next(foo)
       6
     """
     def __kmp_table(W):
@@ -200,7 +200,6 @@ def findall(haystack, needle):
         for i in range(len(S)):
             if S[i] == w:
                 yield i
-
 
     if type(haystack) != type(needle):
         needle = [needle]

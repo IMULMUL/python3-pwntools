@@ -33,19 +33,19 @@ def pidof(target):
         A list of found PIDs.
     """
     if isinstance(target, tubes.sock.sock):
-         local  = target.sock.getsockname()
-         remote = target.sock.getpeername()
+        local = target.sock.getsockname()
+        remote = target.sock.getpeername()
 
-         def match(p):
-             return (c.raddr, c.laddr, c.status) == (local, remote, 'ESTABLISHED')
+        def match(p):
+            return (p.raddr, p.laddr, p.status) == (local, remote, 'ESTABLISHED')
 
-         return [c.pid for c in psutil.net_connections() if match(c)]
+        return [c.pid for c in psutil.net_connections() if match(c)]
 
     elif isinstance(target, tubes.process.process):
-         return [target.proc.pid]
+        return [target.proc.pid]
 
     else:
-         return pid_by_name(target)
+        return pid_by_name(target)
 
 def pid_by_name(name):
     """pid_by_name(name) -> int list
@@ -61,14 +61,14 @@ def pid_by_name(name):
         True
     """
     def match(p):
-         if p.name() == name:
-             return True
-         try:
-             if p.exe() == name:
-                 return True
-         except:
-             pass
-         return False
+        if p.name() == name:
+            return True
+        try:
+            if p.exe() == name:
+                return True
+        except:
+            pass
+        return False
 
     return [p.pid for p in psutil.process_iter() if match(p)]
 
@@ -98,9 +98,9 @@ def parent(pid):
         or 0 if there is not parent.
     """
     try:
-         return psutil.Process(pid).parent().pid
+        return psutil.Process(pid).parent().pid
     except:
-         return 0
+        return 0
 
 def children(ppid):
     """children(ppid) -> int list
@@ -124,8 +124,8 @@ def ancestors(pid):
     """
     pids = []
     while pid != 0:
-         pids.append(pid)
-         pid = parent(pid)
+        pids.append(pid)
+        pid = parent(pid)
     return pids
 
 def descendants(pid):
@@ -137,17 +137,16 @@ def descendants(pid):
     Returns:
         Dictionary mapping the PID of each child of `pid` to it's descendants.
     """
-    this_pid = pid
     allpids = all_pids()
     ppids = {}
     def _parent(pid):
-         if pid not in ppids:
-             ppids[pid] = parent(pid)
-         return ppids[pid]
+        if pid not in ppids:
+            ppids[pid] = parent(pid)
+        return ppids[pid]
     def _children(ppid):
-         return [pid for pid in allpids if _parent(pid) == ppid]
+        return [pid for pid in allpids if _parent(pid) == ppid]
     def _loop(ppid):
-         return {pid: _loop(pid) for pid in _children(ppid)}
+        return {pid: _loop(pid) for pid in _children(ppid)}
     return _loop(pid)
 
 def exe(pid):
@@ -194,12 +193,12 @@ def stat(pid):
         A list of the values in ``/proc/<pid>/stat``, with the exception that ``(`` and ``)`` has been removed from around the process name.
     """
     with open('/proc/%d/stat' % pid) as fd:
-         s = fd.read()
+        s = fd.read()
     # filenames can have ( and ) in them, dammit
     i = s.find('(')
     j = s.rfind(')')
-    name = s[i+1:j]
-    return s[:i].split() + [name] + s[j+1:].split()
+    name = s[i + 1:j]
+    return s[:i].split() + [name] + s[j + 1:].split()
 
 def starttime(pid):
     """starttime(pid) -> float

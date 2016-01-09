@@ -1,17 +1,17 @@
 _const_codes = [
-    'POP_TOP','ROT_TWO','ROT_THREE','ROT_FOUR','DUP_TOP',
-    'BUILD_LIST','BUILD_MAP','BUILD_TUPLE',
-    'LOAD_CONST','RETURN_VALUE','STORE_SUBSCR', 'STORE_MAP'
-    ]
+    'POP_TOP', 'ROT_TWO', 'ROT_THREE', 'ROT_FOUR', 'DUP_TOP',
+    'BUILD_LIST', 'BUILD_MAP', 'BUILD_TUPLE',
+    'LOAD_CONST', 'RETURN_VALUE', 'STORE_SUBSCR', 'STORE_MAP'
+]
 
 _expr_codes = _const_codes + [
-    'UNARY_POSITIVE','UNARY_NEGATIVE','UNARY_NOT',
-    'UNARY_INVERT','BINARY_POWER','BINARY_MULTIPLY',
-    'BINARY_DIVIDE','BINARY_FLOOR_DIVIDE','BINARY_TRUE_DIVIDE',
-    'BINARY_MODULO','BINARY_ADD','BINARY_SUBTRACT',
-    'BINARY_LSHIFT','BINARY_RSHIFT','BINARY_AND','BINARY_XOR',
+    'UNARY_POSITIVE', 'UNARY_NEGATIVE', 'UNARY_NOT',
+    'UNARY_INVERT', 'BINARY_POWER', 'BINARY_MULTIPLY',
+    'BINARY_DIVIDE', 'BINARY_FLOOR_DIVIDE', 'BINARY_TRUE_DIVIDE',
+    'BINARY_MODULO', 'BINARY_ADD', 'BINARY_SUBTRACT',
+    'BINARY_LSHIFT', 'BINARY_RSHIFT', 'BINARY_AND', 'BINARY_XOR',
     'BINARY_OR',
-    ]
+]
 
 _values_codes = _expr_codes + ['LOAD_NAME']
 
@@ -29,7 +29,7 @@ def _get_opcodes(codeobj):
     opcodes = []
     s = codeobj.co_code
     while i < len(s):
-        code = ord(s[i])
+        code = s[i]
         opcodes.append(code)
         if code >= dis.HAVE_ARGUMENT:
             i += 3
@@ -45,7 +45,7 @@ def test_expr(expr, allowed_codes):
     return the compiled code object. Otherwise raise a ValueError
     """
     import dis
-    allowed_codes = [dis.opmap[c] for c in allowed_codes]
+    allowed_codes = [dis.opmap[c] for c in allowed_codes if c in dis.opmap]
     try:
         c = compile(expr, "", "eval")
     except SyntaxError:

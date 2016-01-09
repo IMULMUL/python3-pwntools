@@ -41,21 +41,21 @@ def wget(url, save=None, timeout=5, **kwargs):
             w.failure("Got code %s" % response.status_code)
             return
 
-        total_size = int(response.headers.get('content-length',0))
+        total_size = int(response.headers.get('content-length', 0))
 
         w.status('0 / %s' % size(total_size))
 
         # Find out the next largest size we can represent as
         chunk_size = 1
-        while chunk_size < (total_size/10):
+        while chunk_size < total_size // 10:
             chunk_size *= 1000
 
         # Count chunks as they're received
-        total_data    = ''
+        total_data = b''
 
         # Loop until we have all of the data
-        for chunk in response.iter_content(chunk_size = 2**10):
-            total_data    += chunk
+        for chunk in response.iter_content(chunk_size=2**10):
+            total_data += chunk
             if total_size:
                 w.status('%s / %s' % (size(total_data), size(total_size)))
             else:

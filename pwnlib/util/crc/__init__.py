@@ -23,7 +23,7 @@ from .. import packing
 class BitPolynom:
     def __init__(self, n):
         if not isinstance(n, int):
-            raise TypeError("Polynomial must be called with an integer or a list")
+            raise TypeError("Polynomial must be called with an integer")
         if n < 0:
             raise ValueError("Polynomials cannot be negative: %d" % n)
         self.n = n
@@ -127,7 +127,7 @@ class BitPolynom:
         return BitPolynom(int(other) >> int(self))
 
     def degree(self):
-        return max(0, int(self).bit_length()-1)
+        return max(0, int(self).bit_length() - 1)
 
     def __repr__(self):
         if int(self) == 0:
@@ -192,18 +192,19 @@ class Module(types.ModuleType):
         if polynom.degree() != width:
             raise ValueError("Polynomial is too large for that width")
 
-        init   &= (1 << width)-1
-        xorout &= (1 << width)-1
+        init   &= (1 << width) - 1
+        xorout &= (1 << width) - 1
 
         if isinstance(data, list):
             # refin is not meaningful in this case
             inlen = len(data)
             p = BitPolynom(int(''.join('1' if v else '0' for v in data), 2))
-        elif isinstance(data, str):
-            inlen = len(data)*8
+        elif isinstance(data, (bytes, str)):
+            inlen = len(data) * 8
             if refin:
                 data = fiddling.bitswap(data)
             p = BitPolynom(packing.unpack(data, 'all', 'big', False))
+
         p = p << width
         p ^= init << inlen
         p  = p % polynom
@@ -215,7 +216,7 @@ class Module(types.ModuleType):
         return res
 
     @staticmethod
-    def _make_crc(name, polynom, width, init, refin, refout, xorout, check, extra_doc = ''):
+    def _make_crc(name, polynom, width, init, refin, refout, xorout, check, extra_doc=''):
         def inner(data):
             return crc.generic_crc(data, polynom, width, init, refin, refout, xorout)
         inner.func_name = 'crc_' + name
@@ -237,7 +238,7 @@ class Module(types.ModuleType):
         %s
 
         Arguments:
-            data(str): The data to checksum.
+            data(bytes, str): The data to checksum.
 
         Example:
             >>> print(%s('123456789'))
@@ -253,12 +254,14 @@ class Module(types.ModuleType):
         Calculates the same checksum as returned by the UNIX-tool ``cksum``.
 
         Arguments:
-            data(str): The data to checksum.
+            data(bytes, str): The data to checksum.
 
         Example:
             >>> print(cksum('123456789'))
             930766865
         """
+        if isinstance(data, str):
+            data = data.encode('utf8')
 
         l = len(data)
         data += packing.pack(l, 'all', 'little', False)

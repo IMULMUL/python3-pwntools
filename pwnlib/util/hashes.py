@@ -6,9 +6,10 @@ import hashlib
 for _algo in hashlib.algorithms_guaranteed:
     def _closure():
         hash = hashlib.__dict__[_algo]
+
         def file(p):
             h = hash()
-            fd = open(p)
+            fd = open(p, 'rb')
             while True:
                 s = fd.read(4096)
                 if not s:
@@ -16,8 +17,12 @@ for _algo in hashlib.algorithms_guaranteed:
                 h.update(s)
             fd.close()
             return h
+
         def sum(s):
+            if isinstance(s, str):
+                s = s.encode('utf8')
             return hash(s)
+
         filef = lambda x: file(x).digest()
         filef.__doc__ = 'Calculates the %s sum of a file' % _algo
         sumf = lambda x: sum(x).digest()
