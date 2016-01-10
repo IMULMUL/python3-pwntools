@@ -7,6 +7,7 @@ from .tube import tube
 
 log = getLogger(__name__)
 
+
 class sock(tube):
     """Methods available exclusively to sockets."""
 
@@ -15,12 +16,11 @@ class sock(tube):
         self.closed = {"recv": False, "send": False}
 
     # Overwritten for better usability
-    def recvall(self, timeout = tube.forever):
-        """recvall() -> str
+    def recvall(self, timeout=tube.forever):
+        """recvall() -> bytes
 
         Receives data until the socket is closed.
         """
-
         if getattr(self, 'type', None) == socket.SOCK_DGRAM:
             log.error("UDP sockets does not supports recvall")
         else:
@@ -39,7 +39,7 @@ class sock(tube):
             except IOError as e:
                 if e.errno == errno.EAGAIN:
                     return None
-                elif e.errno in [errno.ECONNREFUSED, errno.ECONNRESET]:
+                elif e.errno in (errno.ECONNREFUSED, errno.ECONNRESET):
                     self.shutdown("recv")
                     raise EOFError
                 elif e.errno == errno.EINTR:
@@ -47,7 +47,7 @@ class sock(tube):
                 else:
                     raise
 
-        if data == '':
+        if data == b'':
             self.shutdown("recv")
             raise EOFError
 
@@ -60,7 +60,7 @@ class sock(tube):
         try:
             self.sock.sendall(data)
         except IOError as e:
-            eof_numbers = [errno.EPIPE, errno.ECONNRESET, errno.ECONNREFUSED]
+            eof_numbers = (errno.EPIPE, errno.ECONNRESET, errno.ECONNREFUSED)
             if e.message == 'Socket is closed' or e.errno in eof_numbers:
                 self.shutdown("send")
                 raise EOFError

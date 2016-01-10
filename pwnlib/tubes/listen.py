@@ -8,6 +8,7 @@ from .sock import sock
 
 log = getLogger(__name__)
 
+
 class listen(sock):
     """Creates an TCP or UDP-socket to receive data on. It supports
     both IPv4 and IPv6.
@@ -23,18 +24,18 @@ class listen(sock):
         timeout: A positive number, None
     """
 
-    def __init__(self, port=0, bindaddr = "0.0.0.0",
-                 fam = "any", typ = "tcp",
-                 timeout = Timeout.default):
+    def __init__(self, port=0, bindaddr="0.0.0.0",
+                 fam="any", typ="tcp",
+                 timeout=Timeout.default):
         super(listen, self).__init__(timeout)
 
         port = int(port)
 
         if fam == 'any':
             fam = socket.AF_UNSPEC
-        elif fam == 4 or fam.lower() in ['ipv4', 'ip4', 'v4', '4']:
+        elif fam.lower() in ('ipv4', 'ip4', 'v4', '4'):
             fam = socket.AF_INET
-        elif fam == 6 or fam.lower() in ['ipv6', 'ip6', 'v6', '6']:
+        elif fam.lower() in ('ipv6', 'ip6', 'v6', '6'):
             fam = socket.AF_INET6
         elif isinstance(fam, int):
             pass
@@ -55,7 +56,7 @@ class listen(sock):
         for res in socket.getaddrinfo(bindaddr, port, fam, typ, 0, socket.AI_PASSIVE):
             self.family, self.type, self.proto, self.canonname, self.sockaddr = res
 
-            if self.type not in [socket.SOCK_STREAM, socket.SOCK_DGRAM]:
+            if self.type not in (socket.SOCK_STREAM, socket.SOCK_DGRAM):
                 continue
 
             h.status("Trying %s" % self.sockaddr[0])
@@ -97,7 +98,7 @@ class listen(sock):
             self.rhost, self.rport = rhost[:2]
             h.success('Got connection from %s on port %d' % (self.rhost, self.rport))
 
-        self._accepter = context.Thread(target = accepter)
+        self._accepter = context.Thread(target=accepter)
         self._accepter.daemon = True
         self._accepter.start()
 
@@ -107,7 +108,8 @@ class listen(sock):
             p = super(listen, self).spawn_process(*args, **kwargs)
             p.wait()
             self.close()
-        t = context.Thread(target = accepter)
+
+        t = context.Thread(target=accepter)
         t.daemon = True
         t.start()
 
@@ -119,7 +121,7 @@ class listen(sock):
     def __getattr__(self, key):
         if key == 'sock':
             while self._accepter.is_alive():
-                self._accepter.join(timeout = 0.1)
+                self._accepter.join(timeout=0.1)
             if 'sock' in self.__dict__:
                 return self.sock
             else:

@@ -7,6 +7,7 @@ from .sock import sock
 
 log = getLogger(__name__)
 
+
 class remote(sock):
     r"""Creates a TCP or UDP-connection to a remote host. It supports
     both IPv4 and IPv6.
@@ -28,7 +29,7 @@ class remote(sock):
         >>> r = remote('google.com', 443, ssl=True)
         >>> r.send('GET /\r\n\r\n')
         >>> r.recvn(4)
-        'HTTP'
+        b'HTTP'
         >>> r = remote('127.0.0.1', 1)
         Traceback (most recent call last):
         ...
@@ -36,31 +37,30 @@ class remote(sock):
         >>> import socket
         >>> s = socket.socket()
         >>> s.connect(('google.com', 80))
-        >>> s.send('GET /' + '\r\n'*2)
+        >>> s.send(b'GET /' + b'\r\n' * 2)
         9
         >>> r = remote.fromsocket(s)
         >>> r.recvn(4)
-        'HTTP'
+        b'HTTP'
     """
 
     def __init__(self, host, port,
-                 fam = "any", typ = "tcp",
-                 timeout = Timeout.default, ssl=False, sock=None):
+                 fam="any", typ="tcp",
+                 timeout=Timeout.default, ssl=False, sock=None):
         super(remote, self).__init__(timeout)
 
-        self.rport  = int(port)
-        self.rhost  = host
+        self.rport = int(port)
+        self.rhost = host
 
         if sock:
             self.family = sock.family
             self.type   = sock.type
             self.proto  = sock.proto
             self.sock   = sock
-
         else:
             typ = self._get_type(typ)
             fam = self._get_family(fam)
-            self.sock   = self._connect(fam, typ)
+            self.sock = self._connect(fam, typ)
 
         if self.sock:
             self.settimeout(self.timeout)
@@ -69,17 +69,15 @@ class remote(sock):
             if ssl:
                 self.sock = _ssl.wrap_socket(self.sock)
 
-
     @staticmethod
     def _get_family(fam):
-
         if isinstance(fam, int):
             pass
         elif fam == 'any':
             fam = socket.AF_UNSPEC
-        elif fam.lower() in ['ipv4', 'ip4', 'v4', '4']:
+        elif fam.lower() in ('ipv4', 'ip4', 'v4', '4'):
             fam = socket.AF_INET
-        elif fam.lower() in ['ipv6', 'ip6', 'v6', '6']:
+        elif fam.lower() in ('ipv6', 'ip6', 'v6', '6'):
             fam = socket.AF_INET6
         else:
             log.error("remote(): family %r is not supported" % fam)
@@ -88,7 +86,6 @@ class remote(sock):
 
     @staticmethod
     def _get_type(typ):
-
         if isinstance(typ, int):
             pass
         elif typ == "tcp":
@@ -109,14 +106,13 @@ class remote(sock):
         for res in socket.getaddrinfo(self.rhost, self.rport, fam, typ, 0, socket.AI_PASSIVE):
             self.family, self.type, self.proto, _canonname, sockaddr = res
 
-            if self.type not in [socket.SOCK_STREAM, socket.SOCK_DGRAM]:
+            if self.type not in (socket.SOCK_STREAM, socket.SOCK_DGRAM):
                 continue
 
             h.status("Trying %s" % sockaddr[0])
-
             sock = socket.socket(self.family, self.type, self.proto)
 
-            if timeout != None and timeout <= 0:
+            if timeout is not None and timeout <= 0:
                 sock.setblocking(0)
             else:
                 sock.setblocking(1)
@@ -133,8 +129,6 @@ class remote(sock):
 
         h.success()
         return sock
-
-
 
     @classmethod
     def fromsocket(cls, socket):
