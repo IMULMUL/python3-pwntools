@@ -66,7 +66,7 @@ Example showing `pwnlib.ui.options()`
 * `port_forward.py`
 ```
 A very simple port forwarder using `pwnlib.tubes.tube.connect_both()`.  Notice
-that `<>` is just a shorthand.
+that `|` is just a shorthand.
 ```
 * `readline_completers.py`
 ```

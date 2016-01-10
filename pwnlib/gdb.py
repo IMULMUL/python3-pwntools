@@ -110,7 +110,7 @@ def debug(args, exe=None, execute=None, ssh=None, arch=None):
     attach(('127.0.0.1', port), exe=orig_args[0], execute=execute, arch=context.arch)
 
     if ssh:
-        remote != listener.wait_for_connection()
+        remote | listener.wait_for_connection()
 
     return gdbserver
 
@@ -340,7 +340,7 @@ def ssh_gdb(ssh, process, execute = None, arch = None, **kwargs):
     forwardport = l.lport
 
     attach(('127.0.0.1', forwardport), execute, local_exe, arch)
-    l.wait_for_connection() != ssh.connect_remote('127.0.0.1', gdbport)
+    l.wait_for_connection() | ssh.connect_remote('127.0.0.1', gdbport)
     return c
 
 def find_module_addresses(binary, ssh=None, ulimit=False):
