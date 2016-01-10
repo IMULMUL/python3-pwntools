@@ -19,6 +19,7 @@ PIPE = subprocess.PIPE
 STDOUT = subprocess.STDOUT
 PTY = object()
 
+
 class process(tube):
     r"""
     Spawns a new process, and wraps it with a tube for communication.
@@ -96,13 +97,13 @@ class process(tube):
         >>> p.recv()
         b'\x00\x00\x00\x00\x00\x00\x00\x00'
 
-        >>> p = process(['python2', '-c', 'import os; print os.read(2,1024)'],
+        >>> p = process(['python2', '-c', 'import os; print os.read(2, 1024)'],
         ...             preexec_fn = lambda: os.dup2(0, 2))
         >>> p.sendline('hello')
         >>> p.recvline()
         b'hello\n'
 
-        >>> p = process(['python2', '-c', 'open("/dev/tty","wb").write("stack smashing detected")'])
+        >>> p = process(['python2', '-c', 'open("/dev/tty", "wb").write("stack smashing detected")'])
         >>> p.recv()
         b'stack smashing detected'
     """
@@ -171,7 +172,7 @@ class process(tube):
                                          preexec_fn=self.preexec_fn)
 
         if master:
-            self.proc.stdout = os.fdopen(master, 'rb')
+            self.proc.stdout = os.fdopen(master, 'rb', 0)
             os.close(stdout)
 
         # Set in non-blocking mode so that a call to call recv(1000) will
@@ -181,7 +182,7 @@ class process(tube):
         fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
     def preexec_fn(self):
-        self.__pty_make_controlling_tty(1)
+        self._pty_make_controlling_tty(1)
         self.preexec_user()
 
     @staticmethod
@@ -316,6 +317,7 @@ class process(tube):
         process has not yet finished and the exit code otherwise.
         """
         self.proc.poll()
+
         if self.proc.returncode is not None and not self._stop_noticed:
             self._stop_noticed = True
             log.info("Program %r stopped with exit code %d" % (self.program, self.proc.returncode))
@@ -384,7 +386,7 @@ class process(tube):
                 return select.select([self.proc.stdout], [], []) == ([self.proc.stdout], [], [])
 
             return select.select([self.proc.stdout], [], [], timeout) == ([self.proc.stdout], [], [])
-        except ValueError:
+        except OSError:
             # Not sure why this isn't caught when testing self.proc.stdout.closed,
             # but it's not.
             #
@@ -438,10 +440,10 @@ class process(tube):
         if direction == "recv":
             self.proc.stdout.close()
 
-        if False not in [self.proc.stdin.closed, self.proc.stdout.closed]:
+        if False not in (self.proc.stdin.closed, self.proc.stdout.closed):
             self.close()
 
-    def __pty_make_controlling_tty(self, tty_fd):
+    def _pty_make_controlling_tty(self, tty_fd):
         '''This makes the pseudo-terminal the controlling tty. This should be
         more portable than the pty.fork() function. Specifically, this should
         work on Solaris. '''
@@ -453,10 +455,8 @@ class process(tube):
             fd = os.open("/dev/tty", os.O_RDWR | os.O_NOCTTY)
             if fd >= 0:
                 os.close(fd)
-        # which exception, shouldnt' we catch explicitly .. ?
         except OSError:
-            # Already disconnected. This happens if running inside cron.
-            pass
+            pass # Already disconnected. This happens if running inside cron.
 
         os.setsid()
 
@@ -466,17 +466,15 @@ class process(tube):
             fd = os.open("/dev/tty", os.O_RDWR | os.O_NOCTTY)
             if fd >= 0:
                 os.close(fd)
-                raise Exception('Failed to disconnect from ' +
-                    'controlling tty. It is still possible to open /dev/tty.')
-        # which exception, shouldnt' we catch explicitly .. ?
+                raise Exception('Failed to disconnect from controlling tty. '
+                                'It is still possible to open /dev/tty.')
         except OSError:
-            # Good! We are disconnected from a controlling tty.
-            pass
+            pass # Good! We are disconnected from a controlling tty.
 
         # Verify we can open child pty.
         fd = os.open(child_name, os.O_RDWR)
         if fd < 0:
-            raise Exception("Could not open child pty, " + child_name)
+            raise Exception("Could not open child pty, %s" % child_name)
         else:
             os.close(fd)
 
