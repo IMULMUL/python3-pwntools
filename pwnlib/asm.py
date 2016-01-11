@@ -16,19 +16,19 @@ Assembly
     To assemble code, simply invoke :func:`asm` on the code to assemble.
 
         >>> asm('mov eax, 0')
-        '\xb8\x00\x00\x00\x00'
+        b'\xb8\x00\x00\x00\x00'
 
     Additionally, you can use constants as defined in the :mod:`pwnlib.constants`
     module.
 
         >>> asm('mov eax, SYS_execve')
-        '\xb8\x0b\x00\x00\x00'
+        b'\xb8\x0b\x00\x00\x00'
 
     Finally, :func:`asm` is used to assemble shellcode provided by ``pwntools``
     in the :mod:`shellcraft` module.
 
         >>> asm(shellcraft.sh())
-        'jhh///sh/bin\x89\xe31\xc9j\x0bX\x99\xcd\x80'
+        b'jhh///sh/bin\x89\xe31\xc9j\x0bX\x99\xcd\x80'
 
 Disassembly
 ------------------------
@@ -61,7 +61,8 @@ log = getLogger(__name__)
 __all__ = ['asm', 'cpp', 'disasm', 'make_elf']
 
 _basedir = path.split(__file__)[0]
-_incdir  = path.join(_basedir, 'data', 'includes')
+_incdir = path.join(_basedir, 'data', 'includes')
+
 
 def which_binutils(util, **kwargs):
     """
@@ -90,16 +91,16 @@ def which_binutils(util, **kwargs):
         # Fix up pwntools vs Debian triplet naming, and account
         # for 'thumb' being its own pwntools architecture.
         arches = [arch] + {
-            'thumb':  ['arm',    'aarch64'],
-            'i386':   ['x86_64', 'amd64'],
-            'amd64':  ['x86_64', 'i386'],
+            'thumb': ['arm', 'aarch64'],
+            'i386': ['x86_64', 'amd64'],
+            'amd64': ['x86_64', 'i386'],
         }.get(arch, [])
 
         # If one of the candidate architectures matches the native
         # architecture, use that as a last resort.
         machine = platform.machine()
         try:
-            with context.local(arch = machine):
+            with context.local(arch=machine):
                 if context.arch in arches:
                     arches.append(None)
         except AttributeError:
@@ -107,12 +108,14 @@ def which_binutils(util, **kwargs):
 
         for arch in arches:
             # hack for homebrew-installed binutils on mac
-            for gutil in ['g'+util, util]:
+            for gutil in ['g' + util, util]:
                 # e.g. objdump
-                if arch is None: pattern = gutil
+                if arch is None:
+                    pattern = gutil
 
                 # e.g. aarch64-linux-gnu-objdump
-                else:       pattern = '%s*linux*-%s' % (arch,gutil)
+                else:
+                    pattern = '%s*linux*-%s' % (arch, gutil)
 
                 for dir in environ['PATH'].split(':'):
                     res = sorted(glob(path.join(dir, pattern)))
@@ -133,54 +136,54 @@ def _assembler():
     gas = which_binutils('as')
 
     E = {
-        'big':    '-EB',
+        'big': '-EB',
         'little': '-EL'
     }[context.endianness]
 
     B = '-%s' % context.bits
 
     assemblers = {
-        'i386'   : [gas, B],
-        'amd64'  : [gas, B],
+        'i386': [gas, B],
+        'amd64': [gas, B],
 
         # Most architectures accept -EL or -EB
-        'thumb'  : [gas, '-mthumb', E],
-        'arm'    : [gas, E],
+        'thumb': [gas, '-mthumb', E],
+        'arm': [gas, E],
         'aarch64': [gas, E],
-        'mips'   : [gas, E, B],
-        'mips64' : [gas, E, B],
-        'sparc':   [gas, E, B],
+        'mips': [gas, E, B],
+        'mips64': [gas, E, B],
+        'sparc': [gas, E, B],
         'sparc64': [gas, E, B],
 
         # Powerpc wants -mbig or -mlittle, and -mppc32 or -mppc64
-        'powerpc':   [gas, '-m%s' % context.endianness, '-mppc%s' % context.bits],
+        'powerpc': [gas, '-m%s' % context.endianness, '-mppc%s' % context.bits],
         'powerpc64': [gas, '-m%s' % context.endianness, '-mppc%s' % context.bits],
 
         # ia64 only accepts -mbe or -mle
-        'ia64':    [gas, '-m%ce' % context.endianness[0]]
+        'ia64': [gas, '-m%ce' % context.endianness[0]]
     }
 
     assembler = assemblers.get(context.arch, [gas])
 
     if not checked_assembler_version[gas]:
         checked_assembler_version[gas] = True
-        result = subprocess.check_output([gas, '--version','/dev/null'],
+        result = subprocess.check_output([gas, '--version', '/dev/null'],
                                          stderr=subprocess.STDOUT)
-        version = re.search(r' (\d\.\d+)', result).group(1)
-        if version < '2.19':
+        version = re.search(rb' (\d\.\d+)', result).group(1)
+        if version < b'2.19':
             log.warn_once('Your binutils version is too old and may not work!\n'  + \
                 'Try updating with: https://pwntools.readthedocs.org/en/latest/install/binutils.html\n' + \
                 'Reported Version: %r' % result.strip())
 
-
     return assembler
 
+
 def _linker():
-    ld  = [which_binutils('ld')]
+    ld = [which_binutils('ld')]
     bfd = ['--oformat=' + _bfdname()]
 
     E = {
-        'big':    '-EB',
+        'big': '-EB',
         'little': '-EL'
     }[context.endianness]
 
@@ -190,8 +193,10 @@ def _linker():
 
     return ld + bfd + [E] + arguments
 
+
 def _objcopy():
     return [which_binutils('objcopy')]
+
 
 def _objdump():
     path = [which_binutils('objdump')]
@@ -201,8 +206,9 @@ def _objdump():
 
     return path
 
+
 def _include_header():
-    os   = context.os
+    os = context.os
     arch = context.arch
 
     if os == 'freebsd':
@@ -218,43 +224,43 @@ def _include_header():
 
 
 def _arch_header():
-    prefix  = ['.section .shellcode,"ax"']
+    prefix = ['.section .shellcode,"ax"']
     headers = {
-        'i386'  :  ['.intel_syntax noprefix'],
-        'amd64' :  ['.intel_syntax noprefix'],
-        'arm'   : ['.syntax unified',
-                   '.arch armv7-a',
-                   '.arm'],
-        'thumb' : ['.syntax unified',
-                   '.arch armv7-a',
-                   '.thumb'],
-        'mips'  : ['.set mips2',
-                   '.set noreorder'],
+        'i386': ['.intel_syntax noprefix'],
+        'amd64': ['.intel_syntax noprefix'],
+        'arm': ['.syntax unified',
+                '.arch armv7-a',
+                '.arm'],
+        'thumb': ['.syntax unified',
+                  '.arch armv7-a',
+                  '.thumb'],
+        'mips': ['.set mips2',
+                 '.set noreorder'],
     }
-
     return '\n'.join(prefix + headers.get(context.arch, [])) + '\n'
+
 
 def _bfdname():
     arch = context.arch
-    E    = context.endianness
+    E = context.endianness
 
     bfdnames = {
-        'i386'    : 'elf32-i386',
-        'aarch64' : 'elf64-%saarch64' % E,
-        'amd64'   : 'elf64-x86-64',
-        'arm'     : 'elf32-%sarm' % E,
-        'thumb'   : 'elf32-%sarm' % E,
-        'mips'    : 'elf32-trad%smips' % E,
-        'mips64'  : 'elf64-trad%smips' % E,
-        'alpha'   : 'elf64-alpha',
-        'cris'    : 'elf32-cris',
-        'ia64'    : 'elf64-ia64-%s' % E,
-        'm68k'    : 'elf32-m68k',
-        'powerpc' : 'elf32-powerpc',
-        'powerpc64' : 'elf64-powerpc',
-        'vax'     : 'elf32-vax',
-        'sparc'   : 'elf32-sparc',
-        'sparc64' : 'elf64-sparc',
+        'i386': 'elf32-i386',
+        'aarch64': 'elf64-%saarch64' % E,
+        'amd64': 'elf64-x86-64',
+        'arm': 'elf32-%sarm' % E,
+        'thumb': 'elf32-%sarm' % E,
+        'mips': 'elf32-trad%smips' % E,
+        'mips64': 'elf64-trad%smips' % E,
+        'alpha': 'elf64-alpha',
+        'cris': 'elf32-cris',
+        'ia64': 'elf64-ia64-%s' % E,
+        'm68k': 'elf32-m68k',
+        'powerpc': 'elf32-powerpc',
+        'powerpc64': 'elf64-powerpc',
+        'vax': 'elf32-vax',
+        'sparc': 'elf32-sparc',
+        'sparc64': 'elf64-sparc',
     }
 
     if arch in bfdnames:
@@ -266,10 +272,10 @@ def _bfdname():
 def _bfdarch():
     arch = context.arch
     convert = {
-    'i386': 'i386',
-    'amd64': 'i386:x86-64',
-    'thumb': 'arm',
-    'ia64': 'ia64-elf64'
+        'i386': 'i386',
+        'amd64': 'i386:x86-64',
+        'thumb': 'arm',
+        'ia64': 'ia64-elf64'
     }
 
     if arch in convert:
@@ -277,15 +283,20 @@ def _bfdarch():
 
     return arch
 
-def _run(cmd, stdin = None):
+
+def _run(cmd, stdin=None):
     log.debug(subprocess.list2cmdline(cmd))
     try:
         proc = subprocess.Popen(
             cmd,
-            stdin  = subprocess.PIPE,
-            stdout = subprocess.PIPE,
-            stderr = subprocess.PIPE
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
         )
+
+        if isinstance(stdin, str):
+            stdin = stdin.encode('utf8')
+
         stdout, stderr = proc.communicate(stdin)
         exitcode = proc.wait()
     except OSError as e:
@@ -294,18 +305,19 @@ def _run(cmd, stdin = None):
         else:
             raise
 
-    if (exitcode, stderr) != (0, ''):
-        msg = 'There was an error running %s:\n' % repr(cmd)
+    if (exitcode, stderr) != (0, b''):
+        msg = 'There was an error running %r:\n' % cmd
         if exitcode != 0:
             msg += 'It had the exitcode %d.\n' % exitcode
         if stderr != '':
-            msg += 'It had this on stdout:\n%s\n' % stderr
+            msg += 'It had this on stderr:\n%r\n' % stderr
         log.error(msg)
 
     return stdout
 
+
 def cpp(shellcode, **kwargs):
-    r"""cpp(shellcode, ...) -> str
+    r"""cpp(shellcode, ...) -> bytes
 
     Runs CPP over the given shellcode.
 
@@ -321,21 +333,21 @@ def cpp(shellcode, **kwargs):
 
         .. doctest::
 
-            >>> cpp("mov al, SYS_setresuid", arch = "i386", os = "linux")
-            'mov al, 164\n'
-            >>> cpp("weee SYS_setresuid", arch = "arm", os = "linux")
-            'weee (0x900000+164)\n'
-            >>> cpp("SYS_setresuid", arch = "thumb", os = "linux")
-            '(0+164)\n'
-            >>> cpp("SYS_setresuid", os = "freebsd")
-            '311\n'
+            >>> cpp("mov al, SYS_setresuid", arch="i386", os="linux")
+            b'mov al, 164\n'
+            >>> cpp("weee SYS_setresuid", arch="arm", os="linux")
+            b'weee (0x900000+164)\n'
+            >>> cpp("SYS_setresuid", arch="thumb", os="linux")
+            b'(0+164)\n'
+            >>> cpp("SYS_setresuid", os="freebsd")
+            b'311\n'
     """
 
     with context.local(**kwargs):
         arch = context.arch
-        os   = context.os
+        os = context.os
         code = _include_header() + shellcode
-        cmd  = [
+        cmd = [
             'cpp',
             '-C',
             '-nostdinc',
@@ -344,7 +356,7 @@ def cpp(shellcode, **kwargs):
             '-I' + _incdir,
             '/dev/stdin'
         ]
-        return _run(cmd, code).strip('\n').rstrip() + '\n'
+        return _run(cmd, code).strip(b'\n').rstrip() + b'\n'
 
 elf_template = '''
 .global _start
@@ -354,13 +366,14 @@ _start:
 __start:
 '''
 
-def make_elf(data, vma = None, strip=True, **kwargs):
+
+def make_elf(data, vma=None, strip=True, **kwargs):
     r"""
     Builds an ELF file with the specified binary data as its
     executable code.
 
     Arguments:
-        data(str): Assembled code
+        data(bytes): Assembled code
         vma(int):  Load address for the ELF file
 
     Examples:
@@ -372,12 +385,12 @@ def make_elf(data, vma = None, strip=True, **kwargs):
         >>> context.arch = 'i386'
         >>> context.bits = 32
         >>> filename = tempfile.mktemp()
-        >>> bin_sh = '6a68682f2f2f73682f62696e89e331c96a0b5899cd80'.decode('hex')
+        >>> bin_sh = codecs.decode('6a68682f2f2f73682f62696e89e331c96a0b5899cd80', 'hex')
         >>> data = make_elf(bin_sh)
-        >>> with open(filename,'wb+') as f:
+        >>> with open(filename, 'wb+') as f:
         ...     f.write(data)
         ...     f.flush()
-        >>> os.chmod(filename,0777)
+        >>> os.chmod(filename, 0777)
         >>> p = process(filename)
         >>> p.sendline('echo Hello; exit')
         >>> p.recvline()
@@ -385,20 +398,20 @@ def make_elf(data, vma = None, strip=True, **kwargs):
     """
     with context.local(**kwargs):
         assembler = _assembler()
-        linker    = _linker()
-        code      = elf_template
-        code      += '.string "%s"' % ''.join('\\x%02x' % c for c in bytearray(data))
-        code      += '\n'
+        linker = _linker()
+        code = elf_template
+        code += '.string "%s"' % ''.join('\\x%02x' % c for c in data)
+        code += '\n'
 
         log.debug(code)
 
-        tmpdir    = tempfile.mkdtemp(prefix = 'pwn-asm-')
-        step1     = path.join(tmpdir, 'step1-asm')
-        step2     = path.join(tmpdir, 'step2-obj')
-        step3     = path.join(tmpdir, 'step3-elf')
+        tmpdir = tempfile.mkdtemp(prefix='pwn-asm-')
+        step1 = path.join(tmpdir, 'step1-asm')
+        step2 = path.join(tmpdir, 'step2-obj')
+        step3 = path.join(tmpdir, 'step3-elf')
 
         try:
-            with open(step1, 'wb+') as f:
+            with open(step1, 'w+') as f:
                 f.write(code)
 
             _run(assembler + ['-o', step2, step1])
@@ -407,21 +420,22 @@ def make_elf(data, vma = None, strip=True, **kwargs):
             if vma is not None:
                 load_addr = ['-Ttext-segment=%#x' % vma]
 
-            _run(linker    + load_addr + ['-N', '-o', step3, step2])
+            _run(linker + load_addr + ['-N', '-o', step3, step2])
 
             if strip:
                 _run([which_binutils('objcopy'), '-Sg', step3])
                 _run([which_binutils('strip'), '--strip-unneeded', step3])
 
-            with open(step3, 'r') as f:
+            with open(step3, 'rb') as f:
                 return f.read()
         except Exception:
             log.exception("An error occurred while building an ELF:\n%s" % code)
         else:
             shutil.rmtree(tmpdir)
 
-def asm(shellcode, vma = 0, **kwargs):
-    r"""asm(code, vma = 0, ...) -> str
+
+def asm(shellcode, vma=0, **kwargs):
+    r"""asm(code, vma=0, ...) -> bytes
 
     Runs :func:`cpp` over a given shellcode and then assembles it into bytes.
 
@@ -442,35 +456,35 @@ def asm(shellcode, vma = 0, **kwargs):
 
         .. doctest::
 
-            >>> asm("mov eax, SYS_select", arch = 'i386', os = 'freebsd')
-            '\xb8]\x00\x00\x00'
-            >>> asm("mov eax, SYS_select", arch = 'amd64', os = 'linux')
-            '\xb8\x17\x00\x00\x00'
-            >>> asm("mov rax, SYS_select", arch = 'amd64', os = 'linux')
-            'H\xc7\xc0\x17\x00\x00\x00'
-            >>> asm("ldr r0, =SYS_select", arch = 'arm', os = 'linux', bits=32)
-            '\x04\x00\x1f\xe5R\x00\x90\x00'
+            >>> asm("mov eax, SYS_select", arch='i386', os='freebsd')
+            b'\xb8]\x00\x00\x00'
+            >>> asm("mov eax, SYS_select", arch='amd64', os='linux')
+            b'\xb8\x17\x00\x00\x00'
+            >>> asm("mov rax, SYS_select", arch='amd64', os='linux')
+            b'H\xc7\xc0\x17\x00\x00\x00'
+            >>> asm("ldr r0, =SYS_select", arch='arm', os='linux', bits=32)
+            b'\x04\x00\x1f\xe5R\x00\x90\x00'
     """
-    result = ''
+    result = b''
 
     with context.local(**kwargs):
         assembler = _assembler()
-        linker    = _linker()
-        objcopy   = _objcopy() + ['-j', '.shellcode', '-Obinary']
-        code      = ''
-        code      += _arch_header()
-        code      += cpp(shellcode)
+        linker = _linker()
+        objcopy = _objcopy() + ['-j', '.shellcode', '-Obinary']
+        code = b''
+        code += _arch_header().encode('utf8')
+        code += cpp(shellcode)
 
-        log.debug('Assembling\n%s' % code)
+        log.debug('Assembling\n%r' % code)
 
-        tmpdir    = tempfile.mkdtemp(prefix = 'pwn-asm-')
-        step1     = path.join(tmpdir, 'step1')
-        step2     = path.join(tmpdir, 'step2')
-        step3     = path.join(tmpdir, 'step3')
-        step4     = path.join(tmpdir, 'step4')
+        tmpdir = tempfile.mkdtemp(prefix='pwn-asm-')
+        step1 = path.join(tmpdir, 'step1')
+        step2 = path.join(tmpdir, 'step2')
+        step3 = path.join(tmpdir, 'step3')
+        step4 = path.join(tmpdir, 'step4')
 
         try:
-            with open(step1, 'w') as fd:
+            with open(step1, 'wb') as fd:
                 fd.write(code)
 
             _run(assembler + ['-o', step2, step1])
@@ -479,32 +493,32 @@ def asm(shellcode, vma = 0, **kwargs):
                 shutil.copy(step2, step3)
 
             if vma:
-                 _run(linker + ['--section-start=.shellcode=%#x' % vma,
-                                '--entry=%#x' % vma,
-                                '-o', step3, step2])
+                _run(linker + ['--section-start=.shellcode=%#x' % vma,
+                               '--entry=%#x' % vma,
+                               '-o', step3, step2])
 
             elif open(step2, 'rb').read(4) == b'\x7fELF':
                 # Sanity check for seeing if the output has relocations
                 relocs = subprocess.check_output(
                     [which_binutils('readelf'), '-r', step2]
                 ).strip()
-                if len(relocs.split('\n')) > 1:
-                    log.error('Shellcode contains relocations:\n%s' % relocs)
+                if len(relocs.split(b'\n')) > 1:
+                    log.error('Shellcode contains relocations:\n%r' % relocs)
             else:
                 shutil.copy(step2, step3)
 
             _run(objcopy + [step3, step4])
 
-            with open(step4) as fd:
+            with open(step4, 'rb') as fd:
                 result = fd.read()
-
         except Exception:
             log.exception("An error occurred while assembling:\n%s" % code)
         else:
             shutil.rmtree(tmpdir)
             return result
 
-def disasm(data, vma = 0, byte = True, offset = True, **kwargs):
+
+def disasm(data, vma=0, byte=True, offset=True, **kwargs):
     """disasm(data, ...) -> str
 
     Disassembles a bytestring into human readable assembler.
@@ -528,32 +542,32 @@ def disasm(data, vma = 0, byte = True, offset = True, **kwargs):
 
         .. doctest::
 
-          >>> print(disasm('b85d000000'.decode('hex'), arch = 'i386'))
+          >>> print(disasm(codecs.decode('b85d000000', 'hex'), arch='i386'))
              0:   b8 5d 00 00 00          mov    eax,0x5d
-          >>> print(disasm('b85d000000'.decode('hex'), arch = 'i386', byte = 0))
+          >>> print(disasm(codecs.decode('b85d000000', 'hex'), arch='i386', byte=0))
              0:   mov    eax,0x5d
-          >>> print(disasm('b85d000000'.decode('hex'), arch = 'i386', byte = 0, offset = 0))
+          >>> print(disasm(codecs.decode('b85d000000', 'hex'), arch='i386', byte=0, offset=0))
           mov    eax,0x5d
-          >>> print(disasm('b817000000'.decode('hex'), arch = 'amd64'))
+          >>> print(disasm(codecs.decode('b817000000', 'hex'), arch='amd64'))
              0:   b8 17 00 00 00          mov    eax,0x17
-          >>> print(disasm('48c7c017000000'.decode('hex'), arch = 'amd64'))
+          >>> print(disasm(codecs.decode('48c7c017000000', 'hex'), arch='amd64'))
              0:   48 c7 c0 17 00 00 00    mov    rax,0x17
-          >>> print(disasm('04001fe552009000'.decode('hex'), arch = 'arm'))
+          >>> print(disasm(codecs.decode('04001fe552009000', 'hex'), arch='arm'))
              0:   e51f0004        ldr     r0, [pc, #-4]   ; 0x4
              4:   00900052        addseq  r0, r0, r2, asr r0
-          >>> print(disasm('4ff00500'.decode('hex'), arch = 'thumb', bits=32))
+          >>> print(disasm(codecs.decode('4ff00500', 'hex'), arch='thumb', bits=32))
              0:   f04f 0005       mov.w   r0, #5
           >>>
     """
     result = ''
 
     with context.local(**kwargs):
-        arch   = context.arch
-        os     = context.os
+        arch = context.arch
+        os = context.os
 
-        tmpdir = tempfile.mkdtemp(prefix = 'pwn-disasm-')
-        step1  = path.join(tmpdir, 'step1')
-        step2  = path.join(tmpdir, 'step2')
+        tmpdir = tempfile.mkdtemp(prefix='pwn-disasm-')
+        step1 = path.join(tmpdir, 'step1')
+        step2 = path.join(tmpdir, 'step2')
 
         bfdarch = _bfdarch()
         bfdname = _bfdname()
@@ -572,13 +586,12 @@ def disasm(data, vma = 0, byte = True, offset = True, **kwargs):
             objcopy += ['-w', '-N', '*']
 
         try:
-
-            with open(step1, 'w') as fd:
+            with open(step1, 'wb') as fd:
                 fd.write(data)
 
-            res = _run(objcopy + [step1, step2])
+            _run(objcopy + [step1, step2])
 
-            output0 = subprocess.check_output(objdump + [step2])
+            output0 = subprocess.check_output(objdump + [step2]).decode('utf8')
             output1 = output0.split('<.text>:\n')
 
             if len(output1) != 2:
