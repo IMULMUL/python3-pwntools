@@ -204,7 +204,7 @@ class process(tube):
             argv = [argv]
 
         if not all(isinstance(arg, (bytes, str)) for arg in argv):
-            log.error("argv must be strings: %r" % argv)
+            log.error("argv must only contain bytes or strings: %r" % argv)
 
         # Create a duplicate so we can modify it
         argv = list(argv or [])
@@ -260,18 +260,20 @@ class process(tube):
         # Create a duplicate so we can modify it safely
         env = dict(env or os.environ)
 
-        for k, v in env.items():
+        env_vars = env.items()
+        env = {}
+        for k, v in env_vars:
             if not isinstance(k, (bytes, str)):
-                log.error('Environment keys must be strings: %r' % k)
-            if not isinstance(k, (bytes, str)):
-                log.error('Environment values must be strings: %r=%r' % (k, v))
+                log.error('Environment keys must be bytes or strings: %r' % k)
+            if not isinstance(v, (bytes, str)):
+                log.error('Environment values must be bytes or strings: %r=%r' % (k, v))
 
             k_null_byte = b'\x00' if isinstance(k, bytes) else '\x00'
             v_null_byte = b'\x00' if isinstance(v, bytes) else '\x00'
             if k_null_byte in k[:-1]:
-                log.error('Inappropriate nulls in env key: %r' % k)
+                log.error('Inappropriate null byte in env key: %r' % k)
             if v_null_byte in v[:-1]:
-                log.error('Inappropriate nulls in env value: %r=%r' % (k, v))
+                log.error('Inappropriate null byte in env value: %r=%r' % (k, v))
 
             env[k.rstrip(k_null_byte)] = v.rstrip(v_null_byte)
 
