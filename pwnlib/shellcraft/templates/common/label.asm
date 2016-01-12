@@ -1,4 +1,4 @@
-<%page args="prefix = 'label'"/>
+<%page args="prefix='label'"/>
 <%docstring>
 Returns a new unique label with a given prefix.
 
