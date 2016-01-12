@@ -7,7 +7,7 @@
   from pwnlib.shellcraft.registers import get_register, is_register, bits_required
   log = getLogger('pwnlib.shellcraft.amd64.mov')
 %>
-<%page args="dest, src, stack_allowed = True"/>
+<%page args="dest, src, stack_allowed=True"/>
 <%docstring>
 Move src into dest without newlines and null bytes.
 
@@ -24,7 +24,7 @@ on the value of `context.os`.
 
 Example:
 
-    >>> print(shellcraft.amd64.mov('eax','ebx').rstrip())
+    >>> print(shellcraft.amd64.mov('eax', 'ebx').rstrip())
         mov eax, ebx
     >>> print(shellcraft.amd64.mov('eax', 0).rstrip())
         xor eax, eax
@@ -59,14 +59,14 @@ Example:
         mov rax, 0x1010110dfac01fe
         xor [rsp], rax
         pop rax
-   >>> with context.local(os = 'linux'):
+   >>> with context.local(os='linux'):
    ...     print(shellcraft.amd64.mov('eax', 'SYS_read').rstrip())
        xor eax, eax
-   >>> with context.local(os = 'freebsd'):
+   >>> with context.local(os='freebsd'):
    ...     print(shellcraft.amd64.mov('eax', 'SYS_read').rstrip())
        push 0x3
        pop rax
-   >>> with context.local(os = 'linux'):
+   >>> with context.local(os='linux'):
    ...     print(shellcraft.amd64.mov('eax', 'PROT_READ | PROT_WRITE | PROT_EXEC').rstrip())
        push 0x7
        pop rax
@@ -78,7 +78,7 @@ Args:
 </%docstring>
 <%
 def okay(s):
-    return '\0' not in s and '\n' not in s
+    return b'\x00' not in s and b'\n' not in s
 
 def pretty(n):
     if n < 0:
@@ -99,7 +99,7 @@ if get_register(src):
     src = get_register(src)
 
     if dest.size < src.size and src.name not in dest.bigger:
-        log.error("cannot mov %s, %s: dddest is smaller than src" % (dest, src))
+        log.error("cannot mov %s, %s: dest is smaller than src" % (dest, src))
 
     # Can't move between RAX and DIL for example.
     if dest.rex_mode & src.rex_mode == 0:
@@ -112,7 +112,7 @@ if get_register(src):
 
     src_size = src.size
 else:
-    with ctx.local(arch = 'amd64'):
+    with ctx.local(arch='amd64'):
         src = constants.eval(src)
 
     if not dest.fits(src):
@@ -147,7 +147,7 @@ else:
     % if src == 0:
         xor ${dest}, ${dest}
 ## Special case for *just* a newline
-    % elif stack_allowed and dest.size in (32,64) and src == 10:
+    % elif stack_allowed and dest.size in (32, 64) and src == 10:
         push 9 /* mov ${dest}, '\n' */
         pop ${dest.native64}
         inc ${dest}
@@ -156,7 +156,7 @@ else:
 ##
 ## 6aff58           push -1; pop rax
 ## 48c7c0ffffffff   mov rax, -1
-    % elif stack_allowed and dest.size in (32,64) and (-2**7 <= srcs < 2**7) and okay(srcp[:1]):
+    % elif stack_allowed and dest.size in (32, 64) and (-2**7 <= srcs < 2**7) and okay(srcp[:1]):
         push ${pretty(srcs)}
         pop ${dest.native64}
 ## Easy case, everybody is trivially happy
@@ -164,7 +164,7 @@ else:
     % elif okay(srcp):
         mov ${dest}, ${pretty(src)}
 ## We can push 32-bit values onto the stack and they are sign-extended.
-    % elif stack_allowed and dest.size in (32,64) and (-2**31 <= srcs < 2**31) and okay(srcp[:4]):
+    % elif stack_allowed and dest.size in (32, 64) and (-2**31 <= srcs < 2**31) and okay(srcp[:4]):
         push ${pretty(srcs)}
         pop ${dest.native64}
 ## We can also leverage the sign-extension to our advantage.
@@ -179,7 +179,7 @@ else:
         mov ${dest.sizes[8]}, ${pretty(srcu)}
 ## Target value is a 16-bit value with no data in the low 8 bits
 ## means we can use the 'AH' style register.
-    % elif srcu == srcu & 0xff00 and okay(srcp[1]) and dest.ff00:
+    % elif srcu == srcu & 0xff00 and okay(srcp[1:2]) and dest.ff00:
         xor ${dest}, ${dest}
         mov ${dest.ff00}, ${pretty(srcu >> 8)}
 ## Target value is a 16-bit value, use a 16-bit mov
@@ -193,7 +193,7 @@ else:
 ## All else has failed.  Use some XOR magic to move things around.
     % else:
         <%
-        a,b = fiddling.xor_pair(srcp, avoid = '\x00\n')
+        a,b = fiddling.xor_pair(srcp, avoid=b'\x00\n')
         a = pretty(packing.unpack(a, dest.size, 'little', False))
         b = pretty(packing.unpack(b, dest.size, 'little', False))
         %>\

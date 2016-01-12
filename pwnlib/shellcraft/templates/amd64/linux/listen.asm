@@ -2,7 +2,7 @@
 <% from socket import htons %>
 <%page args="port, network='ipv4'"/>
 <%docstring>
-    listen(port,network)
+    listen(port, network)
 
     Listens on a TCP port, accept a client and leave his socket in RAX.
     Port is the TCP port to listen on, network is either 'ipv4' or 'ipv6'.

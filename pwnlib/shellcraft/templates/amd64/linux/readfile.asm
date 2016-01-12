@@ -1,5 +1,5 @@
 <% from pwnlib.shellcraft import amd64 %>
-<%page args="path, dst = 'rdi'"/>
+<%page args="path, dst='rdi'"/>
 <%docstring>
 Args: [path, dst (imm/reg) = rdi ]
     Opens the specified file path and sends its content to the specified file descriptor.

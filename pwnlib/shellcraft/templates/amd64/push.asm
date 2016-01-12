@@ -16,7 +16,7 @@ means that this shellcode can change behavior depending on the value of
 `context.os`.
 
 Args:
-  value (int,str): The value or register to push
+  value (int, str): The value or register to push
 
 Example:
 
@@ -31,11 +31,11 @@ Example:
         /* push 256 */
         push 0x1010201
         xor dword ptr [rsp], 0x1010301
-    >>> with context.local(os = 'linux'):
+    >>> with context.local(os='linux'):
     ...     print(pwnlib.shellcraft.amd64.push('SYS_write').rstrip())
         /* push 'SYS_write' */
         push 0x1
-    >>> with context.local(os = 'freebsd'):
+    >>> with context.local(os='freebsd'):
     ...     print(pwnlib.shellcraft.amd64.push('SYS_write').rstrip())
         /* push 'SYS_write' */
         push 0x4
@@ -44,9 +44,9 @@ Example:
 
 <%
   value_orig = value
-  if isinstance(value, (bytes, str)):
+  if isinstance(value, str):
     try:
-      with ctx.local(arch = 'amd64'):
+      with ctx.local(arch='amd64'):
         value = constants.eval(value)
     except (ValueError, AttributeError):
       pass

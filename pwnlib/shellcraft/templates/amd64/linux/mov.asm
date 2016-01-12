@@ -2,7 +2,7 @@
   from pwnlib.shellcraft import amd64
   from pwnlib.context import context as ctx # Ugly hack, mako will not let it be called context
 %>
-<%page args="dest, src, stack_allowed = True"/>
+<%page args="dest, src, stack_allowed=True"/>
 <%docstring>
 
 Thin wrapper around :func:`pwnlib.shellcraft.amd64.mov`, which sets
@@ -16,6 +16,6 @@ Example:
 
 </%docstring>
 
-% with ctx.local(os = 'linux'):
+% with ctx.local(os='linux'):
   ${amd64.mov(dest, src, stack_allowed)}
 % endwith

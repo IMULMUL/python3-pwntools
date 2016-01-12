@@ -1,5 +1,5 @@
 <% from pwnlib.shellcraft import common, amd64 %>
-<%page args="sock = 'rbp'"/>
+<%page args="sock='rbp'"/>
 <%docstring>
 Args: [sock (imm/reg) = rbp]
     Duplicates sock to stdin, stdout and stderr
