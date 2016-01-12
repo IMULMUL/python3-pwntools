@@ -19,7 +19,7 @@ on the value of `context.os`.
 
 Examples:
 
-    >>> print(shellcraft.arm.mov('r0','r1').rstrip())
+    >>> print(shellcraft.arm.mov('r0', 'r1').rstrip())
         mov r0, r1
     >>> print(shellcraft.arm.mov('r0', 5).rstrip())
         /* Set r0 = 5 = 0x5 */
@@ -35,10 +35,10 @@ Args:
 </%docstring>
 <%
 if not dst in regs:
-    log.error('%r is not a register' % str(dst))
+    log.error('%r is not a register' % dst)
     
 if not src in regs:
-    with ctx.local(arch = 'arm'):
+    with ctx.local(arch='arm'):
         src = constants.eval(src)
 
 %>

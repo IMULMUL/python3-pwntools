@@ -1,4 +1,4 @@
-<%page args="filepath, flags = 'O_RDONLY', mode = 0644"/>
+<%page args="filepath, flags='O_RDONLY', mode=0644"/>
 <%docstring>Opens a file. Leaves the file descriptor in r0.
 
 Args:
@@ -22,7 +22,7 @@ Args:
   if isinstance(mode, int):
       mode = hex(mode)
 %>
-%if expr(cpp("%s & O_CREAT" % flags, arch = 'arm', os = 'linux')):
+%if expr(cpp("%s & O_CREAT" % flags, arch='arm', os='linux')):
     mov r2, #(${mode})
 %endif
     mov r1, #(${flags})

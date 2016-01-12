@@ -13,9 +13,9 @@ Examples:
     000020e01eff2fe1
     ef0e0be3ad0e4de31eff2fe1
 </%docstring>
-<%page args="return_value = None"/>
+<%page args="return_value=None"/>
 
-% if return_value != None:
+% if return_value is not None:
     ${arm.mov('r0', return_value)}
 % endif
 

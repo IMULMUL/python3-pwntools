@@ -1,9 +1,9 @@
 <% from pwnlib.shellcraft.arm import mov %>
 <% from pwnlib.util.packing import unpack %>
 <% from pwnlib import constants %>
-<%page args="egg, start_address = 0, double_check = True"/>
+<%page args="egg, start_address=0, double_check=True"/>
 <%docstring>
-    egghunter(egg, start_address = 0, double_check = True)
+    egghunter(egg, start_address=0, double_check=True)
 
     Searches for an egg, which is either a four byte integer
     or a four byte string. The egg must appear twice in a row
@@ -15,8 +15,12 @@
 </%docstring>
 <%
     if not isinstance(egg, int):
+        if isinstance(egg, str):
+            egg = egg.encode('utf8')
+
         if not len(egg) == 4:
             raise Exception('Egg should be either an integer or a four byte string')
+
         egg = unpack(egg)
 %>
 egghunter:
