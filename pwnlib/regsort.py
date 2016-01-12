@@ -8,6 +8,7 @@ from .log import getLogger
 
 log = getLogger(__name__)
 
+
 def check_cycle(reg, assignments):
     """Walk down the assignment list of a register,
     return the path walked if it is encountered again.
@@ -32,6 +33,7 @@ def check_cycle(reg, assignments):
     """
     return check_cycle_(reg, assignments, [])
 
+
 def check_cycle_(reg, assignments, path):
     target = assignments[reg]
     path.append(reg)
@@ -54,6 +56,7 @@ def check_cycle_(reg, assignments, path):
     # Recurse
     return check_cycle_(target, assignments, path)
 
+
 def extract_dependencies(reg, assignments):
     """Return a list of all registers which directly
     depend on the specified register.
@@ -70,7 +73,7 @@ def extract_dependencies(reg, assignments):
         ['b', 'c']
     """
     # sorted() is only for determinism
-    return sorted([k for k,v in assignments.items() if v == reg])
+    return sorted([k for k, v in assignments.items() if v == reg])
 
 
 def resolve_order(reg, deps):
@@ -96,6 +99,7 @@ def resolve_order(reg, deps):
     x.append(reg)
     return x
 
+
 def depends_on_cycle(reg, assignments, in_cycles):
     while reg in assignments:
         if reg in in_cycles:
@@ -103,7 +107,8 @@ def depends_on_cycle(reg, assignments, in_cycles):
         reg = assignments.get(reg, None)
     return False
 
-def regsort(in_out, all_regs, tmp = None, xchg = True):
+
+def regsort(in_out, all_regs, tmp=None, xchg=True):
     """
     Sorts register dependencies.
 
@@ -187,22 +192,22 @@ def regsort(in_out, all_regs, tmp = None, xchg = True):
         >>> regsort({'a': 'b', 'b': 'a', 'c': 'b'}, R) #doctest: +NORMALIZE_WHITESPACE
         [('mov', 'c', 'b'),
          ('xchg', 'a', 'b')]
-        >>> regsort({'a':'b', 'b':'a', 'x':'b'}, R, tmp='y', xchg=False) #doctest: +NORMALIZE_WHITESPACE
+        >>> regsort({'a': 'b', 'b': 'a', 'x': 'b'}, R, tmp='y', xchg=False) #doctest: +NORMALIZE_WHITESPACE
         [('mov', 'x', 'b'),
          ('mov', 'y', 'a'),
          ('mov', 'a', 'b'),
          ('mov', 'b', 'y')]
-        >>> regsort({'a':'b', 'b':'a', 'x':'b'}, R, tmp='x', xchg=False) #doctest: +ELLIPSIS
+        >>> regsort({'a': 'b', 'b': 'a', 'x': 'b'}, R, tmp='x', xchg=False) #doctest: +ELLIPSIS
         Traceback (most recent call last):
         ...
         PwnlibException: Cannot break dependency cycles ...
-        >>> regsort({'a':'b','b':'c','c':'a','x':'1','y':'z','z':'c'}, R) #doctest: +NORMALIZE_WHITESPACE
+        >>> regsort({'a': 'b', 'b': 'c', 'c': 'a', 'x': '1', 'y': 'z', 'z': 'c'}, R) #doctest: +NORMALIZE_WHITESPACE
         [('mov', 'x', '1'),
          ('mov', 'y', 'z'),
          ('mov', 'z', 'c'),
          ('xchg', 'a', 'b'),
          ('xchg', 'b', 'c')]
-        >>> regsort({'a':'b','b':'c','c':'a','x':'1','y':'z','z':'c'}, R, tmp='x') #doctest: +NORMALIZE_WHITESPACE
+        >>> regsort({'a': 'b', 'b': 'c', 'c': 'a', 'x': '1', 'y': 'z', 'z': 'c'}, R, tmp='x') #doctest: +NORMALIZE_WHITESPACE
         [('mov', 'y', 'z'),
          ('mov', 'z', 'c'),
          ('mov', 'x', 'a'),
@@ -210,7 +215,7 @@ def regsort(in_out, all_regs, tmp = None, xchg = True):
          ('mov', 'b', 'c'),
          ('mov', 'c', 'x'),
          ('mov', 'x', '1')]
-        >>> regsort({'a':'b','b':'c','c':'a','x':'1','y':'z','z':'c'}, R, xchg=0) #doctest: +NORMALIZE_WHITESPACE
+        >>> regsort({'a': 'b', 'b': 'c', 'c': 'a', 'x': '1','y': 'z', 'z': 'c'}, R, xchg=0) #doctest: +NORMALIZE_WHITESPACE
         [('mov', 'y', 'z'),
          ('mov', 'z', 'c'),
          ('mov', 'x', 'a'),
@@ -224,7 +229,7 @@ def regsort(in_out, all_regs, tmp = None, xchg = True):
     # Drop all registers which will be set to themselves.
     #
     # For example, {'eax': 'eax'}
-    in_out = {k:v for k,v in in_out.items() if k != v}
+    in_out = {k: v for k, v in in_out.items() if k != v}
 
     # Check input
     if not all(k in all_regs for k in in_out):
@@ -234,8 +239,8 @@ def regsort(in_out, all_regs, tmp = None, xchg = True):
     # which are also 'outputs'.
     #
     # For example, {'eax': 1, 'ebx': 2, 'ecx': 'edx'}
-    if not any(v in in_out for k,v in in_out.items()):
-        return [('mov', k,in_out[k]) for k in sorted(in_out)]
+    if not any(v in in_out for k, v in in_out.items()):
+        return [('mov', k, in_out[k]) for k in sorted(in_out)]
 
     # Invert so we have a dependency graph.
     #
@@ -243,7 +248,7 @@ def regsort(in_out, all_regs, tmp = None, xchg = True):
     # Output:  {'A': [], 'B': ['A', 'C'], 'C': []}
     #
     # In this case, both A and C must be set before B.
-    deps  = {r: extract_dependencies(r, in_out) for r in in_out}
+    deps = {r: extract_dependencies(r, in_out) for r in in_out}
 
     # Order alphabetically for repeatability
     not_done = OrderedDict(in_out)
@@ -256,12 +261,12 @@ def regsort(in_out, all_regs, tmp = None, xchg = True):
     # Given that everything is single-assignment, the cycles
     # are guarnteed to be disjoint.
     cycle_candidates = sorted(list(in_out))
-    cycles           = []
-    in_cycle         = []
-    not_in_cycle     = []
+    cycles = []
+    in_cycle = []
+    not_in_cycle = []
 
     while cycle_candidates:
-        reg   = cycle_candidates[0]
+        reg = cycle_candidates[0]
         cycle = check_cycle(reg, in_out)
 
         if cycle:
@@ -302,9 +307,8 @@ def regsort(in_out, all_regs, tmp = None, xchg = True):
                 tmp = reg
                 break
         else:
-            nope = sorted((k,v) for k,v in in_out.items())
+            nope = sorted((k, v) for k, v in in_out.items())
             log.error("Cannot break dependency cycles in %r" % nope)
-
 
     # Don't set the temporary register now
     if tmp in not_in_cycle:
@@ -312,7 +316,7 @@ def regsort(in_out, all_regs, tmp = None, xchg = True):
 
     # Resolve everything *not* in a cycle.
     while not_in_cycle:
-        reg   = not_in_cycle[0]
+        reg = not_in_cycle[0]
         order = resolve_order(reg, deps)
 
         for reg in order:
@@ -320,14 +324,13 @@ def regsort(in_out, all_regs, tmp = None, xchg = True):
             if reg not in not_in_cycle:
                 continue
 
-            src =  in_out[reg]
+            src = in_out[reg]
             result.append(('mov', reg, src))
             not_in_cycle.remove(reg)
 
             # Mark this as resolved
             if reg in deps.get(src, []):
                 deps[src].remove(reg)
-
 
     # If using a temporary register, break each cycle individually
     #
@@ -346,7 +349,7 @@ def regsort(in_out, all_regs, tmp = None, xchg = True):
     if tmp:
         for cycle in cycles:
             first = cycle[0]
-            last  = cycle[-1]
+            last = cycle[-1]
 
             deps[first].remove(last)
             in_out[last] = tmp
@@ -360,8 +363,8 @@ def regsort(in_out, all_regs, tmp = None, xchg = True):
     else:
         for cycle in cycles:
             size = len(cycle)
-            for i in range(size-1):
-                result.append(('xchg', cycle[i], cycle[(i+1) % size]))
+            for i in range(size - 1):
+                result.append(('xchg', cycle[i], cycle[(i + 1) % size]))
 
     # Finally, set the temp register's final value
     if tmp and tmp in in_out:
