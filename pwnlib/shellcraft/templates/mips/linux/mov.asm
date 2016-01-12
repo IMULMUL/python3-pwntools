@@ -16,6 +16,6 @@ Example:
 
 </%docstring>
 
-% with ctx.local(os = 'linux'):
+% with ctx.local(os='linux'):
   ${mips.mov(dest, src)}
 % endwith

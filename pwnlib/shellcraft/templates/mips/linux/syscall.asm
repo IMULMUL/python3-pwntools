@@ -2,7 +2,7 @@
   from pwnlib.shellcraft import mips
   from pwnlib import constants
 %>
-<%page args="syscall = None, arg0 = None, arg1 = None, arg2 = None, arg3 = None, arg4 = None, arg5 = None, arg6 = None"/>
+<%page args="syscall=None, arg0=None, arg1=None, arg2=None, arg3=None, arg4=None, arg5=None, arg6=None"/>
 <%docstring>
 Args: [syscall_number, \*args]
     Does a syscall
@@ -10,28 +10,30 @@ Args: [syscall_number, \*args]
 Any of the arguments can be expressions to be evaluated by :func:`pwnlib.constants.eval`.
 </%docstring>
 <%
-    if isinstance(syscall, (bytes, str)) and syscall.startswith('SYS_'):
+    if isinstance(syscall, str) and syscall.startswith('SYS_'):
         syscall_repr = syscall[4:] + "(%s)"
         args = []
     else:
-      syscall_repr = 'syscall(%s)'
-      if syscall == None:
-          args = ['?']
-      else:
-          args = [repr(syscall)]
+        syscall_repr = 'syscall(%s)'
+        if syscall is None:
+            args = ['?']
+        else:
+            args = [repr(syscall)]
 
     for arg in [arg0, arg1, arg2, arg3, arg4, arg5, arg6]:
-        if arg == None:
+        if arg is None:
             args.append('?')
         else:
             args.append(repr(arg))
+
     while args and args[-1] == '?':
         args.pop()
+
     syscall_repr = syscall_repr % ', '.join(args)
     stack_regs = [arg4, arg5, arg6]
 %>\
 /* call ${syscall_repr} */
-% if len(filter(lambda x: x is not None, stack_regs)) > 0:
+% if len(list(filter(lambda x: x is not None, stack_regs))) > 0:
     /* Be able to restore stack */
     sw $sp, -36($sp)
 
@@ -49,7 +51,7 @@ Any of the arguments can be expressions to be evaluated by :func:`pwnlib.constan
     % endif
 % endfor
     syscall 0x42424
-% if len(filter(lambda x: x is not None, stack_regs)) > 0:
+% if len(list(filter(lambda x: x is not None, stack_regs))) > 0:
 
     lw $sp, -4($sp)
 % endif

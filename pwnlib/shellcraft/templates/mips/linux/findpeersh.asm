@@ -1,5 +1,5 @@
 <% from pwnlib.shellcraft.mips.linux import findpeer, dupsh %>
-<%page args="port = None"/>
+<%page args="port=None"/>
 <%docstring>
     findpeersh(port)
 

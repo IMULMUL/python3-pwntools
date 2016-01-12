@@ -14,17 +14,17 @@ This might modify the four bytes before the stack pointer.
 
 Args:
   dest (str): The destination register.
-  src (str): Either the input register, or an immediate value.
+  src (int, str): Either the input register, or an immediate value.
 </%docstring>
 <%
 if not dst in regs:
-    log.error('%r is not a register' % str(dst))
+    log.error('%r is not a register' % dst)
     
 if not src in regs:
     src = constants.eval(src)
 
 def okay(s):
-    return not ('\x00' in s or '\n' in s)
+    return not (b'\x00' in s or b'\n' in s)
 
 %>
 .set noat
@@ -47,7 +47,7 @@ def okay(s):
             ori ${dst}, $zero, ${src}
         %else:
             <%
-                a, b = fiddling.xor_pair(packing.pack(src, 16), avoid = '\x00\n')
+                a, b = fiddling.xor_pair(packing.pack(src, 16), avoid=b'\x00\n')
                 a = hex(packing.unpack(a, 16))
                 b = hex(packing.unpack(b, 16))
             %>\

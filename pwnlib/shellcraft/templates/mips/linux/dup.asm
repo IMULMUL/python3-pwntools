@@ -2,7 +2,7 @@
     from pwnlib.shellcraft import mips
     from pwnlib.shellcraft import common
 %>\
-<%page args="sock = '$s0'"/>
+<%page args="sock='$s0'"/>
 <%docstring>
 Args: [sock (imm/reg) = s0]
     Duplicates sock to stdin, stdout and stderr

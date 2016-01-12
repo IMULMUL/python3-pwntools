@@ -1,7 +1,7 @@
 <% from pwnlib.shellcraft import mips %>
-<%page args="path, dst = '$s0'"/>
+<%page args="path, dst='$s0'"/>
 <%docstring>
-Args: [path, dst (imm/reg) = $s0 ]
+Args: [path, dst (imm/reg) = $s0]
     Opens the specified file path and sends its content to the specified file descriptor.
 </%docstring>
     /* Save dst fd for later */

@@ -2,7 +2,7 @@
   from pwnlib.shellcraft import mips
   from pwnlib.context import context as ctx # Ugly hack, mako will not let it be called context
 %>
-<%page args="string, append_null = True"/>
+<%page args="string, append_null=True"/>
 <%docstring>
 
 Thin wrapper around :func:`pwnlib.shellcraft.mips.pushstr`, which sets
@@ -33,10 +33,10 @@ Example:
         add $sp, $sp, -4
 
 Args:
-  string (str): The string to push.
+  string (bytes, str): The string to push.
   append_null (bool): Whether to append a single NULL-byte before pushing.
 </%docstring>
 
-% with ctx.local(os = 'linux'):
+% with ctx.local(os='linux'):
   ${mips.pushstr(string, append_null)}
 % endwith
