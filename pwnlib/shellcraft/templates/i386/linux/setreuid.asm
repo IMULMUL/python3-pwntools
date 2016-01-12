@@ -1,5 +1,5 @@
 <% from pwnlib.shellcraft import i386 %>
-<%page args="uid = 'euid'"/>
+<%page args="uid='euid'"/>
 <%docstring>
 Args: [uid (imm/reg) = euid]
     Sets the real and effective user id.

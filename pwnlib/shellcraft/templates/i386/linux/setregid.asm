@@ -1,5 +1,5 @@
 <% from pwnlib.shellcraft import i386 %>
-<%page args="gid = 'egid'"/>
+<%page args="gid='egid'"/>
 <%docstring>
 Args: [gid (imm/reg) = egid]
     Sets the real and effective group id.

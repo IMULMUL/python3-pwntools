@@ -46,9 +46,9 @@ Example:
   # There are no meaningful constants of length < 3.
   # There are however constants such as EBP, which we would
   # prefer to avoid.
-  if isinstance(value, (bytes, str)) and len(value) > 3:
+  if isinstance(value, str) and len(value) > 3:
     try:
-      with ctx.local(arch = 'i386'):
+      with ctx.local(arch='i386'):
         value = constants.eval(value)
     except (ValueError, AttributeError):
       pass

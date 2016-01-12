@@ -1,5 +1,5 @@
 <% from pwnlib.shellcraft import i386 %>
-<%page args="in_fd = 'ebp', size = 255, allocate_stack = True"/>
+<%page args="in_fd='ebp', size=255, allocate_stack=True"/>
 <%docstring> Reads to the stack from a directory.
 
 Args:

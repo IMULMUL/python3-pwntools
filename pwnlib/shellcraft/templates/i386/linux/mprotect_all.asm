@@ -1,5 +1,5 @@
 <% from pwnlib.shellcraft import common %>
-<%page args="clear_ebx = True, fix_null = False"/>
+<%page args="clear_ebx=True, fix_null=False"/>
 <%docstring>Calls mprotect(page, 4096, PROT_READ | PROT_WRITE | PROT_EXEC) for every page.
 
 It takes around 0.3 seconds on my box, but your milage may vary.

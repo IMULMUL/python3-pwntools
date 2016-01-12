@@ -1,6 +1,6 @@
 <% from pwnlib.shellcraft import i386 %>
 <% from pwnlib.shellcraft import common %>
-<%page args="sock = 'ebp'"/>
+<%page args="sock='ebp'"/>
 <%docstring>
 Args: [sock (imm/reg) = ebp]
     Duplicates sock to stdin, stdout and stderr

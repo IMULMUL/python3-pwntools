@@ -1,6 +1,6 @@
 <% from pwnlib.shellcraft import common %>
 <% from socket import htons %>
-<%page args="port = None"/>
+<%page args="port=None"/>
 <%docstring>
 Args: port (defaults to any port)
     Finds a socket, which is connected to the specified port.

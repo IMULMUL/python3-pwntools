@@ -16,6 +16,6 @@ Example:
 
 </%docstring>
 
-% with ctx.local(os = 'freebsd'):
+% with ctx.local(os='freebsd'):
   ${i386.push(value)}
 % endwith

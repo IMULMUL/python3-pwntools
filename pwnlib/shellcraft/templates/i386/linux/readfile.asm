@@ -1,7 +1,7 @@
 <% from pwnlib.shellcraft import i386 %>
-<%page args="path, dst = 'esi'"/>
+<%page args="path, dst='esi'"/>
 <%docstring>
-Args: [path, dst (imm/reg) = esi ]
+Args: [path, dst (imm/reg) = esi]
     Opens the specified file path and sends its content to the specified file descriptor.
 </%docstring>
     /* Save destination */

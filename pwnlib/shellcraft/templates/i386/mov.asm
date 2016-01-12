@@ -6,7 +6,7 @@
   from pwnlib.shellcraft.registers import get_register, is_register, bits_required
   log = getLogger('pwnlib.shellcraft.i386.mov')
 %>
-<%page args="dest, src, stack_allowed = True"/>
+<%page args="dest, src, stack_allowed=True"/>
 <%docstring>
 Move src into dest without newlines and null bytes.
 
@@ -23,7 +23,7 @@ on the value of `context.os`.
 
 Example:
 
-    >>> print(shellcraft.i386.mov('eax','ebx').rstrip())
+    >>> print(shellcraft.i386.mov('eax', 'ebx').rstrip())
         mov eax, ebx
     >>> print(shellcraft.i386.mov('eax', 0).rstrip())
         xor eax, eax
@@ -37,8 +37,6 @@ Example:
         pop edi
         inc edi
     >>> print(shellcraft.i386.mov('al', 'ax').rstrip())
-        /* moving ax into al, but this is a no-op */
-    >>> print(shellcraft.i386.mov('al','ax').rstrip())
         /* moving ax into al, but this is a no-op */
     >>> print(shellcraft.i386.mov('esp', 'esp').rstrip())
         /* moving esp into esp, but this is a no-op */
@@ -68,7 +66,7 @@ Example:
     >>> print(shellcraft.i386.mov('eax', 'SYS_execve').rstrip())
         push 0xb
         pop eax
-    >>> with context.local(os = 'freebsd'):
+    >>> with context.local(os='freebsd'):
     ...     print(shellcraft.i386.mov('eax', 'SYS_execve').rstrip())
         push 0x3b
         pop eax
@@ -83,7 +81,7 @@ Args:
 </%docstring>
 <%
 def okay(s):
-    return '\0' not in s and '\n' not in s
+    return b'\x00' not in s and b'\n' not in s
 
 def pretty(n):
     if n < 0:
@@ -112,7 +110,7 @@ if get_register(src):
     if dest.size < src.size and src.name not in dest.bigger:
         log.error("cannot mov %s, %s: dddest is smaller than src" % (dest, src))
 else:
-    with ctx.local(arch = 'i386'):
+    with ctx.local(arch='i386'):
         src = constants.eval(src)
 
     if not dest.fits(src):
@@ -153,20 +151,20 @@ else:
     % elif stack_allowed and dest.size == 32 and okay(srcp):
         push ${pretty(src)}
         pop ${dest}
-    % elif stack_allowed and dest.size == 32 and  -127 <= srcs < 128 and okay(srcp[0]):
+    % elif stack_allowed and dest.size == 32 and  -127 <= srcs < 128 and okay(srcp[0:1]):
         push ${pretty(src)}
         pop ${dest}
 ## Easy case, everybody is happy
     % elif okay(srcp):
         mov ${dest}, ${pretty(src)}
 ## If it's an IMM8, we can use the 8-bit register
-    % elif 0 <= srcu < 2**8 and okay(srcp[0]) and dest.sizes[8]:
+    % elif 0 <= srcu < 2**8 and okay(srcp[0:1]) and dest.sizes[8]:
         xor ${dest}, ${dest}
         mov ${dest.sizes[8]}, ${pretty(srcu)}
 ## If it's an IMM16, but there's nothing in the lower 8 bits,
 ## we can use the high-8-bits register.
 ## However, we must check that it exists.
-    % elif srcu == (srcu & 0xff00) and okay(srcp[1]) and dest.ff00:
+    % elif srcu == (srcu & 0xff00) and okay(srcp[1:2]) and dest.ff00:
         xor ${dest}, ${dest} /* mov ${dest}, ${pretty(src)} */
         mov ${dest.ff00}, ${pretty(srcu >> 8)}
 ## If it's an IMM16, use the 16-bit register
@@ -177,7 +175,7 @@ else:
 ## the XOR trick.
     % else:
         <%
-        a,b = fiddling.xor_pair(srcp, avoid = '\x00\n')
+        a, b = fiddling.xor_pair(srcp, avoid=b'\x00\n')
         a = hex(packing.unpack(a, dest.size))
         b = hex(packing.unpack(b, dest.size))
         %>\

@@ -7,7 +7,7 @@
 <% from pwnlib.shellcraft import i386 %>
 <% from pwnlib.util.net import sockaddr %>
 
-<%page args="host, port, network = 'ipv4'"/>
+<%page args="host, port, network='ipv4'"/>
 <%docstring>
 Connects to the host on the specified port.
 Leaves the connected socket in ebp
