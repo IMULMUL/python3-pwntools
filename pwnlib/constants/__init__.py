@@ -29,13 +29,13 @@ what happens in :mod:`pwnlib.shellcraft`.
 
 Example:
 
-    >>> with context.local(os = 'freebsd'):
+    >>> with context.local(os='freebsd'):
     ...     print(int(constants.SYS_stat))
     188
-    >>> with context.local(os = 'linux', arch = 'i386'):
+    >>> with context.local(os='linux', arch='i386'):
     ...     print(int(constants.SYS_stat))
     106
-    >>> with context.local(os = 'linux', arch = 'amd64'):
+    >>> with context.local(os='linux', arch='amd64'):
     ...     print(int(constants.SYS_stat))
     4
 
@@ -54,13 +54,13 @@ class ConstantsModule(ModuleType):
     route queries down to the correct module based on the
     current context arch / os.
 
-        >>> with context.local(arch = 'i386', os = 'linux'):
+        >>> with context.local(arch='i386', os='linux'):
         ...    print(constants.SYS_execve + constants.PROT_WRITE)
         13
-        >>> with context.local(arch = 'amd64', os = 'linux'):
+        >>> with context.local(arch='amd64', os='linux'):
         ...    print(constants.SYS_execve + constants.PROT_WRITE)
         61
-        >>> with context.local(arch = 'amd64', os = 'linux'):
+        >>> with context.local(arch='amd64', os='linux'):
         ...    print(constants.SYS_execve + constants.PROT_WRITE)
         61
         >>> False
@@ -90,7 +90,7 @@ class ConstantsModule(ModuleType):
         # Special case for __all__, we want to return the contextually
         # relevant module.
         if key == '__all__':
-            return self.guess().__dict__.keys()
+            return list(self.guess().__dict__.keys())
 
         # Special case for all other special properties which aren't defined
         if key.endswith('__'):
@@ -121,13 +121,13 @@ class ConstantsModule(ModuleType):
 
         Example:
 
-            >>> with context.local(arch = 'i386', os = 'linux'):
+            >>> with context.local(arch='i386', os='linux'):
             ...    print(constants.eval('SYS_execve + PROT_WRITE'))
             13
-            >>> with context.local(arch = 'amd64', os = 'linux'):
+            >>> with context.local(arch='amd64', os='linux'):
             ...    print(constants.eval('SYS_execve + PROT_WRITE'))
             61
-            >>> with context.local(arch = 'amd64', os = 'linux'):
+            >>> with context.local(arch='amd64', os='linux'):
             ...    print(constants.eval('SYS_execve + PROT_WRITE'))
             61
         """
