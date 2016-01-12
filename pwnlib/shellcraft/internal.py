@@ -12,16 +12,18 @@ def init_mako():
     from mako import ast
     import threading
 
-    if lookup != None:
+    if lookup is not None:
         return
 
     class IsInsideManager:
         def __init__(self, parent):
             self.parent = parent
+
         def __enter__(self):
             self.oldval = self.parent.is_inside
             self.parent.is_inside = True
             return self.oldval
+
         def __exit__(self, *args):
             self.parent.is_inside = self.oldval
 
@@ -35,8 +37,8 @@ def init_mako():
 
     curdir = os.path.dirname(os.path.abspath(__file__))
     lookup = TemplateLookup(
-        directories      = [os.path.join(curdir, 'templates')],
-        module_directory = os.path.expanduser('~/.pwntools-cache/mako')
+        directories=[os.path.join(curdir, 'templates')],
+        module_directory=os.path.expanduser('~/.pwntools-cache/mako')
     )
 
     # The purpose of this definition is to create a new Tag.
@@ -67,6 +69,7 @@ def init_mako():
             method = getattr(visitor, "visitCode", lambda x: x)
             method(self)
 
+
 def lookup_template(filename):
     init_mako()
 
@@ -74,6 +77,7 @@ def lookup_template(filename):
         loaded[filename] = lookup.get_template(filename)
 
     return loaded[filename]
+
 
 def get_context_from_dirpath(directory):
     """
@@ -84,23 +88,24 @@ def get_context_from_dirpath(directory):
     >>> get_context_from_dirpath('amd64/linux') == {'arch': 'amd64', 'os': 'linux'}
     True
     """
-    A,O = os.path.split(directory)
+    A, O = os.path.split(directory)
 
     if O == 'common':
         O = None
 
     if not A:
-        A,O = O,None
+        A, O = O, None
 
     rv = {}
-    if O: rv['os']=O
-    if A: rv['arch']=A
+    if O: rv['os'] = O
+    if A: rv['arch'] = A
     return rv
+
 
 def make_function(funcname, filename, directory):
     import inspect
-    path       = os.path.join(directory, filename)
-    template   = lookup_template(path)
+    path = os.path.join(directory, filename)
+    template = lookup_template(path)
 
     args, varargs, keywords, defaults = inspect.getargspec(template.module.render_body)
 
@@ -123,7 +128,7 @@ def make_function(funcname, filename, directory):
         args_used.append('**' + keywords)
 
     docstring = inspect.cleandoc(template.module.__doc__ or '')
-    args      = ', '.join(args)
+    args = ', '.join(args)
     args_used = ', '.join(args_used)
     local_ctx = get_context_from_dirpath(directory)
 
@@ -161,7 +166,9 @@ def wrap(template, render_global):
     return %(funcname)s
 ''' % locals()
 
-    exec(T)
+    defs = {}
+    exec(T, defs)
+    wrap = defs['wrap']
 
     # Setting _relpath is a slight hack only used to get better documentation
     res = wrap(template, render_global)

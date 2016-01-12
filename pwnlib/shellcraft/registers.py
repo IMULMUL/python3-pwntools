@@ -1,14 +1,12 @@
-import re
-
 from ..context import context
 from ..util.misc import register_sizes
 
-mips =  list(map('${}'.format, range(32)))
+mips = list(map('${}'.format, range(32)))
 mips += list(map('$v{}'.format, range(2)))
 mips += list(map('$a{}'.format, range(4)))
 mips += list(map('$t{}'.format, range(8)))
 mips += list(map('$s{}'.format, range(9)))
-mips += list(map('$t{}'.format, range(8,10)))
+mips += list(map('$t{}'.format, range(8, 10)))
 mips += list(map('$k{}'.format, range(2)))
 mips += ['$zero', '$at', '$gp', '$sp', '$ra']
 
@@ -18,29 +16,27 @@ arm += ["sp", "lr", "pc", "cpsr"]
 aarch64 = list(map('x{}'.format, range(32)))
 aarch64 += ["sp", "lr", "pc", "cpsr"]
 
-i386_baseregs = [ "ax", "cx", "dx", "bx", "sp", "bp", "si", "di", "ip"]
+i386_baseregs = ["ax", "cx", "dx", "bx", "sp", "bp", "si", "di", "ip"]
 
 i386 = list(map('e{}'.format, i386_baseregs))
 i386 += i386_baseregs
-i386 += [ "eflags", "cs", "ss", "ds", "es", "fs", "gs", ]
+i386 += ["eflags", "cs", "ss", "ds", "es", "fs", "gs"]
 
-amd64 =  list(map('r{}'.format, i386_baseregs))
-amd64 += list(map('r{}'.format, range(10,16)))
-amd64 += list(map('r{}d'.format, range(10,16)))
+amd64 = list(map('r{}'.format, i386_baseregs))
+amd64 += list(map('r{}'.format, range(10, 16)))
+amd64 += list(map('r{}d'.format, range(10, 16)))
 amd64 += i386
 
-powerpc =  list(map('r{}'.format, range(32)))
-powerpc += ["pc", "msr", "cr", "lr", "ctr", "xer", "orig_r3", "trap" ]
-powerpc =  list(map('%{}'.format, powerpc))
+powerpc = list(map('r{}'.format, range(32)))
+powerpc += ["pc", "msr", "cr", "lr", "ctr", "xer", "orig_r3", "trap"]
+powerpc = list(map('%{}'.format, powerpc))
 
-sparc =  list(map('g{}'.format, range(8)))
+sparc = list(map('g{}'.format, range(8)))
 sparc += list(map('o{}'.format, range(5)))
 sparc += list(map('l{}'.format, range(8)))
 sparc += list(map('i{}'.format, range(5)))
-sparc += ["pc", "sp", "fp", "psr" ]
-sparc =  list(map('%{}'.format, sparc))
-
-
+sparc += ["pc", "sp", "fp", "psr"]
+sparc = list(map('%{}'.format, sparc))
 
 # x86/amd64 registers in decreasing size
 i386_ordered = [
@@ -63,8 +59,9 @@ i386_ordered = [
 ]
 
 all_regs, sizes, bigger, smaller = register_sizes(i386_ordered, [64, 32, 16, 8, 8])
-native64 = {k:v[0] for k,v in bigger.items()}
-native32 = {k:v[1] for k,v in bigger.items() if not k.startswith('r')}
+native64 = {k: v[0] for k, v in bigger.items()}
+native32 = {k: v[1] for k, v in bigger.items() if not k.startswith('r')}
+
 
 class Register:
     #: Register name
@@ -108,9 +105,9 @@ class Register:
 
         for row in i386_ordered:
             if name in row:
-                self.bigger  = row[0:row.index(name)]
-                self.smaller = row[row.index(name)+1:]
-                self.sizes   = {64>>i:r for i,r in enumerate(row)}
+                self.bigger = row[0:row.index(name)]
+                self.smaller = row[row.index(name) + 1:]
+                self.sizes = {64 >> i: r for i, r in enumerate(row)}
                 self.native64 = row[0]
                 self.native32 = row[1]
                 self.xor = self.sizes[min(self.size, 32)]
@@ -134,7 +131,7 @@ class Register:
         return self.name
 
     def __repr__(self):
-        return "Register(%r)" % self.namepyth
+        return "Register(%r)" % self.name
 
 intel = {}
 
@@ -142,8 +139,10 @@ for row in i386_ordered:
     for i, reg in enumerate(row):
         intel[reg] = Register(reg, 64 >> i)
 
+
 def get_register(name):
     return intel.get(name, None)
+
 
 def is_register(obj):
     if isinstance(obj, Register):
@@ -152,7 +151,7 @@ def is_register(obj):
 
 
 def bits_required(value):
-    bits  = 0
+    bits = 0
 
     if value < 0:
         return context.bits
@@ -160,10 +159,13 @@ def bits_required(value):
     while value:
         value >>= 8
         bits += 8
+
     return bits
+
 
 def register_size(reg):
     return sizes[reg]
+
 
 def fits_in_register(reg, value):
     return register_size(reg) >= bits_required(value)

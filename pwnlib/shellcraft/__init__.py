@@ -33,7 +33,6 @@ class module(ModuleType):
         sys.modules[self.__name__] = self
 
     def __lazyinit__(self):
-
         # Create a dictionary of submodules
         self._submodules = {}
         self._shellcodes = {}
@@ -51,7 +50,8 @@ class module(ModuleType):
         self.__dict__.update(self._submodules)
 
         # These are exported
-        self.__all__ = sorted(self._shellcodes.keys() + self._submodules.keys())
+        self.__all__ = list(self._shellcodes.keys()) + list(self._submodules.keys())
+        self.__all__.sort()
 
         # Make sure this is not called again
         self.__lazyinit__ = None
@@ -84,8 +84,7 @@ class module(ModuleType):
         self.__lazyinit__ and self.__lazyinit__()
 
         result = list(self._submodules.keys())
-        result.extend(('__file__', '__package__', '__path__',
-                       '__all__',  '__name__'))
+        result.extend(('__file__', '__package__', '__path__', '__all__', '__name__'))
         result.extend(self.__shellcodes__())
 
         return result
@@ -98,13 +97,13 @@ class module(ModuleType):
 
     def __shellcodes__(self):
         self.__lazyinit__ and self.__lazyinit__()
-        result = self._shellcodes.keys()
+        result = list(self._shellcodes.keys())
         for m in self._context_modules():
             result.extend(m.__shellcodes__())
         return result
 
     template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-    templates    = []
+    templates = []
 
     for root, subfolder, files in os.walk(template_dir):
         for file in filter(lambda x: x.endswith('.asm'), files):
@@ -128,6 +127,7 @@ tether = sys.modules[__name__]
 # Create the module structure
 shellcraft = module(__name__, '')
 
+
 class LazyImporter:
     def find_module(self, fullname, path):
         if not fullname.startswith('pwnlib.shellcraft.'):
@@ -144,4 +144,5 @@ class LazyImporter:
 
     def load_module(self, fullname):
         return sys.modules[fullname]
+
 sys.meta_path.append(LazyImporter())
