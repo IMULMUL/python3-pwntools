@@ -27,8 +27,8 @@ class ROP:
        #  '0x0004:       0xdeadbeef',
        #  '0x0008:              0x0',
        #  '0x000c:        0x80496a8']
-       str(rop)
-       # '\\xfc\\x82\\x04\\x08\\xef\\xbe\\xad\\xde\\x00\\x00\\x00\\x00\\xa8\\x96\\x04\\x08'
+       bytes(rop)
+       # b'\\xfc\\x82\\x04\\x08\\xef\\xbe\\xad\\xde\\x00\\x00\\x00\\x00\\xa8\\x96\\x04\\x08'
     """
     def __init__(self, elfs, base = None):
         """
@@ -41,13 +41,13 @@ class ROP:
         # Permit singular ROP(elf) vs ROP([elf])
         if isinstance(elfs, ELF):
             elfs = [elfs]
-        elif isinstance(elfs, (bytes, str)):
+        elif isinstance(elfs, bytes):
             elfs = [ELF(elfs)]
 
         self.elfs  = elfs
         self._chain = []
         self.base = base
-        self.align = max(e.elfclass for e in elfs)/8
+        self.align = max(e.elfclass for e in elfs) // 8
         self.migrated = False
         self.__load()
 
@@ -55,17 +55,21 @@ class ROP:
         """Resolves a symbol to an address
 
         Arguments:
-            resolvable(str,int): Thing to convert into an address
+            resolvable(bytes, str, int): Thing to convert into an address
 
         Returns:
             int containing address of 'resolvable', or None
         """
-        if isinstance(resolvable, str):
+        if isinstance(resolvable, (bytes, str)):
+            if isinstance(resolvable, str):
+                resolvable = resolvable.encode('utf8')
+
             for elf in self.elfs:
                 if resolvable in elf.symbols:
                     return elf.symbols[resolvable]
         if isinstance(resolvable, int):
             return resolvable
+
         return None
 
     def unresolve(self, value):
@@ -77,7 +81,7 @@ class ROP:
             value(int): Address to look up
 
         Returns:
-            String containing the symbol name for the address, disassembly for a gadget
+            Bytes containing the symbol name for the address, disassembly for a gadget
             (if there's one at that address), or an empty string.
         """
         for elf in self.elfs:
@@ -99,7 +103,7 @@ class ROP:
                 value = value.encode('utf8')
 
             while True:
-                value += '\x00'
+                value += b'\x00'
                 if len(value) % self.align == 0:
                     break
 
@@ -150,7 +154,7 @@ class ROP:
                 if best_pivot == None:
                     log.error("Could not find gadget to clean up stack for call %r %r" % (addr, args))
 
-                chain.append([addr, [best_pivot], args, best_size/4 - len(args) - 1])
+                chain.append([addr, [best_pivot], args, best_size // 4 - len(args) - 1])
 
         # Stage 2
         # If the last call has arguments, there is no need
@@ -345,7 +349,7 @@ class ROP:
 
         self.migrated = True
 
-    def __str__(self):
+    def __bytes__(self):
         """Returns: Raw bytes of the ROP chain"""
         return self.chain()
 
@@ -445,7 +449,6 @@ class ROP:
 
             elf_gadgets = {}
             for gadget in core._Core__gadgets:
-
                 address = gadget['vaddr'] - elf.load_addr + elf.address
                 insns   = [g.strip() for g in gadget['gadget'].split(';')]
 
