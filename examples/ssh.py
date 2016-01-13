@@ -11,16 +11,16 @@ log.info("username: %s" % shell.whoami())
 log.info("pwd: %s" % shell.pwd())
 
 # Show full tube syntax
-tube = shell.run('cat')
+tube = shell.run('cat', tty=False)
 tube.send("Hello, cat")
 tube.shutdown("out")
 print(tube.recvall())
 
 # Show automatic working directories
 shell.set_working_directory()
-log.info("pwd: %s" % shell.pwd())
+log.info("pwd: %r" % shell.pwd())
 
-shell.upload_data("""
+shell.upload_data(b"""
 #include <stdio.h>
 int main() {
     return printf("Hello, world");
