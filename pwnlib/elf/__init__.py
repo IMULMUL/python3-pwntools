@@ -56,13 +56,13 @@ class ELF(ELFFile):
     .. code-block:: python
 
        bash = ELF(which('bash'))
-       hex(bash.symbols['read'])
+       hex(bash.symbols[b'read'])
        # 0x41dac0
-       hex(bash.plt['read'])
+       hex(bash.plt[b'read'])
        # 0x41dac0
-       u32(bash.read(bash.got['read'], 4))
+       u32(bash.read(bash.got[b'read'], 4))
        # 0x41dac6
-       print(disasm(bash.read(bash.plt['read'],16), arch='amd64'))
+       print(disasm(bash.read(bash.plt[b'read'],16), arch='amd64'))
        # 0:   ff 25 1a 18 2d 00       jmp    QWORD PTR [rip+0x2d181a]        # 0x2d1820
        # 6:   68 59 00 00 00          push   0x59
        # b:   e9 50 fa ff ff          jmp    0xfffffffffffffa60
@@ -169,9 +169,9 @@ class ELF(ELFFile):
         When updated, cascades updates to segment vaddrs, section addrs, symbols, plt, and got.
 
         >>> bash = ELF(which('bash'))
-        >>> old = bash.symbols['read']
+        >>> old = bash.symbols[b'read']
         >>> bash.address += 0x1000
-        >>> bash.symbols['read'] == old + 0x1000
+        >>> bash.symbols[b'read'] == old + 0x1000
         True
         """
         return self._address
@@ -191,7 +191,7 @@ class ELF(ELFFile):
         """Gets data for the named section
 
         Arguments:
-            name(str): Name of the section
+            name(bytes): Name of the section
 
         Returns:
             String containing the bytes for that section
@@ -239,14 +239,14 @@ class ELF(ELFFile):
             arg = misc.sh_string(self.path)
 
             data = subprocess.check_output(cmd % (arg, arg, arg), shell = True)
-            self.libs = misc.parse_ldd_output(data)
+            self.libs = misc.parse_ldd_output(data.decode('utf8'))
         except subprocess.CalledProcessError:
             self.libs = {}
 
     def _populate_symbols(self):
         """
         >>> bash = ELF(which('bash'))
-        >>> bash.symbols['_start'] == bash.header.e_entry
+        >>> bash.symbols[b'_start'] == bash.header.e_entry
         True
         """
         # By default, have 'symbols' include everything in the PLT.
@@ -269,11 +269,11 @@ class ELF(ELFFile):
         # iff there is no symbol for that address
         for sym, addr in self.plt.items():
             if addr not in self.symbols.values():
-                self.symbols['plt.%s' % sym] = addr
+                self.symbols[b'plt.%s' % sym] = addr
 
         for sym, addr in self.got.items():
             if addr not in self.symbols.values():
-                self.symbols['got.%s' % sym] = addr
+                self.symbols[b'got.%s' % sym] = addr
 
 
     def _populate_got_plt(self):
@@ -294,8 +294,8 @@ class ELF(ELFFile):
         >>> all(map(validate_got_plt, bash.got.keys()))
         True
         """
-        plt = self.get_section_by_name('.plt')
-        got = self.get_section_by_name('.got')
+        plt = self.get_section_by_name(b'.plt')
+        got = self.get_section_by_name(b'.got')
 
         self.got = {}
         self.plt = {}
@@ -310,7 +310,7 @@ class ELF(ELFFile):
                             isinstance(s, RelocationSection))
         except StopIteration:
             # Evidently whatever android-ndk uses to build binaries zeroes out sh_info for rel.plt
-            rel_plt = self.get_section_by_name('.rel.plt') or self.get_section_by_name('.rela.plt')
+            rel_plt = self.get_section_by_name(b'.rel.plt') or self.get_section_by_name(b'.rela.plt')
 
         if not rel_plt:
             log.warning("Couldn't find relocations against PLT to get symbols")
@@ -352,7 +352,7 @@ class ELF(ELFFile):
         Search the ELF's virtual address space for the specified string.
 
         Arguments:
-            needle(str): String to search for.
+            needle(bytes, str): String to search for.
             writable(bool): Search only writable sections.
 
         Returns:
@@ -371,6 +371,9 @@ class ELF(ELFFile):
             >>> len(list(libc.search('/bin/sh'))) > 0
             True
         """
+        if isinstance(needle, str):
+            needle = needle.encode('utf8')
+
         load_address_fixup = (self.address - self.load_addr)
 
         if writable:
@@ -462,7 +465,7 @@ class ELF(ELFFile):
         Examples:
           >>> bash = ELF(which('bash'))
           >>> bash.read(bash.address+1, 3)
-          'ELF'
+          b'ELF'
         """
         offset = self.vaddr_to_offset(address)
 
@@ -480,7 +483,7 @@ class ELF(ELFFile):
 
         Arguments:
             address(int): Virtual address to write
-            data(str): Bytes to write
+            data(bytes): Bytes to write
 
         Note::
             This routine does not check the bounds on the write to ensure
@@ -489,10 +492,10 @@ class ELF(ELFFile):
         Examples:
           >>> bash = ELF(which('bash'))
           >>> bash.read(bash.address+1, 3)
-          'ELF'
-          >>> bash.write(bash.address, "HELO")
+          b'ELF'
+          >>> bash.write(bash.address, b"HELO")
           >>> bash.read(bash.address, 4)
-          'HELO'
+          b'HELO'
         """
         offset = self.vaddr_to_offset(address)
 
@@ -556,7 +559,7 @@ class ELF(ELFFile):
 
     def bss(self, offset=0):
         """Returns an index into the .bss segment"""
-        orig_bss = self.get_section_by_name('.bss').header.sh_addr
+        orig_bss = self.get_section_by_name(b'.bss').header.sh_addr
         curr_bss = orig_bss - self.load_addr + self.address
         return curr_bss + offset
 
@@ -565,7 +568,7 @@ class ELF(ELFFile):
 
     def dynamic_by_tag(self, tag):
         dt      = None
-        dynamic = self.get_section_by_name('.dynamic')
+        dynamic = self.get_section_by_name(b'.dynamic')
 
         if not dynamic:
             return None
@@ -584,11 +587,11 @@ class ELF(ELFFile):
             return None
 
         address   = dt_strtab.entry.d_ptr + offset
-        string    = ''
-        while '\x00' not in string:
+        string    = b''
+        while b'\x00' not in string:
             string  += self.read(address, 1)
             address += 1
-        return string.rstrip('\x00')
+        return string.rstrip(b'\x00')
 
 
     @property
@@ -615,11 +618,11 @@ class ELF(ELFFile):
 
     @property
     def canary(self):
-        return '__stack_chk_fail' in self.symbols
+        return b'__stack_chk_fail' in self.symbols
 
     @property
     def packed(self):
-        return 'UPX!' in self.get_data()
+        return b'UPX!' in self.get_data()
 
     @property
     def pie(self):
@@ -691,7 +694,7 @@ class ELF(ELFFile):
 
     @property
     def buildid(self):
-        section = self.get_section_by_name('.note.gnu.build-id')
+        section = self.get_section_by_name(b'.note.gnu.build-id')
         if section:
             return section.data()[16:]
         return None
