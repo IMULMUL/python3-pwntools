@@ -48,7 +48,7 @@ def yesno(prompt, default = None):
                                        'No' if default == False else 'no',
                                        )
         while True:
-            opt = raw_input(prompt).lower()
+            opt = input(prompt).lower()
             if opt == '' and default != None:
                 return default
             elif opt in ('y','yes'):
@@ -137,7 +137,7 @@ def options(prompt, opts, default = None):
             if default:
                 s += '[%s] ' % str(default)
             try:
-                x = int(raw_input(s) or default)
+                x = int(input(s) or default)
             except (ValueError, TypeError):
                 continue
             if x >= 1 and x <= len(opts):
@@ -152,7 +152,7 @@ def pause(n = None):
             term.getkey()
         else:
             log.info('Paused (press enter to continue)')
-            raw_input('')
+            input('')
     elif isinstance(n, int):
         with log.waitfor("Waiting") as l:
             for i in range(n, 0, -1):
