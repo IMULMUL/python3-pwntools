@@ -8,7 +8,7 @@ from .misc import size
 log = getLogger(__name__)
 
 def wget(url, save=None, timeout=5, **kwargs):
-    """wget(url, save=None, timeout=5) -> str
+    """wget(url, save=None, timeout=5) -> bytes
 
     Downloads a file via HTTP/HTTPS.
 
