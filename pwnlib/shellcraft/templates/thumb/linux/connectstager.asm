@@ -7,7 +7,7 @@ Args:
     port, which port to connect to
     network, ipv4 or ipv6? (default: ipv4)
 </%docstring>
-<%page args="host, port, network = 'ipv4'"/>
+<%page args="host, port, network='ipv4'"/>
 
 ${linux.connect(host, port, network)}
 ${linux.recvsize('r6', 'r1')}

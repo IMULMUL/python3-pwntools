@@ -1,6 +1,6 @@
 <% from pwnlib.shellcraft.thumb.linux import mov %>
 <% from socket import htons %>
-<%page args="port = None"/>
+<%page args="port=None"/>
 <%docstring>
     findpeer(port)
 

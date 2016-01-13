@@ -4,9 +4,9 @@
 Args:
     return_value: Value to return
 </%docstring>
-<%page args="return_value = None"/>
+<%page args="return_value=None"/>
 
-% if return_value != None:
+% if return_value is not None:
     ${thumb.mov('r0', return_value)}
 % endif
 

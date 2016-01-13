@@ -5,7 +5,7 @@ Findpeer recvsize stager
 Args:
     port, the port given to findpeer (defaults to any)
 </%docstring>
-<%page args="port = None"/>
+<%page args="port=None"/>
 
 ${linux.findpeer(port)}
 ${linux.recvsize('r6', 'r1')}

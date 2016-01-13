@@ -17,6 +17,6 @@ Example:
 
 </%docstring>
 
-% with ctx.local(os = 'linux'):
+% with ctx.local(os='linux'):
   ${thumb.push(value)}
 % endwith

@@ -2,9 +2,9 @@
     from pwnlib.shellcraft import thumb
     from pwnlib.util.net import sockaddr
 %>
-<%page args="path, dst = 'r6'"/>
+<%page args="path, dst='r6'"/>
 <%docstring>
-Args: [path, dst (imm/reg) = r6 ]
+Args: [path, dst (imm/reg) = r6]
     Opens the specified file path and sends its content to the specified file descriptor.
     Leaves the destination file descriptor in r6 and the input file descriptor in r5.
 </%docstring>

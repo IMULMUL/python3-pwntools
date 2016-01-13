@@ -15,6 +15,6 @@ Example:
 
 </%docstring>
 
-% with ctx.local(os = 'linux'):
+% with ctx.local(os='linux'):
   ${thumb.mov(dest, src)}
 % endwith

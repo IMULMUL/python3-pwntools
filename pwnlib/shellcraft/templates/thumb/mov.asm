@@ -17,7 +17,7 @@
 
 Example:
 
-   >>> print(shellcraft.thumb.mov('r1','r2').rstrip())
+   >>> print(shellcraft.thumb.mov('r1', 'r2').rstrip())
        mov r1, r2
    >>> print(shellcraft.thumb.mov('r1', 0).rstrip())
        eor r1, r1
@@ -32,13 +32,13 @@ Example:
        b value_..._after
    value_...: .word 3735879935
    value_..._after:
-   >>> with context.local(os = 'linux'):
+   >>> with context.local(os='linux'):
    ...     print(shellcraft.thumb.mov('r1', 'SYS_execve').rstrip())
        mov r1, #SYS_execve
-   >>> with context.local(os = 'freebsd'):
+   >>> with context.local(os='freebsd'):
    ...     print(shellcraft.thumb.mov('r1', 'SYS_execve').rstrip())
        mov r1, #SYS_execve
-   >>> with context.local(os = 'linux'):
+   >>> with context.local(os='linux'):
    ...     print(shellcraft.thumb.mov('r1', 'PROT_READ | PROT_WRITE | PROT_EXEC').rstrip())
        mov r1, #7
 
@@ -46,12 +46,12 @@ Example:
 <%
 all_regs = ['r' + str(n) for n in range(16)] + ['sp', 'fp', 'pc', 'lr']
 src_orig = src
-if isinstance(src, (bytes, str)):
+if isinstance(src, str):
     src = src.strip()
     if src.lower() in all_regs:
         src = src.lower()
     else:
-        with ctx.local(arch = 'thumb'):
+        with ctx.local(arch='thumb'):
             try:
                 src = constants.eval(src)
             except (AttributeError, ValueError):
