@@ -153,7 +153,7 @@ class ssh_channel(sock):
         # which may not happen by the time .close() is called by tube.recvall()
         tmp_sock = self.sock
 
-        timeout = self.maximum if self.timeout is self.forever else self.timeout
+        timeout = self.maximum if timeout is sock.forever else timeout
         data = super(ssh_channel, self).recvall(timeout)
 
         # Restore self.sock to be able to call wait()
@@ -1313,7 +1313,7 @@ os.execve(exe, argv, env)
 
         if not wd:
             wd, status = self.run_to_end('x=$(mktemp -d) && cd $x && chmod +x . && echo $PWD', wd='.')
-            wd = wd.strip()
+            wd = wd.decode('utf8').strip()
 
             if status:
                 log.error("Could not generate a temporary directory (%i)\n%s" % (status, wd))
