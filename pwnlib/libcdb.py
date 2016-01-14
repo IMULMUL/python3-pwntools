@@ -37,7 +37,7 @@ def search_by_build_id(hex_encoded_id):
     """
     cache = cache_dir + '-libc.so.' + hex_encoded_id
 
-    if os.path.exists(cache) and read(cache).startswith('\x7FELF'):
+    if os.path.exists(cache) and read(cache).startswith(b'\x7FELF'):
         log.info_once("Using cached data from %r" % cache)
         return cache
 
@@ -46,16 +46,16 @@ def search_by_build_id(hex_encoded_id):
     url_base = "https://gitlab.com/libcdb/libcdb/raw/master/hashes/build_id/"
     url      = urlparse.urljoin(url_base, hex_encoded_id)
 
-    data   = ""
-    while not data.startswith('\x7fELF'):
+    data = b''
+    while not data.startswith(b'\x7fELF'):
         data = wget(url)
 
         if not data:
             return None
 
-        if data.startswith('..'):
+        if data.startswith(b'..'):
             url = os.path.dirname(url) + '/'
-            url = urlparse.urljoin(url, data)
+            url = urlparse.urljoin(url, data.decode('utf8'))
 
     write(cache, data)
     return cache

@@ -66,27 +66,27 @@ log    = getLogger(__name__)
 sizeof = ctypes.sizeof
 
 def sysv_hash(symbol):
-    """sysv_hash(str) -> int
+    """sysv_hash(bytes) -> int
 
     Function used to generate SYSV-style hashes for strings.
     """
     h = 0
     g = 0
     for c in symbol:
-        h = (h << 4) + ord(c)
+        h = (h << 4) + c
         g = h & 0xf0000000
         h ^= (g >> 24)
         h &= ~g
     return h & 0xffffffff
 
 def gnu_hash(s):
-    """gnu_hash(str) -> int
+    """gnu_hash(bytes) -> int
 
     Function used to generated GNU-style hashes for strings.
     """
     h = 5381
     for c in s:
-        h = h * 33 + ord(c)
+        h = h * 33 + c
     return h & 0xffffffff
 
 class DynELF:
@@ -151,7 +151,7 @@ class DynELF:
         Arguments:
             leak(MemLeak): Instance of pwnlib.memleak.MemLeak for leaking memory
             pointer(int):  A pointer into a loaded ELF file
-            elf(str,ELF):  Path to the ELF file on disk, or a loaded :class:`pwnlib.elf.ELF`.
+            elf(bytes, ELF):  Path to the ELF file on disk, or a loaded :class:`pwnlib.elf.ELF`.
         '''
         self._elfclass = None
         self._link_map = None
@@ -256,7 +256,7 @@ class DynELF:
         w = None
 
         while True:
-            if self.leak.b(ptr) == 0x7f and self.leak.n(ptr+1,3) == 'ELF':
+            if self.leak.b(ptr) == 0x7f and self.leak.n(ptr + 1, 3) == b'ELF':
                 break
             ptr -= page_size
 
@@ -342,7 +342,7 @@ class DynELF:
             #Skip to next
             dynamic += sizeof(Dyn)
         else:
-            self.failure("Could not find any of: " % map(name, tags))
+            self.failure("Could not find any of %r" % list(map(name, tags)))
             return None
 
         self.status("Found %s at %#x" % (name(d_tag), dynamic))
@@ -433,7 +433,7 @@ class DynELF:
         Returns:
             An ELF object, or None.
         """
-        lib = 'libc.so'
+        lib = b'libc.so'
 
         with self.waitfor('Downloading libc'):
             dynlib = self._dynamic_load_dynelf(lib)
@@ -448,8 +448,8 @@ class DynELF:
 
             for offset in libcdb.get_build_id_offsets():
                 address = libbase + offset
-                if self.leak.d(address + 0xC) == unpack("GNU\x00", 32):
-                    return enhex(''.join(self.leak.raw(address + 0x10, 20)))
+                if self.leak.d(address + 0xC) == unpack(b"GNU\x00", 32):
+                    return enhex(b''.join(self.leak.raw(address + 0x10, 20)))
 
             if not build_id:
                 return None
@@ -470,17 +470,21 @@ class DynELF:
         Find the address of ``symbol``, which is found in ``lib``.
 
         Arguments:
-            symb(str): Named routine to look up
-            lib(str): Substring to match for the library name.
+            symb(bytes, str): Named routine to look up
+            lib(bytes, str): Substring to match for the library name.
               If omitted, the current library is searched.
               If set to ``'libc'``, ``'libc.so'`` is assumed.
 
         Returns:
             Address of the named symbol, or ``None``.
         """
+        if isinstance(symb, str):
+            symb = symb.encode('utf8')
+        if isinstance(lib, str):
+            lib = lib.encode('utf8')
 
-        if lib == 'libc':
-            lib = 'libc.so'
+        if lib == b'libc':
+            lib = b'libc.so'
 
         #
         # Get a pretty name for the symbol to show the user
@@ -700,7 +704,7 @@ class DynELF:
         maskwords = leak.field(hshtab, elf.GNU_HASH.maskwords)
 
         # Skip over the bloom filter to get to the buckets
-        elfword = self.elfclass / 8
+        elfword = self.elfclass // 8
         buckets = hshtab + sizeof(elf.GNU_HASH) + (elfword * maskwords)
 
         # The chains come after the buckets
