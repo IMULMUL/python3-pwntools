@@ -5,7 +5,7 @@ Script for downloading lists of user agent strings
 
 import os
 import re
-import urllib
+from urllib import request
 
 from bs4 import BeautifulSoup
 
@@ -19,7 +19,7 @@ if os.path.isfile('useragents.txt'):
                 uas.add(line.rstrip())
 
 def getxml(url):
-    f = urllib.urlopen(url)
+    f = request.urlopen(url)
     xml = f.read()
     f.close()
     return xml
@@ -68,7 +68,7 @@ def loop(xml):
             uas.add(item['useragent'].strip())
 
 with log.waitfor('Parsing list') as l:
-    loop(soup.body.useragentswitcher)
+    loop(soup.useragentswitcher)
     l.success()
 
 with log.waitfor('Fetching from from http://www.user-agents.org') as l:
@@ -77,13 +77,9 @@ with log.waitfor('Fetching from from http://www.user-agents.org') as l:
     l.success()
 
 with log.waitfor('Parsing list') as l:
-    for item in soup.body.__getattr__('user-agents'):
+    for item in soup.__getattr__('user-agents'):
         if item.name == 'user-agent':
             ua = item.select('string')[0].string.strip()
-            try:
-                ua = ua.decode('utf-8')
-            except UnicodeEncodeError:
-                continue
             uas.add(ua)
     l.success()
 
