@@ -20,7 +20,7 @@ def debug_shellcode(data, execute=None, **kwargs):
     Creates an ELF file, and launches it with GDB.
 
     Arguments:
-        data(str): Assembled shellcode bytes
+        data(bytes): Assembled shellcode bytes
         kwargs(dict): Arguments passed to context (e.g. arch='arm')
 
     Returns:
@@ -77,7 +77,7 @@ def debug(args, exe=None, execute=None, ssh=None, arch=None):
     if not ssh:
         runner  = tubes.process.process
         which   = misc.which
-    if ssh:
+    else:
         runner  = ssh.run
         which   = ssh.which
 
@@ -162,7 +162,7 @@ def attach(target, execute = None, exe = None, arch = None):
     # if execute is a file object, then read it; we probably need to run some
     # more gdb script anyway
     if execute:
-        if isinstance(execute, file):
+        if hasattr(execute, 'read') and hasattr(execute, 'close'):
             fd = execute
             execute = fd.read()
             fd.close()
@@ -199,7 +199,7 @@ def attach(target, execute = None, exe = None, arch = None):
 
         shell = target.parent
 
-        tmpfile = shell.mktemp()
+        tmpfile = shell.mktemp().decode('utf8')
         shell.upload_data(execute or '', tmpfile)
 
         cmd = ['ssh', '-t', '-p', str(shell.port), '-l', shell.user, shell.host]
@@ -303,7 +303,7 @@ def attach(target, execute = None, exe = None, arch = None):
 
     if execute:
         tmp = tempfile.NamedTemporaryFile(prefix = 'pwn', suffix = '.gdb',
-                                          delete = False)
+                                          mode = 'w+', delete = False)
         tmp.write(execute)
         tmp.close()
         atexit.register(lambda: os.unlink(tmp.name))
@@ -332,7 +332,7 @@ def ssh_gdb(ssh, process, execute = None, arch = None, **kwargs):
     # Find the port for the gdb server
     c.recvuntil('port ')
     line = c.recvline().strip()
-    gdbport = re.match('[0-9]+', line)
+    gdbport = re.match(b'[0-9]+', line)
     if gdbport:
         gdbport = int(gdbport.group(0))
 
@@ -393,7 +393,7 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
     ...     bash_libs = gdb.find_module_addresses('/bin/bash', shell)
     >>> os.path.basename(bash_libs[0].path) # doctest: +SKIP
     'libc.so.6'
-    >>> hex(bash_libs[0].symbols['system']) # doctest: +SKIP
+    >>> hex(bash_libs[0].symbols[b'system']) # doctest: +SKIP
     '0x7ffff7634660'
     """
     #
@@ -417,7 +417,7 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
     #
     libs = {}
     cmd  = "gdb --args %s" % (binary)
-    expr = re.compile(r'(0x\S+)[^/]+(.*)')
+    expr = re.compile(rb'(0x\S+)[^/]+(.*)')
 
     if ulimit:
         cmd = 'sh -c "(ulimit -s unlimited; %s)"' % cmd
@@ -438,7 +438,7 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
         for line in lines.splitlines():
             m = expr.match(line)
             if m:
-                libs[m.group(2)] = int(m.group(1),16)
+                libs[m.group(2).decode('utf8')] = int(m.group(1),16)
         gdb.sendline('kill')
         gdb.sendline('y')
         gdb.sendline('quit')
@@ -460,7 +460,7 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
         lib      = elf.ELF(path)
 
         # Find its text segment
-        text     = lib.get_section_by_name('.text')
+        text     = lib.get_section_by_name(b'.text')
 
         # Fix the address
         lib.address = text_address - text.header.sh_addr
