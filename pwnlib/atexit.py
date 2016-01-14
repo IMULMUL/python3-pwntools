@@ -11,6 +11,7 @@ printed twice when the standard :mod:`atexit` is used.
 import sys
 import threading
 import traceback
+import atexit as _atexit
 
 from .context import context
 
@@ -65,6 +66,7 @@ def unregister(ident):
     if ident in _handlers:
         del _handlers[ident]
 
+@_atexit.register
 def _run_handlers():
     """_run_handlers()
 
@@ -88,9 +90,3 @@ def _run_handlers():
             # originated
             typ, val, tb = sys.exc_info()
             traceback.print_exception(typ, val, tb.tb_next)
-
-# if there's already an exitfunc registered be sure to run that too
-if hasattr(sys, "exitfunc"):
-    register(sys.exitfunc)
-
-sys.exitfunc = _run_handlers
