@@ -29,10 +29,9 @@ banner = '\n'.join(['  ' + r('____') + '  ' + g('_') + '          ' + r('_') + '
 
 def _string(s):
     out = []
-    for c in s:
-        co = ord(c)
-        if co >= 0x20 and co <= 0x7e and c not in '/$\'"`':
-            out.append(c)
+    for co in s:
+        if co >= 0x20 and co <= 0x7e and chr(c) not in '/$\'"`':
+            out.append(chr(c))
         else:
             out.append('\\x%02x' % co)
     return '"' + ''.join(out) + '"\n'
@@ -52,8 +51,8 @@ p.add_argument(
 p.add_argument(
     '-o', '--out',
     metavar = 'file',
-    type = argparse.FileType('w'),
-    default = sys.stdout,
+    type = argparse.FileType('wb'),
+    default = sys.stdout.buffer,
     help = 'Output file (default: stdout)',
 )
 
@@ -163,8 +162,8 @@ def main():
         print('\n'.join(doc).rstrip())
         exit()
 
-    defargs = len(func.func_defaults or ())
-    reqargs = func.func_code.co_argcount - defargs
+    defargs = len(func.__defaults__ or ())
+    reqargs = func.__code__.co_argcount - defargs
     if len(args.args) < reqargs:
         if defargs > 0:
             log.critical('%s takes at least %d arguments' % (args.shellcode, reqargs))
@@ -185,10 +184,10 @@ def main():
     code = func(*args.args)
 
     if args.format in ['a', 'asm', 'assembly']:
-        print(code)
+        args.out.write(code.encode('utf8'))
         exit()
     if args.format == 'p':
-        print(cpp(code))
+        args.out.write(cpp(code))
         exit()
 
     code = asm(code)
@@ -209,8 +208,11 @@ def main():
         code = hexii(code) + '\n'
 
     if not sys.stdin.isatty():
-        sys.stdout.write(sys.stdin.read())
+        args.out.write(sys.stdin.buffer.read())
 
-    sys.stdout.write(code)
+    if isinstance(code, str):
+        code = code.encode('utf8')
+
+    args.out.write(code)
 
 if __name__ == '__main__': main()

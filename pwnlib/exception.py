@@ -10,7 +10,7 @@ class PwnlibException(Exception):
     :func:`pwnlib.log.error` function instead of throwing this exception directly.'''
     def __init__(self, msg, reason = None, exit_code = None):
         '''bar'''
-        Exception.__init__(self, msg)
+        super(PwnlibException, self).__init__(self, msg)
         self.reason = reason
         self.exit_code = exit_code
 

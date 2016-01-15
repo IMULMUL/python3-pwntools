@@ -2,7 +2,8 @@
 import argparse
 import sys
 from string import hexdigits
-from string import whitespace
+import codecs
+import re
 
 import pwnlib.log
 from pwnlib import asm
@@ -34,13 +35,13 @@ def main():
 
     if len(args.hex) > 0:
         dat = ''.join(args.hex)
-        dat = dat.translate(None, whitespace)
+        dat = re.sub(r'\s', '', dat)
         if not set(hexdigits) >= set(dat):
             print("This is not a hex string")
             exit(-1)
-        dat = dat.decode('hex')
+        dat = codecs.decode(dat, 'hex')
     else:
-        dat = sys.stdin.read()
+        dat = sys.stdin.buffer.read()
 
     print(asm.disasm(dat, arch = args.context))
 

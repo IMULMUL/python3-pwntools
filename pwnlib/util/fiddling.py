@@ -492,7 +492,7 @@ def hexii(s, width=16, skip=True):
     return hexdump(s, width, skip, True)
 
 def _hexiichar(c):
-    HEXII = string.punctuation + string.digits + string.letters
+    HEXII = string.punctuation + string.digits + string.ascii_letters
     if c in map(ord, HEXII):
         return ".%c " % c
     elif c == 0:
@@ -585,15 +585,17 @@ def hexdump_iter(fd, width=16, skip=True, hexii=False, begin=0,
             out = []
             for b in bseq:
                 if isinstance(b, str):
+                    out += [ord(x) for x in b]
+                elif isinstance(b, bytes):
                     out += list(b)
                 elif isinstance(b, int):
-                    out.append(chr(b))
+                    out.append(b)
                 elif b is None:
                     out.append(b)
                 else:
                     log.error('Byte value must be a character, and integer or None')
             return out
-        highlight = map(canon, highlight)
+        highlight = list(map(canon, highlight))
         lookahead = max(map(len, highlight)) - 1
         def match(needle, haystack):
             for a, b in zip(needle, haystack):

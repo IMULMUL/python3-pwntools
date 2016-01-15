@@ -48,7 +48,7 @@ group.add_argument(
 
 def main():
     args = parser.parse_args()
-    alphabet = args.alphabet
+    alphabet = args.alphabet.encode('utf8')
     subsize  = args.length
 
     if args.lookup:
@@ -58,6 +58,8 @@ def main():
             pat = packing.pack(int(pat[2:], 16), subsize*8, 'little', False)
         elif pat.isdigit():
             pat = packing.pack(int(pat, 10), subsize*8, 'little', False)
+        else:
+            pat = pat.encode('utf8')
 
         if len(pat) != subsize:
             log.critical('Subpattern must be %d bytes' % subsize)
@@ -81,9 +83,9 @@ def main():
         if got < want:
             log.failure("Alphabet too small (max length = %i)" % got)
 
-        sys.stdout.write(result)
+        sys.stdout.buffer.write(result)
 
         if sys.stdout.isatty():
-            sys.stdout.write('\n')
+            sys.stdout.buffer.write(b'\n')
 
 if __name__ == '__main__': main()

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import argparse
 import sys
-from string import whitespace
+from pwnlib.util.fiddling import unhex
+import re
 
 parser = argparse.ArgumentParser(description='''
 Decodes hex-encoded data provided on the command line or via stdin.
@@ -13,10 +14,11 @@ def main():
     args = parser.parse_args()
     try:
         if not args.hex:
-            s = sys.stdin.read().translate(None, whitespace)
-            sys.stdout.write(s.decode('hex'))
+            s = sys.stdin.read()
+            s = re.sub(r'\s', '', s)
+            sys.stdout.buffer.write(unhex(s))
         else:
-            sys.stdout.write(''.join(sys.argv[1:]).decode('hex'))
+            sys.stdout.buffer.write(unhex(''.join(sys.argv[1:])))
     except TypeError as e:
         sys.stderr.write(str(e) + '\n')
 

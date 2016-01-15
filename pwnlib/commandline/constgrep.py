@@ -3,6 +3,7 @@
 import argparse
 import os
 import re
+import functools
 
 import pwnlib.log
 from pwnlib import asm
@@ -58,7 +59,7 @@ p.add_argument(
     default = ['i386','linux'],
     action = 'append',
     help = 'The os/architecture to find constants for (default: linux/i386), choose from: %s' % \
-    ', '.join(sorted(context.oses + context.architectures.keys()))
+    ', '.join(sorted(context.oses + list(context.architectures.keys())))
 )
 
 def main():
@@ -122,7 +123,7 @@ def main():
 
         # Output all matching constants
         for _, k in sorted(out):
-            print('#define %s %s' % (k.ljust(maxlen), asm.cpp(k, os = os, arch = arch).strip()))
+            print('#define %s %s' % (k.ljust(maxlen), asm.cpp(k, os = os, arch = arch).strip().decode('utf8')))
 
         # If we are in match_mode, then try to find a combination of
         # constants that yield the exact given value
@@ -139,7 +140,7 @@ def main():
 
                 out = [(v, k) for v, k in out if mask & v == v]
 
-            if reduce(lambda x, cur: x | cur[0], good, 0) == constant:
+            if functools.reduce(lambda x, cur: x | cur[0], good, 0) == constant:
                 print()
                 print('(%s) == %s' % (' | '.join(k for v, k in good), args.constant))
 

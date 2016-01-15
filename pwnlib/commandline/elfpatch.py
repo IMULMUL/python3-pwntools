@@ -25,6 +25,6 @@ def main():
     elf    = ELF(a.elf)
 
     elf.write(offset, bytes)
-    sys.stdout.write(elf.get_data())
+    sys.stdout.buffer.write(elf.get_data())
 
 if __name__ == '__main__': main()

@@ -27,8 +27,8 @@ parser.add_argument(
     "-o","--output",
     metavar='file',
     help="Output file (defaults to stdout)",
-    type=argparse.FileType('w'),
-    default=sys.stdout
+    type=argparse.FileType('wb'),
+    default=sys.stdout.buffer
 )
 
 parser.add_argument(
@@ -55,16 +55,23 @@ def main():
     data   = '\n'.join(args.lines) or sys.stdin.read()
     output = asm(data.replace(';', '\n'))
     fmt    = args.format or ('hex' if tty else 'raw')
-    formatters = {'r':str, 'h':enhex, 's':repr}
+    formatters = {
+        'r': bytes,
+        'h': enhex,
+        's': lambda d: repr(d)[1:]
+    }
 
     if args.debug:
         proc = gdb.debug_shellcode(output, arch=context.arch)
         proc.interactive()
         sys.exit(0)
 
-    args.output.write(formatters[fmt[0]](output))
+    output = formatters[fmt[0]](output)
+    if isinstance(output, str):
+        output = output.encode('utf8')
+    args.output.write(output)
 
     if tty and fmt is not 'raw':
-        args.output.write('\n')
+        args.output.write(b'\n')
 
 if __name__ == '__main__': main()

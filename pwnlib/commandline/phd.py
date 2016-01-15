@@ -19,8 +19,8 @@ parser.add_argument(
     metavar='file',
     nargs='?',
     help='File to hexdump.  Reads from stdin if missing.',
-    type=argparse.FileType('r'),
-    default=sys.stdin
+    type=argparse.FileType('rb'),
+    default=sys.stdin.buffer
 )
 
 parser.add_argument(
@@ -85,7 +85,7 @@ def main():
     text.when = color
 
     if skip:
-        if infile == sys.stdin:
+        if infile == sys.stdin.buffer:
             infile.read(skip)
         else:
             infile.seek(skip, os.SEEK_CUR)
@@ -100,24 +100,24 @@ def main():
                     c2 = hl[i + 1]
                     if   c2 == 'x':
                         try:
-                            b = chr(int(hl[i + 2: i + 4], 16))
+                            b = int(hl[i + 2: i + 4], 16)
                         except:
                             print('Bad escape sequence:', hl[i:])
                             sys.exit(1)
                         out.append(b)
                         i += 3
                     elif c2 in '\\?':
-                        out.append(c2)
+                        out.append(ord(c2))
                         i += 1
                     else:
                         out.append(c)
                 elif c == '?':
                     out.append(None)
                 else:
-                    out.append(c)
+                    out.append(ord(c))
                 i += 1
-            return out
-        highlight = map(canon, args.highlight)
+            return bytes(out)
+        highlight = list(map(canon, args.highlight))
     else:
         highlight = []
 

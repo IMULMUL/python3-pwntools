@@ -69,7 +69,7 @@ def cyclic(length=None, alphabet=string.ascii_lowercase, n=4):
     if isinstance(alphabet, str):
         return ''.join(out)
     else:
-        return out
+        return bytes(out)
 
 def cyclic_find(subseq, alphabet=string.ascii_lowercase, n=None):
     """cyclic_find(subseq, alphabet=string.ascii_lowercase, n=None) -> int

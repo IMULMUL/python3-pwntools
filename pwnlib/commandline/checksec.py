@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     'elf',
     nargs='+',
-    type=file,
+    type=argparse.FileType('rb'),
     help='Files to check'
 )
 

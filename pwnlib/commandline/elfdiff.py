@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 from subprocess import CalledProcessError
 from subprocess import check_output
 from tempfile import NamedTemporaryFile
+import sys
 
 
 def dump(x):
@@ -24,6 +25,6 @@ p.add_argument('b')
 
 def main():
     a = p.parse_args()
-    print(diff(dump(a.a), dump(a.b)))
+    sys.stdout.buffer.write(diff(dump(a.a), dump(a.b)))
 
 if __name__ == '__main__': main()
