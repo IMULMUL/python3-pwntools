@@ -626,10 +626,10 @@ class ContextType:
             >>> context.arch, context.bits
             ('i386', 32)
             >>> context.binary = '/bin/bash'
-            >>> context.arch, context.bits
-            ('amd64', 64)
             >>> context.binary
             ELF('/bin/bash')
+            >>> (context.arch, context.bits) == (context.binary.arch, context.binary.bits)
+            True
 
         """
         # Cyclic imports... sorry Idolf.
