@@ -286,6 +286,7 @@ def make_single(op, size, end, sign):
     def routine(data):
         return ops[op](fmt, data)
     routine.__name__ = name
+    routine.__qualname__ = name
 
     return name, routine
 
@@ -321,6 +322,7 @@ def make_multi(op, size):
                     ("big",    False):  bu}[endian, signed](number)
 
     routine.__name__ = name
+    routine.__qualname__ = name
     routine.__doc__  = """
     %s%s(number, **kwargs) -> %s
 
