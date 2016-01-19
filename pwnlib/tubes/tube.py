@@ -888,7 +888,7 @@ class tube(Timeout):
 
         Examples:
 
-            >>> def recv(n, data=['', 'hooray_data']):
+            >>> def recv(n, data=[b'', b'hooray_data']):
             ...     while data: return data.pop()
             >>> t = tube()
             >>> t.recv_raw      = recv

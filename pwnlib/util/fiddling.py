@@ -348,7 +348,7 @@ def xor_pair(data, avoid=b'\x00\n'):
     Example:
 
       >>> xor_pair("test")
-      ('\\x01\\x01\\x01\\x01', 'udru')
+      (b'\\x01\\x01\\x01\\x01', b'udru')
 """
     if isinstance(data, str):
         data = data.encode('utf8')

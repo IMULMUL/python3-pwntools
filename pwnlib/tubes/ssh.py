@@ -494,12 +494,12 @@ class ssh(Timeout):
             Return a :class:`pwnlib.tubes.ssh.ssh_channel` object.
 
         Examples:
-            >>> s =  ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass')
+            >>> s =  ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0')
             >>> sh = s.shell('/bin/sh')
             >>> sh.sendline('echo Hello; exit')
-            >>> print('Hello' in sh.recvall())
+            >>> b'Hello' in sh.recvall()
             True
         """
         if not shell:
@@ -560,9 +560,9 @@ class ssh(Timeout):
             Requires Python on the remote server.
 
         Examples:
-            >>> s = ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass')
+            >>> s = ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0')
             >>> sh = s.process('sh', env={'PS1':''})
             >>> sh.sendline('echo Hello; exit')
             >>> sh.recvall()
@@ -576,8 +576,6 @@ class ssh(Timeout):
             >>> s.process(['LOLOLOL\x00', '/proc/self/cmdline'], executable='cat').recvall()
             b'LOLOLOL\x00/proc/self/cmdline\x00'
             >>> sh = s.process(executable='/bin/sh')
-            >>> sh.pid in pidof('sh')
-            True
             >>> s.process(['pwd'], cwd='/tmp').recvall()
             b'/tmp\n'
             >>> p = s.process(['python2','-c','import os; print os.read(2, 1024)'], stderr=0)
@@ -759,9 +757,9 @@ os.execve(exe, argv, env)
         Return a :class:`pwnlib.tubes.ssh.ssh_channel` object.
 
         Examples:
-            >>> s =  ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass')
+            >>> s =  ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0')
             >>> py = s.run('python2 -i')
             >>> _ = py.recvuntil('>>> ')
             >>> py.sendline('print 2+2')
@@ -785,9 +783,9 @@ os.execve(exe, argv, env)
         a TTY on the remote server.
 
         Examples:
-            >>> s =  ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass')
+            >>> s =  ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0')
             >>> print(s.run_to_end('echo Hello; exit 17'))
             (b'Hello\n', 17)
             """
@@ -810,14 +808,13 @@ os.execve(exe, argv, env)
         Examples:
             >>> from pwn import *
             >>> l = listen()
-            >>> s =  ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass')
-            >>> a = s.connect_remote(s.host, l.lport)
-            >>> b = l.wait_for_connection()
-            >>> a.sendline('Hello')
-            >>> print(repr(b.recvline()))
-            b'Hello\n'
+            >>> s =  ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0')
+            >>> r = s.connect_remote('google.com', 80)
+            >>> r.send('GET /\r\n\r\n')
+            >>> r.recvn(4)
+            b'HTTP'
         """
         return ssh_connecter(self, host, port, timeout)
 
@@ -832,14 +829,14 @@ os.execve(exe, argv, env)
         Examples:
 
             >>> from pwn import *
-            >>> s =  ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass')
+            >>> s =  ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0')
             >>> l = s.listen_remote()
-            >>> a = remote(s.host, l.port)
+            >>> a = s.connect_remote('localhost', l.port)
             >>> b = l.wait_for_connection()
             >>> a.sendline('Hello')
-            >>> print(repr(b.recvline()))
+            >>> b.recvline()
             b'Hello\n'
         """
         return ssh_listener(self, bind_address, port, timeout)
@@ -849,9 +846,9 @@ os.execve(exe, argv, env)
 
         Examples:
 
-            >>> s =  ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass')
+            >>> s =  ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0')
             >>> print(s['echo hello'])
             b'hello'
         """
@@ -862,9 +859,9 @@ os.execve(exe, argv, env)
 
         Examples:
 
-            >>> s =  ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass')
+            >>> s =  ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0')
             >>> print(repr(s('echo hello')))
             b'hello'
         """
@@ -875,9 +872,9 @@ os.execve(exe, argv, env)
 
         Examples:
 
-            >>> s =  ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass')
+            >>> s =  ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0')
             >>> s.echo('hello')
             b'hello'
             >>> s.whoami()
@@ -906,9 +903,9 @@ os.execve(exe, argv, env)
 
         Example:
 
-            >>> s =  ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass')
+            >>> s =  ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0')
             >>> s.connected()
             True
             >>> s.close()
@@ -1041,17 +1038,17 @@ os.execve(exe, argv, env)
 
 
         Examples:
-            >>> with open('/tmp/bar', 'w+') as f:
-            ...     f.write('Hello, world')
-            >>> s =  ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass',
+            >>> s =  ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0',
             ...         cache=False)
+            >>> s.run_to_end('echo Hello, world > /tmp/bar')
+            (b'', 0)
             >>> s.download_data('/tmp/bar')
-            b'Hello, world'
+            b'Hello, world\\n'
             >>> s.sftp = False
             >>> s.download_data('/tmp/bar')
-            b'Hello, world'
+            b'Hello, world\\n'
 
         """
         with log.progress('Downloading %r' % remote) as p:
@@ -1125,15 +1122,15 @@ os.execve(exe, argv, env)
             remote(str): The filename to upload it to.
 
         Examoles:
-            >>> s =  ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass')
+            >>> s =  ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0')
             >>> s.upload_data(b'Hello, world', '/tmp/upload_foo')
-            >>> print(open('/tmp/upload_foo', 'rb').read())
+            >>> s.download_data('/tmp/upload_foo')
             b'Hello, world'
             >>> s.sftp = False
             >>> s.upload_data('Hello, world', '/tmp/upload_bar')
-            >>> print(open('/tmp/upload_bar', 'rb').read())
+            >>> s.download_data('/tmp/upload_foo')
             b'Hello, world'
         """
         # If a relative path was provided, prepend the cwd
@@ -1300,13 +1297,13 @@ os.execve(exe, argv, env)
                 based on the result of running 'mktemp -d' on the remote machine.
 
         Examples:
-            >>> s =  ssh(host='example.pwnme',
-            ...         user='travis',
-            ...         password='demopass')
+            >>> s =  ssh(host='bandit.labs.overthewire.org',
+            ...         user='bandit0',
+            ...         password='bandit0')
             >>> cwd = s.set_working_directory()
             >>> s.ls()
-            ''
-            >>> s.pwd() == cwd
+            b''
+            >>> s.pwd().decode('utf8') == cwd
             True
         """
         status = 0

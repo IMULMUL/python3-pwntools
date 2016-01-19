@@ -2,7 +2,7 @@
 
    import pwnlib
    from   pwnlib.context import context
-   import threading, logging
+   import threading, logging, codecs
 
 
 :mod:`pwnlib.context` --- Setting runtime variables

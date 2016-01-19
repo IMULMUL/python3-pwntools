@@ -2,6 +2,7 @@
 
    import tempfile
    import os
+   import codecs
    from pwnlib.context import context
    from pwnlib.asm import *
    from pwnlib import shellcraft

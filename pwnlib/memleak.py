@@ -216,7 +216,7 @@ class MemLeak:
         Examples:
 
             >>> import string
-            >>> data = string.ascii_lowercase
+            >>> data = string.ascii_lowercase.encode('utf8')
             >>> l = MemLeak(lambda a: data[a:a+16], reraise=False)
             >>> l.q(0) == unpack(b'abcdefgh', 64)
             True
@@ -429,7 +429,7 @@ class MemLeak:
             >>> l = MemLeak(lambda x: '')
             >>> l.cache == {}
             True
-            >>> l.sets(0, 'H\x00ello')
+            >>> l.sets(0, b'H\x00ello')
             >>> l.cache == {0: 72, 1: 0, 2: 101, 3: 108, 4: 108, 5: 111, 6: 0}
             True
         """

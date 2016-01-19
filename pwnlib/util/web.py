@@ -24,10 +24,10 @@ def wget(url, save=None, timeout=5, **kwargs):
       >>> with context.local(log_level='ERROR'):
       ...     result = wget(url)
       >>> result
-      'User-agent: *\\nDisallow: /deny\\n'
+      b'User-agent: *\\nDisallow: /deny\\n'
       >>> with context.local(log_level='ERROR'):
       ...     _ = wget(url, True)
-      >>> result == open('robots.txt', 'r').read()
+      >>> result == open('robots.txt', 'rb').read()
       True
     """
     import requests

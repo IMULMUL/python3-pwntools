@@ -236,15 +236,15 @@ def unpack_many(data, word_size=None, endianness=None, sign=None, **kwargs):
         The unpacked numbers.
 
     Examples:
-        >>> map(hex, unpack_many(b'\\xaa\\x55\\xcc\\x33', 16, 'little', False))
+        >>> list(map(hex, unpack_many(b'\\xaa\\x55\\xcc\\x33', 16, 'little', False)))
         ['0x55aa', '0x33cc']
-        >>> map(hex, unpack_many(b'\\xaa\\x55\\xcc\\x33', 16, 'big', False))
+        >>> list(map(hex, unpack_many(b'\\xaa\\x55\\xcc\\x33', 16, 'big', False)))
         ['0xaa55', '0xcc33']
-        >>> map(hex, unpack_many(b'\\xaa\\x55\\xcc\\x33', 16, 'big', True))
+        >>> list(map(hex, unpack_many(b'\\xaa\\x55\\xcc\\x33', 16, 'big', True)))
         ['-0x55ab', '-0x33cd']
-        >>> map(hex, unpack_many(b'\\xff\\x02\\x03', 'all', 'little', True))
+        >>> list(map(hex, unpack_many(b'\\xff\\x02\\x03', 'all', 'little', True)))
         ['0x302ff']
-        >>> map(hex, unpack_many(b'\\xff\\x02\\x03', 'all', 'big', True))
+        >>> list(map(hex, unpack_many(b'\\xff\\x02\\x03', 'all', 'big', True)))
         ['-0xfdfd']
     """
     with context.local(**kwargs):
@@ -374,7 +374,7 @@ def make_packer(word_size=None, endianness=None, sign=None, **kwargs):
             ...
         error: integer out of range for 'I' format code
         >>> make_packer(33, 'little', 'unsigned')
-        <function <lambda> at 0x...>
+        <function make_packer.<locals>.<lambda> at 0x...>
 """
     with context.local(endianness=endianness, sign=sign, **kwargs):
         word_size  = word_size or context.word_size
@@ -435,7 +435,7 @@ def make_unpacker(word_size=None, endianness=None, sign=None, **kwargs):
             ...
         error: unpack requires a string argument of length 4
         >>> make_unpacker(33, 'little', 'unsigned')
-        <function <lambda> at 0x...>
+        <function make_unpacker.<locals>.<lambda> at 0x...>
 """
     # Validate
     with context.local(endianness=endianness, sign=sign, **kwargs):

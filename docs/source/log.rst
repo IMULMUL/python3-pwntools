@@ -12,10 +12,6 @@
    :members:
    :member-order: bysource
 
-.. autoclass:: pwnlib.log.Handler
-   :members:
-   :member-order: bysource
-
 .. autoclass:: pwnlib.log.Formatter
    :members:
    :member-order: bysource

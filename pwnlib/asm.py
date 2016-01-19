@@ -35,7 +35,7 @@ Disassembly
 
     To disassemble code, simply invoke :func:`disasm` on the bytes to disassemble.
 
-    >>> disasm('\xb8\x0b\x00\x00\x00')
+    >>> disasm(b'\xb8\x0b\x00\x00\x00')
     '   0:   b8 0b 00 00 00          mov    eax,0xb'
 
 """
@@ -388,13 +388,13 @@ def make_elf(data, vma=None, strip=True, **kwargs):
         >>> bin_sh = codecs.decode('6a68682f2f2f73682f62696e89e331c96a0b5899cd80', 'hex')
         >>> data = make_elf(bin_sh)
         >>> with open(filename, 'wb+') as f:
-        ...     f.write(data)
+        ...     _ = f.write(data)
         ...     f.flush()
-        >>> os.chmod(filename, 0777)
+        >>> os.chmod(filename, 0o777)
         >>> p = process(filename)
         >>> p.sendline('echo Hello; exit')
         >>> p.recvline()
-        'Hello\n'
+        b'Hello\n'
     """
     with context.local(**kwargs):
         assembler = _assembler()

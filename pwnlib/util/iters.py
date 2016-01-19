@@ -694,7 +694,7 @@ def lexicographic(alphabet):
       order.
 
     Example:
-      >>> take(8, imap(lambda x: ''.join(x), lexicographic('01')))
+      >>> take(8, map(lambda x: ''.join(x), lexicographic('01')))
       ['', '0', '1', '00', '01', '10', '11', '000']
     """
     for n in count():
