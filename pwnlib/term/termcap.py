@@ -7,7 +7,7 @@ def get(cap, *args, **kwargs):
     default = kwargs.pop('default', b'')
 
     if 'PWNLIB_NOTERM' in os.environ:
-        return b''
+        return default
 
     if kwargs != {}:
         raise TypeError("get(): No such argument %r" % kwargs.popitem()[0])

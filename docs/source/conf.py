@@ -240,8 +240,8 @@ intersphinx_mapping = {'python': ('https://docs.python.org/2.7', None),
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pwntools', u'pwntools Documentation',
-     [u'Gallopsled et al'], 1)
+    ('index', 'pwntools', 'pwntools Documentation',
+     ['Gallopsled et al'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -254,8 +254,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'pwntools', u'pwntools Documentation',
-   u'Gallopsled et al', 'pwntools', 'One line description of project.',
+  ('index', 'pwntools', 'pwntools Documentation',
+   'Gallopsled et al', 'pwntools', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -271,13 +271,13 @@ texinfo_documents = [
 branch = release
 
 try:
-    git_branch = subprocess.check_output('git describe --tags', shell = True)
+    git_branch = subprocess.check_output('git describe --tags', shell = True).decode('utf8')
 except subprocess.CalledProcessError:
     git_branch = '-'
 
 try:
     if '-' in git_branch:
-        branch = subprocess.check_output('git rev-parse HEAD', shell = True).strip()[:10]
+        branch = subprocess.check_output('git rev-parse HEAD', shell = True).decode('utf8').strip()[:10]
 except subprocess.CalledProcessError:
     pass
 
@@ -305,11 +305,11 @@ def linkcode_resolve(domain, info):
     else:
         filename = info['module'].replace('.', '/') + '.py'
 
-        if isinstance(val, (types.ModuleType, types.ClassType, types.MethodType, types.FunctionType, types.TracebackType, types.FrameType, types.CodeType)):
+        if isinstance(val, (type, types.ModuleType, types.MethodType, types.FunctionType, types.TracebackType, types.FrameType, types.CodeType)):
             try:
                 lines, first = inspect.getsourcelines(val)
                 filename += '#L%d-%d' % (first, first + len(lines) - 1)
-            except IOError:
+            except (IOError, TypeError):
                 pass
 
     return "https://github.com/Gallopsled/pwntools/blob/%s/%s" % (branch, filename)
