@@ -575,9 +575,6 @@ class ssh(Timeout):
             b'/bin/readlink\n'
             >>> s.process(['LOLOLOL\x00', '/proc/self/cmdline'], executable='cat').recvall()
             b'LOLOLOL\x00/proc/self/cmdline\x00'
-            >>> sh = s.process(executable='/bin/sh')
-            >>> sh.pid in pidof('sh')
-            True
             >>> s.process(['pwd'], cwd='/tmp').recvall()
             b'/tmp\n'
             >>> p = s.process(['python2','-c','import os; print os.read(2, 1024)'], stderr=0)
