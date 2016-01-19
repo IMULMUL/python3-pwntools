@@ -29,7 +29,7 @@ def partition(lst, f, save_keys=False):
     if save_keys:
         return d
     else:
-        return d.values()
+        return list(d.values())
 
 def group(n, lst, underfull_action='ignore', fill_value=None):
     """group(n, lst, underfull_action='ignore', fill_value=None) -> list
