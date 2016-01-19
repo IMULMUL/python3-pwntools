@@ -269,11 +269,11 @@ class ELF(ELFFile):
         # iff there is no symbol for that address
         for sym, addr in self.plt.items():
             if addr not in self.symbols.values():
-                self.symbols[b'plt.%s' % sym] = addr
+                self.symbols[b'plt.' + sym] = addr
 
         for sym, addr in self.got.items():
             if addr not in self.symbols.values():
-                self.symbols[b'got.%s' % sym] = addr
+                self.symbols[b'got.' + sym] = addr
 
 
     def _populate_got_plt(self):
