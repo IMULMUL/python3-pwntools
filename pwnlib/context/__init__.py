@@ -742,10 +742,8 @@ class ContextType:
             pass
 
         # Otherwise, fail
-        level_names = (v.lower() for v in logging._levelToName.values())
-        permitted = sorted(level_names)
+        permitted = sorted(v.lower() for v in logging._levelToName.values())
         raise AttributeError('log_level must be an integer or one of %r' % permitted)
-
 
     @_validator
     def os(self, os):

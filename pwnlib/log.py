@@ -101,7 +101,7 @@ added, to do this in an easy way.
 """
 
 __all__ = [
-    'getLogger', 'getPerformanceLogger', 'install_default_handler', 'rootlogger', 'console', 'ConsoleHandler', 'Handler'
+    'getLogger', 'getPerformanceLogger', 'install_default_handler', 'rootlogger', 'console', 'ConsoleHandler'
 ]
 
 import logging
@@ -461,9 +461,11 @@ class ConsoleHandler(logging.StreamHandler):
         but can be overwritten.
         """
         if self._level == 'context':
-            return context.log_level
+            value = context.log_level
         else:
-            return self._level
+            value = self._level
+
+        return checkLevel(value)
 
     @level.setter
     def level(self, level):
@@ -613,9 +615,11 @@ def getPerformanceLogger(name):
             @property
             def level(self):
                 if self._level == 'context':
-                    return context.log_level
+                    value = context.log_level
                 else:
-                    return self._level
+                    value = self._level
+
+                return checkLevel(value)
 
             @level.setter
             def level(self, level):
@@ -624,6 +628,38 @@ def getPerformanceLogger(name):
         logger._logger._level = 'context'
         logger._pwnlib_initialized = True
     return logger
+
+def checkLevel(value):
+    '''checkLevel(value) -> int
+
+    Checks the log level, and returns the corresponding numeric value.
+
+    Examples:
+
+        >>> checkLevel(10)
+        10
+        >>> checkLevel('error')
+        40
+        >>> checkLevel('foobar') #doctest: +ELLIPSIS
+        Traceback (most recent call last):
+        ...
+        AttributeError: log_level must be an integer or one of ['CRITICAL', 'DEBUG', 'ERROR', 'INFO', 'NOTSET', 'WARN', 'WARNING']
+    '''
+    # If it can be converted into an int, success
+    try:
+        return int(value)
+    except ValueError:
+        pass
+
+    # If it is defined in the logging module, success
+    try:
+        return getattr(logging, value.upper())
+    except AttributeError:
+        pass
+
+    # Otherwise, fail
+    permitted = sorted(v.lower() for v in logging._levelToName.values())
+    raise AttributeError('log_level must be an integer or one of %r' % permitted)
 
 #
 # The root 'pwnlib' logger is declared here.  To change the target of all
