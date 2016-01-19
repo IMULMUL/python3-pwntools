@@ -50,9 +50,7 @@ def random():
     Returns:
         A random user agent string selected from :func:`getall`.
 
-    >>> import random as randommod
-    >>> randommod.seed(1)
-    >>> random()
-    'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; FunWebProducts; FunWebProducts-MyTotalSearch; iebar)'
+    >>> random() in getall()
+    True
     """
     return randommod.choice(list(_load()))

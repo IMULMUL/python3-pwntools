@@ -1042,16 +1042,17 @@ os.execve(exe, argv, env)
 
         Examples:
             >>> with open('/tmp/bar','w+') as f:
-            ...     f.write('Hello, world')
+            ...     _ = f.write('Hello, world')
+            >>> os.chmod('/tmp/bar', 0o777)
             >>> s =  ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass',
             ...         cache=False)
             >>> s.download_data('/tmp/bar')
-            b'Hello, world\\n'
+            b'Hello, world'
             >>> s.sftp = False
             >>> s.download_data('/tmp/bar')
-            b'Hello, world\\n'
+            b'Hello, world'
 
         """
         with log.progress('Downloading %r' % remote) as p:
