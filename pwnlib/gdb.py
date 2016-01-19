@@ -417,7 +417,7 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
     #
     libs = {}
     cmd  = "gdb --args %s" % (binary)
-    expr = re.compile(rb'(0x\S+)[^/]+(.*)')
+    expr = re.compile(r'(0x\S+)[^/]+(.*)'.encode('utf8'))
 
     if ulimit:
         cmd = 'sh -c "(ulimit -s unlimited; %s)"' % cmd

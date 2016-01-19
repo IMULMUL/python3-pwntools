@@ -24,7 +24,7 @@ def unhex(s):
       >>> unhex("74657374")
       b'test'
 """
-    return codecs.decode(s, 'hex')
+    return codecs.decode(s, 'hex_codec')
 
 def enhex(x):
     """enhex(x) -> str
@@ -39,7 +39,7 @@ def enhex(x):
     if isinstance(x, str):
         x = x.encode('utf8')
 
-    return codecs.encode(x, 'hex').decode('utf8')
+    return codecs.encode(x, 'hex_codec').decode('utf8')
 
 def urlencode(s):
     """urlencode(s) -> str
