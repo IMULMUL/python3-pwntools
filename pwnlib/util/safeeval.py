@@ -15,6 +15,7 @@ _expr_codes = _const_codes + [
 
 _values_codes = _expr_codes + ['LOAD_NAME']
 
+
 def _get_opcodes(codeobj):
     """_get_opcodes(codeobj) -> [opcodes]
 
@@ -37,6 +38,7 @@ def _get_opcodes(codeobj):
             i += 1
     return opcodes
 
+
 def test_expr(expr, allowed_codes):
     """test_expr(expr, allowed_codes) -> codeobj
 
@@ -55,6 +57,7 @@ def test_expr(expr, allowed_codes):
         if code not in allowed_codes:
             raise ValueError("opcode %s not allowed" % dis.opname[code])
     return c
+
 
 def const(expr):
     """const(expression) -> value
@@ -80,6 +83,7 @@ def const(expr):
     c = test_expr(expr, _const_codes)
     return eval(c)
 
+
 def expr(expr):
     """expr(expression) -> value
 
@@ -103,6 +107,7 @@ def expr(expr):
 
     c = test_expr(expr, _expr_codes)
     return eval(c)
+
 
 def values(expr, env):
     """values(expression, dict) -> value

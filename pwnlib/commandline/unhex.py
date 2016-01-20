@@ -8,7 +8,8 @@ parser = argparse.ArgumentParser(description='''
 Decodes hex-encoded data provided on the command line or via stdin.
 ''')
 parser.add_argument('hex', nargs='*',
-    help='Hex bytes to decode')
+                    help='Hex bytes to decode')
+
 
 def main():
     args = parser.parse_args()
@@ -22,4 +23,5 @@ def main():
     except TypeError as e:
         sys.stderr.write(str(e) + '\n')
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()

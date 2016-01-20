@@ -8,13 +8,15 @@ import sys
 
 def dump(x):
     n = NamedTemporaryFile(delete=False)
-    o = check_output(['objdump','-d','-x','-s',x])
+    o = check_output(['objdump', '-d', '-x', '-s', x])
     n.write(o)
     n.flush()
     return n.name
 
-def diff(a,b):
-    try: return check_output(['diff',a,b])
+
+def diff(a, b):
+    try:
+        return check_output(['diff', a, b])
     except CalledProcessError as e:
         return e.output
 
@@ -23,8 +25,10 @@ p = ArgumentParser()
 p.add_argument('a')
 p.add_argument('b')
 
+
 def main():
     a = p.parse_args()
     sys.stdout.buffer.write(diff(dump(a.a), dump(a.b)))
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()

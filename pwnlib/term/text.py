@@ -19,7 +19,9 @@ def eval_when(when):
     else:
         raise ValueError('text.when: must be a file-object or "always", "never" or "auto"')
 
+
 class Module(types.ModuleType):
+
     def __init__(self):
         self.__file__ = __file__
         self.__name__ = __name__
@@ -39,10 +41,10 @@ class Module(types.ModuleType):
         }
         self._reset = b'\x1b[m'
         self._attributes = {}
-        for x, y in [('italic'   , 'sitm'),
-                     ('bold'     , 'bold'),
+        for x, y in [('italic', 'sitm'),
+                     ('bold', 'bold'),
                      ('underline', 'smul'),
-                     ('reverse'  , 'rev')]:
+                     ('reverse', 'rev')]:
             s = termcap.get(y)
             self._attributes[x] = s
         self._cache = {}
@@ -94,6 +96,7 @@ class Module(types.ModuleType):
                     ds.pop(0)
                 except KeyError:
                     break
+
             def c():
                 bright = 0
                 c = ds.pop(0)

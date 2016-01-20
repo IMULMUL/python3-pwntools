@@ -147,17 +147,19 @@ class process(tube):
 
         stdin, stdout, stderr, master = self._handles(stdin, stdout, stderr)
 
-        self.executable   = self.program = executable
-        self.argv         = argv
-        self.env          = env
-        self.cwd          = cwd or os.path.curdir
+        self.executable = self.program = executable
+        self.argv = argv
+        self.env = env
+        self.cwd = cwd or os.path.curdir
         self.preexec_user = preexec_fn
 
         message = "Starting program %r" % self.program
 
         if log.isEnabledFor(logging.DEBUG):
-            if self.argv != [self.executable]: message += ' argv=%r ' % self.argv
-            if self.env  != os.environ:        message += ' env=%r ' % self.env
+            if self.argv != [self.executable]:
+                message += ' argv=%r ' % self.argv
+            if self.env != os.environ:
+                message += ' env=%r ' % self.env
 
         with log.progress(message):
             self.proc = subprocess.Popen(args=argv,
@@ -322,7 +324,8 @@ class process(tube):
 
         if self.proc.returncode is not None and not self._stop_noticed:
             self._stop_noticed = True
-            log.info("Program %r stopped with exit code %d" % (self.program, self.proc.returncode))
+            log.info("Program %r stopped with exit code %d" %
+                     (self.program, self.proc.returncode))
 
         return self.proc.returncode
 
@@ -423,7 +426,7 @@ class process(tube):
         if not self._stop_noticed:
             try:
                 self.proc.kill()
-                self.proc.wait() # avoid leaving zombies around
+                self.proc.wait()  # avoid leaving zombies around
                 self._stop_noticed = True
                 log.info('Stopped program %r' % self.program)
             except OSError:
@@ -458,7 +461,7 @@ class process(tube):
             if fd >= 0:
                 os.close(fd)
         except OSError:
-            pass # Already disconnected. This happens if running inside cron.
+            pass  # Already disconnected. This happens if running inside cron.
 
         os.setsid()
 
@@ -471,7 +474,7 @@ class process(tube):
                 raise Exception('Failed to disconnect from controlling tty. '
                                 'It is still possible to open /dev/tty.')
         except OSError:
-            pass # Good! We are disconnected from a controlling tty.
+            pass  # Good! We are disconnected from a controlling tty.
 
         # Verify we can open child pty.
         fd = os.open(child_name, os.O_RDWR)

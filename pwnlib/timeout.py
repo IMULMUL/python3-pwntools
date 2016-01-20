@@ -9,6 +9,7 @@ import pwnlib
 
 
 class _DummyContextClass:
+
     def __enter__(self):
         pass
 
@@ -17,16 +18,18 @@ class _DummyContextClass:
 
 _DummyContext = _DummyContextClass()
 
+
 class _countdown_handler:
+
     def __init__(self, obj, timeout):
-        self.obj     = obj
+        self.obj = obj
         self.timeout = timeout
 
     def __enter__(self):
-        self.old_timeout  = self.obj._timeout
-        self.old_stop     = self.obj._stop
+        self.old_timeout = self.obj._timeout
+        self.old_stop = self.obj._stop
 
-        self.obj._stop    = time.time() + self.timeout
+        self.obj._stop = time.time() + self.timeout
 
         if self.old_stop:
             self.obj._stop = min(self.obj._stop, self.old_stop)
@@ -35,32 +38,37 @@ class _countdown_handler:
 
     def __exit__(self, *a):
         self.obj._timeout = self.old_timeout
-        self.obj._stop    = self.old_stop
+        self.obj._stop = self.old_stop
+
 
 class _local_handler:
+
     def __init__(self, obj, timeout):
-        self.obj     = obj
+        self.obj = obj
         self.timeout = timeout
 
     def __enter__(self):
-        self.old_timeout  = self.obj._timeout
-        self.old_stop     = self.obj._stop
+        self.old_timeout = self.obj._timeout
+        self.old_stop = self.obj._stop
 
-        self.obj._stop    = 0
-        self.obj._timeout = self.timeout # leverage validation
+        self.obj._stop = 0
+        self.obj._timeout = self.timeout  # leverage validation
         self.obj.timeout_change()
 
     def __exit__(self, *a):
         self.obj._timeout = self.old_timeout
-        self.obj._stop    = self.old_stop
+        self.obj._stop = self.old_stop
         self.obj.timeout_change()
 
+
 class TimeoutDefault:
+
     def __repr__(self):
         return "pwnlib.timeout.Timeout.default"
 
     def __str__(self):
         return "<default timeout>"
+
 
 class Timeout:
     """
@@ -126,7 +134,7 @@ class Timeout:
     maximum = float(2**20)
 
     def __init__(self, timeout=default):
-        self._stop    = 0
+        self._stop = 0
         self.timeout = self._get_timeout_seconds(timeout)
 
     @property
@@ -135,7 +143,7 @@ class Timeout:
         Timeout for obj operations.  By default, uses ``context.timeout``.
         """
         timeout = self._timeout
-        stop    = self._stop
+        stop = self._stop
 
         if not stop:
             return timeout

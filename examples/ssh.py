@@ -4,7 +4,7 @@ Example showing how to use the ssh class.
 
 from pwn import *
 
-shell = ssh(host='bandit.labs.overthewire.org',user='bandit0',password='bandit0')
+shell = ssh(host='bandit.labs.overthewire.org', user='bandit0', password='bandit0')
 
 # Show basic command syntax
 log.info("username: %s" % shell.whoami())
@@ -27,13 +27,13 @@ int main() {
 }
 """, 'example.c')
 
-shell.gcc(['example.c','-o','example'])
+shell.gcc(['example.c', '-o', 'example'])
 
 print(shell['./example'])
 
 # Show the different styles of calling
 print(shell.echo("single string"))
-print(shell.echo(["list","of","strings"]))
+print(shell.echo(["list", "of", "strings"]))
 print(shell["echo single statement"])
 
 # Show off the interactive shell

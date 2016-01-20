@@ -3,6 +3,8 @@ import curses
 import os
 
 cache = None
+
+
 def get(cap, *args, **kwargs):
     default = kwargs.pop('default', b'')
 
@@ -31,6 +33,7 @@ def get(cap, *args, **kwargs):
         return curses.tparm(s, *args)
     else:
         return s
+
 
 def init():
     global cache

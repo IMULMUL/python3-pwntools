@@ -12,6 +12,7 @@ log = getLogger(__name__)
 
 
 class serialtube(tube.tube):
+
     def __init__(
             self, port='/dev/ttyUSB0', baudrate=115200,
             convert_newlines=True,
@@ -104,6 +105,7 @@ class serialtube(tube.tube):
         term.term.show_cursor()
 
         go = [True]
+
         def recv_thread(go):
             while go[0]:
                 try:

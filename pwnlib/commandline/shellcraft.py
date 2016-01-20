@@ -37,56 +37,56 @@ def _string(s):
     return '"' + ''.join(out) + '"\n'
 
 p = argparse.ArgumentParser(
-    description = 'Microwave shellcode -- Easy, fast and delicious',
-    formatter_class = argparse.RawDescriptionHelpFormatter,
+    description='Microwave shellcode -- Easy, fast and delicious',
+    formatter_class=argparse.RawDescriptionHelpFormatter,
 )
 
 
 p.add_argument(
     '-?', '--show',
-    action = 'store_true',
-    help = 'Show shellcode documentation',
+    action='store_true',
+    help='Show shellcode documentation',
 )
 
 p.add_argument(
     '-o', '--out',
-    metavar = 'file',
-    type = argparse.FileType('wb'),
-    default = sys.stdout.buffer,
-    help = 'Output file (default: stdout)',
+    metavar='file',
+    type=argparse.FileType('wb'),
+    default=sys.stdout.buffer,
+    help='Output file (default: stdout)',
 )
 
 p.add_argument(
     '-f', '--format',
-    metavar = 'format',
-    choices = ['r', 'raw',
-               's', 'str', 'string',
-               'c',
-               'h', 'hex',
-               'a', 'asm', 'assembly',
-               'p',
-               'i', 'hexii',
-               'default'],
-    default = 'default',
-    help = 'Output format (default: hex), choose from {r}aw, {s}tring, {c}-style array, {h}ex string, hex{i}i, {a}ssembly code, {p}reprocssed code',
+    metavar='format',
+    choices=['r', 'raw',
+             's', 'str', 'string',
+             'c',
+             'h', 'hex',
+             'a', 'asm', 'assembly',
+             'p',
+             'i', 'hexii',
+             'default'],
+    default='default',
+    help='Output format (default: hex), choose from {r}aw, {s}tring, {c}-style array, {h}ex string, hex{i}i, {a}ssembly code, {p}reprocssed code',
 )
 
 p.add_argument(
     'shellcode',
-    nargs = '?',
-    choices = shellcraft.templates,
-    metavar = 'shellcode',
-    help = 'The shellcode you want',
+    nargs='?',
+    choices=shellcraft.templates,
+    metavar='shellcode',
+    help='The shellcode you want',
 )
 
 p.epilog = 'Available shellcodes are:\n' + '\n'.join(shellcraft.templates)
 
 p.add_argument(
     'args',
-    nargs = '*',
-    metavar = 'arg',
-    default = (),
-    help = 'Argument to the chosen shellcode',
+    nargs='*',
+    metavar='arg',
+    default=(),
+    help='Argument to the chosen shellcode',
 )
 
 p.add_argument(
@@ -95,6 +95,7 @@ p.add_argument(
     help='Debug the shellcode with GDB',
     action='store_true'
 )
+
 
 def main():
     # Banner must be added here so that it doesn't appear in the autodoc
@@ -215,4 +216,5 @@ def main():
 
     args.out.write(code)
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()

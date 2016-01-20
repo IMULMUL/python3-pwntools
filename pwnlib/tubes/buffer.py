@@ -29,8 +29,9 @@ class Buffer(Exception):
         The ``0th`` item in the buffer is the oldest item, and
         will be received first.
     """
+
     def __init__(self):
-        self.data = [] # buffer
+        self.data = []  # buffer
         self.size = 0  # length
 
     def __len__(self):

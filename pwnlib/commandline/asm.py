@@ -7,7 +7,7 @@ from pwn import *
 from . import common
 
 parser = argparse.ArgumentParser(
-    description = 'Assemble shellcode into bytes'
+    description='Assemble shellcode into bytes'
 )
 
 parser.add_argument(
@@ -24,7 +24,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-o","--output",
+    "-o", "--output",
     metavar='file',
     help="Output file (defaults to stdout)",
     type=argparse.FileType('wb'),
@@ -33,11 +33,11 @@ parser.add_argument(
 
 parser.add_argument(
     '-c', '--context',
-    metavar = 'context',
-    action = 'append',
-    type   = common.context_arg,
-    choices = common.choices,
-    help = 'The os/architecture/endianness/bits the shellcode will run in (default: linux/i386), choose from: %s' % common.choices,
+    metavar='context',
+    action='append',
+    type=common.context_arg,
+    choices=common.choices,
+    help='The os/architecture/endianness/bits the shellcode will run in (default: linux/i386), choose from: %s' % common.choices,
 )
 
 
@@ -48,13 +48,14 @@ parser.add_argument(
     action='store_true'
 )
 
-def main():
-    args   = parser.parse_args()
-    tty    = args.output.isatty()
 
-    data   = '\n'.join(args.lines) or sys.stdin.read()
+def main():
+    args = parser.parse_args()
+    tty = args.output.isatty()
+
+    data = '\n'.join(args.lines) or sys.stdin.read()
     output = asm(data.replace(';', '\n'))
-    fmt    = args.format or ('hex' if tty else 'raw')
+    fmt = args.format or ('hex' if tty else 'raw')
     formatters = {
         'r': bytes,
         'h': enhex,
@@ -74,4 +75,5 @@ def main():
     if tty and fmt is not 'raw':
         args.output.write(b'\n')
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()

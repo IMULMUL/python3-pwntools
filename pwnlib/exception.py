@@ -8,7 +8,8 @@ class PwnlibException(Exception):
 
     Pwnlib functions that encounters unrecoverable errors should call the
     :func:`pwnlib.log.error` function instead of throwing this exception directly.'''
-    def __init__(self, msg, reason = None, exit_code = None):
+
+    def __init__(self, msg, reason=None, exit_code=None):
         super(PwnlibException, self).__init__(self, msg)
         self.reason = reason
         self.exit_code = exit_code
@@ -18,7 +19,7 @@ class PwnlibException(Exception):
         if self.reason:
             s += '\nReason:\n'
             s += ''.join(traceback.format_exception(*self.reason))
-        elif sys.exc_type not in (None, KeyboardInterrupt):
+        elif sys.exc_info()[0] not in (None, KeyboardInterrupt):
             s += '\n'
             s += traceback.format_exc()
         return s

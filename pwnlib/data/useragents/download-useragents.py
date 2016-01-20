@@ -18,6 +18,7 @@ if os.path.isfile('useragents.txt'):
             if line:
                 uas.add(line.rstrip())
 
+
 def getxml(url):
     f = request.urlopen(url)
     xml = f.read()
@@ -58,6 +59,7 @@ with log.waitfor('Fetching from from http://techpatterns.com') as l:
     xml = getxml('http://techpatterns.com/downloads/firefox/useragentswitcher.xml')
     soup = BeautifulSoup(xml)
     l.success()
+
 
 def loop(xml):
     for item in xml:

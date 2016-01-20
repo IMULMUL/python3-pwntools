@@ -12,6 +12,7 @@ from .util import packing
 
 log = getLogger(__name__)
 
+
 class ROP:
     """Class which simplifies the generation of ROP-chains.
 
@@ -30,7 +31,8 @@ class ROP:
        bytes(rop)
        # b'\\xfc\\x82\\x04\\x08\\xef\\xbe\\xad\\xde\\x00\\x00\\x00\\x00\\xa8\\x96\\x04\\x08'
     """
-    def __init__(self, elfs, base = None):
+
+    def __init__(self, elfs, base=None):
         """
         Arguments:
             elfs(list): List of pwnlib.elf.ELF objects for mining
@@ -44,7 +46,7 @@ class ROP:
         elif isinstance(elfs, bytes):
             elfs = [ELF(elfs)]
 
-        self.elfs  = elfs
+        self.elfs = elfs
         self._chain = []
         self.base = base
         self.align = max(e.elfclass for e in elfs) // 8
@@ -141,17 +143,17 @@ class ROP:
             if not args:
                 chain.append([addr, [], [], 0])
             else:
-                need = (1+len(args)) * self.align
+                need = (1 + len(args)) * self.align
                 best_pivot = None
-                best_size  = None
+                best_size = None
 
                 for size, pivot in sorted(self.pivots.items()):
                     if size >= need:
                         best_pivot = pivot
-                        best_size  = size
+                        best_size = size
                         break
 
-                if best_pivot == None:
+                if best_pivot is None:
                     log.error("Could not find gadget to clean up stack for call %r %r" % (addr, args))
 
                 chain.append([addr, [best_pivot], args, best_size // 4 - len(args) - 1])
@@ -190,7 +192,7 @@ class ROP:
 
     _build_x86 = _build_i386
 
-    def build(self, base = None):
+    def build(self, base=None):
         """Build the ROP chain into a list (addr, int/string, bool), where the
         last value is True iff the value was an internal reference.
 
@@ -203,7 +205,7 @@ class ROP:
                      self.base.
         """
 
-        if base == None:
+        if base is None:
             base = self.base
 
         # Use the architecture specific builder to get a [[str/ints/refs]]
@@ -215,7 +217,7 @@ class ROP:
         # Stage 1
         #   Generate a dictionary {ref_id: addr}.
         addrs = {}
-        if base != None:
+        if base is not None:
             addr = base
             for i, l in enumerate(rop):
                 addrs[i] = addr
@@ -241,7 +243,7 @@ class ROP:
                     if v[0] in addrs:
                         out.append((addr, addrs[v[0]], True))
                         addr += self.align
-                    elif base != None:
+                    elif base is not None:
                         log.error("ROP: References unknown structure index")
                     else:
                         log.error("ROP: Cannot use structures without a base address")
@@ -259,7 +261,7 @@ class ROP:
 
         return packing.flat(
             [value for addr, value, was_ref in self.build()],
-            word_size = 8*self.align
+            word_size=8 * self.align
         )
 
     def dump(self):
@@ -270,7 +272,7 @@ class ROP:
         addrs = [addr for addr, value, was_ref in rop]
         for addr, value, was_ref in rop:
             if isinstance(value, str):
-                line   = "0x%04x: %16r" % (addr, value.rstrip('\x00'))
+                line = "0x%04x: %16r" % (addr, value.rstrip('\x00'))
             elif isinstance(value, int):
                 if was_ref:
                     line = "0x%04x: %#16x (%+d)" % (
@@ -335,14 +337,14 @@ class ROP:
 
         pop_sp = self.rsp or self.esp
         pop_bp = self.rbp or self.ebp
-        leave  = self.leave
+        leave = self.leave
 
         if pop_sp and len(pop_sp[1]['regs']) == 1:
             self.raw(pop_sp[0])
             self.raw(next_base)
         elif pop_bp and leave and len(pop_bp[1]['regs']) == 1:
             self.raw(pop_bp[0])
-            self.raw(next_base-4)
+            self.raw(next_base - 4)
             self.raw(leave[0])
         else:
             log.error("Cannot find the gadgets to migrate")
@@ -355,11 +357,11 @@ class ROP:
 
     def __get_cachefile_name(self, elf):
         basename = os.path.basename(elf.file.name)
-        md5sum   = hashlib.md5(elf.get_data()).hexdigest()
+        md5sum = hashlib.md5(elf.get_data()).hexdigest()
 
-        filename  = "%s-%s-%#x" % (basename, md5sum, elf.address)
+        filename = "%s-%s-%#x" % (basename, md5sum, elf.address)
 
-        cachedir  = os.path.join(tempfile.gettempdir(), 'pwntools-rop-cache')
+        cachedir = os.path.join(tempfile.gettempdir(), 'pwntools-rop-cache')
 
         if not os.path.exists(cachedir):
             os.mkdir(cachedir)
@@ -390,9 +392,9 @@ class ROP:
         # https://github.com/JonathanSalwan/ROPgadget/issues/53
         #
 
-        pop   = re.compile(r'^pop (.{3})')
-        add   = re.compile(r'^add .sp, (\S+)$')
-        ret   = re.compile(r'^ret$')
+        pop = re.compile(r'^pop (.{3})')
+        add = re.compile(r'^add .sp, (\S+)$')
+        ret = re.compile(r'^ret$')
         leave = re.compile(r'^leave$')
 
         #
@@ -405,20 +407,24 @@ class ROP:
         # >>> valid('add esp, 0x24')
         # True
         #
-        valid = lambda insn: any(map(lambda pattern: pattern.match(insn), [pop,add,ret,leave]))
+        valid = lambda insn: any(map(lambda pattern: pattern.match(insn), [pop, add, ret, leave]))
 
         #
         # Currently, ropgadget.args.Args() doesn't take any arguments, and pulls
         # only from sys.argv.  Preserve it through this call.  We also
         # monkey-patch sys.stdout to suppress output from ropgadget.
         #
-        argv    = sys.argv
-        stdout  = sys.stdout
+        argv = sys.argv
+        stdout = sys.stdout
+
         class Wrapper:
+
             def __init__(self, fd):
                 self._fd = fd
+
             def write(self, s):
                 pass
+
             def __getattr__(self, k):
                 return self._fd.__getattribute__(k)
         gadgets = {}
@@ -438,36 +444,42 @@ class ROP:
                     import ropgadget
                 except ImportError:
                     log.error("ROP is not supported without installing libcapstone. See http://www.capstone-engine.org/download.html")
-                sys.argv = ['ropgadget', '--binary', elf.path, '--only', 'add|pop|leave|ret', '--nojop', '--nosys']
+                sys.argv = [
+                    'ropgadget',
+                    '--binary',
+                    elf.path,
+                    '--only',
+                    'add|pop|leave|ret',
+                    '--nojop',
+                    '--nosys']
                 args = ropgadget.args.Args().getArgs()
                 core = ropgadget.core.Core(args)
                 core.do_binary(elf.path)
                 core.do_load(0)
             finally:
-                sys.argv   = argv
+                sys.argv = argv
                 sys.stdout = stdout
 
             elf_gadgets = {}
             for gadget in core._Core__gadgets:
                 address = gadget['vaddr'] - elf.load_addr + elf.address
-                insns   = [g.strip() for g in gadget['gadget'].split(';')]
+                insns = [g.strip() for g in gadget['gadget'].split(';')]
 
                 if all(map(valid, insns)):
                     elf_gadgets[address] = insns
             self.__cache_save(elf, elf_gadgets)
             gadgets.update(elf_gadgets)
 
-
         #
         # For each gadget we decided to keep, find out how much it moves the stack,
         # and log which registers it modifies.
         #
         self.gadgets = {}
-        self.pivots  = {}
+        self.pivots = {}
 
-        frame_regs = ['ebp','esp'] if self.align == 4 else ['rbp','rsp']
+        frame_regs = ['ebp', 'esp'] if self.align == 4 else ['rbp', 'rsp']
 
-        for addr,insns in gadgets.items():
+        for addr, insns in gadgets.items():
             sp_move = 0
             regs = []
             for insn in insns:
@@ -489,21 +501,21 @@ class ROP:
                     #       is specified as a register.
                     #
                     sp_move += 9999999999
-                    regs    += frame_regs
+                    regs += frame_regs
 
             # Permit duplicates, because blacklisting bytes in the gadget
             # addresses may result in us needing the dupes.
             self.gadgets[addr] = {'insns': insns, 'regs': regs, 'move': sp_move}
 
             # Don't use 'pop esp' for pivots
-            if not set(['rsp','esp']) & set(regs):
-                self.pivots[sp_move]  = addr
+            if not set(['rsp', 'esp']) & set(regs):
+                self.pivots[sp_move] = addr
 
         #
         # HACK: Set up a special '.leave' helper.  This is so that
         #       I don't have to rewrite __getattr__ to support this.
         #
-        leave = self.search(regs = frame_regs, order = 'regs')
+        leave = self.search(regs=frame_regs, order='regs')
         if leave and leave[1]['regs'] != frame_regs:
             leave = None
         self.leave = leave
@@ -511,7 +523,7 @@ class ROP:
     def __repr__(self):
         return "ROP(%r)" % self.elfs
 
-    def search(self, move = 0, regs = None, order = 'size'):
+    def search(self, move=0, regs=None, order='size'):
         """Search for a gadget which matches the specified criteria.
 
         Arguments:
@@ -538,7 +550,7 @@ class ROP:
         # Search for an exact match, save the closest match
         closest = None
         closest_val = (float('inf'), float('inf'), float('inf'))
-        for a,i in self.gadgets.items():
+        for a, i in self.gadgets.items():
             cur_regs = set(i['regs'])
             if regs == cur_regs and move == i['move']:
                 return (a, i)
@@ -583,8 +595,8 @@ class ROP:
         ]
 
         if attr in self.__dict__ \
-        or attr in bad_attrs \
-        or attr.startswith('_'):
+                or attr in bad_attrs \
+                or attr.startswith('_'):
             raise AttributeError('ROP instance has no attribute %r' % attr)
 
         #
@@ -603,11 +615,11 @@ class ROP:
         x86_suffixes = ['ax', 'bx', 'cx', 'dx', 'bp', 'sp', 'di', 'si',
                         'r8', 'r9', '10', '11', '12', '13', '14', '15']
         if all(map(lambda x: x[-2:] in x86_suffixes, attr.split('_'))):
-            return self.search(regs = attr.split('_'), order = 'regs')
+            return self.search(regs=attr.split('_'), order='regs')
 
         #
         # Otherwise, assume it's a rop.call() shorthand
         #
         def call(*args):
-            return self.call(attr,args)
+            return self.call(attr, args)
         return call

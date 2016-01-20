@@ -9,8 +9,11 @@ import sys
 from . import keyconsts as kc
 from . import termcap
 
-try:    _fd = sys.stdin.fileno()
-except: _fd = open('/dev/null', 'r').fileno()
+try:
+    _fd = sys.stdin.fileno()
+except:
+    _fd = open('/dev/null', 'r').fileno()
+
 
 def getch(timeout=0):
     while True:
@@ -26,18 +29,21 @@ def getch(timeout=0):
                 continue
             raise
 
+
 def getraw(timeout=None):
     '''Get list of raw key codes corresponding to zero or more key presses'''
     cs = []
     c = getch(timeout)
-    while c is not None: # timeout
+    while c is not None:  # timeout
         cs.append(c)
-        if c is None: # EOF
+        if c is None:  # EOF
             break
         c = getch(0)
     return cs
 
+
 class Matcher:
+
     def __init__(self, desc):
         self._desc = desc
         desc = desc.split('-')
@@ -98,7 +104,9 @@ class Matcher:
     def __str__(self):
         return self._desc
 
+
 class Key:
+
     def __init__(self, type, code=None, mods=kc.MOD_NONE):
         self.type = type
         self.code = code
@@ -151,12 +159,15 @@ class Key:
 _cbuf = []
 _kbuf = []
 
+
 def _read(timeout=0):
     _cbuf.extend(getraw(timeout))
+
 
 def _peek():
     if _cbuf:
         return _peek_ti() or _peek_csi() or _peek_simple()
+
 
 def get(timeout=None):
     if _kbuf:
@@ -167,10 +178,13 @@ def get(timeout=None):
     _read(timeout)
     return _peek()
 
+
 def unget(k):
     _kbuf.append(k)
 
 # terminfo
+
+
 def _name_to_key(fname):
     if fname in kc.FUNCSYMS:
         k = Key(kc.TYPE_KEYSYM, *kc.FUNCSYMS[fname])
@@ -186,6 +200,7 @@ def _name_to_key(fname):
 
 _ti_table = None
 
+
 def _peek_ti():
     global _cbuf
     if _ti_table is None:
@@ -195,6 +210,7 @@ def _peek_ti():
         if _cbuf[:len(seq)] == seq:
             _cbuf = _cbuf[len(seq):]
             return key
+
 
 def _init_ti_table():
     global _ti_table
@@ -208,6 +224,8 @@ def _init_ti_table():
             _ti_table.append((list(seq), k))
 
 # csi
+
+
 def _parse_csi(offset):
     i = offset
     while i < len(_cbuf):
@@ -248,6 +266,7 @@ def _parse_csi(offset):
 
     return cmd, args, end + 1
 
+
 def _csi_func(cmd, args):
     k = Key(kc.TYPE_UNKNOWN)
     if len(args) > 1 and args[1]:
@@ -263,6 +282,7 @@ def _csi_func(cmd, args):
         k.code = f[1]
         return k
 
+
 def _csi_ss3(cmd, args):
     t, c = _csi_ss3s[chr(cmd[0])]
     k = Key(t, c)
@@ -270,11 +290,13 @@ def _csi_ss3(cmd, args):
         k.mods |= args[1] - 1
     return k
 
+
 def _csi_u(cmd, args):
     k = Key(kc.TYPE_UNICODE, chr(args[0]))
     if len(args) > 1 and args[1]:
         k.mods |= args[1] - 1
     return k
+
 
 def _csi_R(cmd, args):
     if cmd[0] == ord('R') and cmd[1] == ord('?'):
@@ -308,14 +330,14 @@ _csi_ss3s = {
 _csi_ss3kp = {}
 
 _csi_funcs = {
-    1 : (kc.TYPE_KEYSYM, kc.KEY_FIND),
-    2 : (kc.TYPE_KEYSYM, kc.KEY_INSERT),
-    3 : (kc.TYPE_KEYSYM, kc.KEY_DELETE),
-    4 : (kc.TYPE_KEYSYM, kc.KEY_SELECT),
-    5 : (kc.TYPE_KEYSYM, kc.KEY_PAGEUP),
-    6 : (kc.TYPE_KEYSYM, kc.KEY_PAGEDOWN),
-    7 : (kc.TYPE_KEYSYM, kc.KEY_HOME),
-    8 : (kc.TYPE_KEYSYM, kc.KEY_END),
+    1: (kc.TYPE_KEYSYM, kc.KEY_FIND),
+    2: (kc.TYPE_KEYSYM, kc.KEY_INSERT),
+    3: (kc.TYPE_KEYSYM, kc.KEY_DELETE),
+    4: (kc.TYPE_KEYSYM, kc.KEY_SELECT),
+    5: (kc.TYPE_KEYSYM, kc.KEY_PAGEUP),
+    6: (kc.TYPE_KEYSYM, kc.KEY_PAGEDOWN),
+    7: (kc.TYPE_KEYSYM, kc.KEY_HOME),
+    8: (kc.TYPE_KEYSYM, kc.KEY_END),
     11: (kc.TYPE_FUNCTION, 1),
     12: (kc.TYPE_FUNCTION, 2),
     13: (kc.TYPE_FUNCTION, 3),
@@ -337,6 +359,7 @@ _csi_funcs = {
     33: (kc.TYPE_FUNCTION, 19),
     34: (kc.TYPE_FUNCTION, 20),
 }
+
 
 def _peekkey_csi(offset):
     global _cbuf
@@ -360,6 +383,7 @@ def _peekkey_csi(offset):
     else:
         return Key(kc.TYPE_UNKNOWN_CSI, (cmd, args))
 
+
 def _peekkey_ss3(offset):
     global _cbuf
     if len(_cbuf) <= offset:
@@ -367,17 +391,18 @@ def _peekkey_ss3(offset):
     cmd = _cbuf[offset]
     if cmd < 0x40 or cmd >= 0x80:
         return
-    _cbuf = _cbuf[numb:] # XXX: numb is not defined
+    _cbuf = _cbuf[numb:]  # XXX: numb is not defined
 
     if chr(cmd) in _csi_ss3s:
         return Key(*_csi_ss3s[chr(cmd)])
 
     if chr(cmd) in _csi_ss3kp:
         t, c, a = _csi_ss3kp[chr(cmd)]
-        if CONVERTKP and a: # XXX: CONVERTKP is not defined
+        if CONVERTKP and a:  # XXX: CONVERTKP is not defined
             return Key(kc.TYPE_UNICODE, a)
         else:
             return Key(t, c)
+
 
 def _peek_csi():
     global _cbuf
@@ -393,6 +418,7 @@ def _peek_csi():
         return _peekkey_ss3(1)
     elif c0 == 0x9b:
         return _peekkey_csi(1)
+
 
 def _peek_simple():
     global _cbuf
@@ -436,7 +462,7 @@ def _peek_simple():
             k = Key(kc.TYPE_UNICODE, chr(c0))
         else:
             k = Key(kc.TYPE_UNICODE, chr(c0 - 0x40), kc.MOD_CTRL | kc.MOD_ALT)
-    else: # utf8
+    else:  # utf8
         n = 0
         if c0 & 0b11100000 == 0b11000000:
             n = 2

@@ -4,6 +4,7 @@ from .util.packing import unpack
 
 log = getLogger(__name__)
 
+
 class MemLeak:
     """MemLeak is a caching and heuristic tool for exploiting memory leaks.
 
@@ -46,7 +47,8 @@ class MemLeak:
             leaking 0x1
             '0x464c457f'
     """
-    def __init__(self, f, search_range = 20, reraise = True):
+
+    def __init__(self, f, search_range=20, reraise=True):
         self.leak = f
         self.search_range = search_range
         self.reraise = reraise
@@ -81,10 +83,10 @@ class MemLeak:
             The type of the return value will be dictated by
             the type of ``field``.
         """
-        size   = obj.size
+        size = obj.size
         offset = obj.offset
-        data   = self.n(address + offset, size)
-        return unpack(data, size*8)
+        data = self.n(address + offset, size)
+        return unpack(data, size * 8)
 
     def _leak(self, addr, n, recurse=True):
         """_leak(addr, n) => bytes
@@ -94,7 +96,7 @@ class MemLeak:
         Returns:
             A bytes of length ``n``, or ``None``.
         """
-        addresses = [addr+i for i in range(n)]
+        addresses = [addr + i for i in range(n)]
 
         for address in addresses:
             # Cache hit
@@ -113,7 +115,7 @@ class MemLeak:
             # to see if another request will satisfy it
             if not data and recurse:
                 for i in range(1, self.search_range):
-                    data = self._leak(address-i, i, False)
+                    data = self._leak(address - i, i, False)
                     if address in self.cache:
                         break
                 else:
@@ -125,22 +127,21 @@ class MemLeak:
                 return None
 
             # Fill cache for as many bytes as we received
-            for i,byte in enumerate(data):
-                self.cache[address+i] = byte
+            for i, byte in enumerate(data):
+                self.cache[address + i] = byte
 
         # Ensure everything is in the cache
         if not all(a in self.cache for a in addresses):
             return None
 
         # Cache is filled, satisfy the request
-        return bytes(self.cache[addr+i] for i in range(n))
+        return bytes(self.cache[addr + i] for i in range(n))
 
     def raw(self, addr, numb):
         """raw(addr, numb) -> bytes
 
         Leak `numb` bytes at `addr`"""
-        return b''.join(self._leak(a, 1) for a in range(addr, addr+numb))
-
+        return b''.join(self._leak(a, 1) for a in range(addr, addr + numb))
 
     def _b(self, addr, ndx, size):
         addr += ndx * size
@@ -149,10 +150,10 @@ class MemLeak:
         if not data:
             return None
 
-        return unpack(data, 8*size)
+        return unpack(data, 8 * size)
 
-    def b(self, addr, ndx = 0):
-        """b(addr, ndx = 0) -> int
+    def b(self, addr, ndx=0):
+        """b(addr, ndx=0) -> int
 
         Leak byte at ``((uint8_t*) addr)[ndx]``
 
@@ -170,8 +171,8 @@ class MemLeak:
         """
         return self._b(addr, ndx, 1)
 
-    def w(self, addr, ndx = 0):
-        """w(addr, ndx = 0) -> int
+    def w(self, addr, ndx=0):
+        """w(addr, ndx=0) -> int
 
         Leak word at ``((uint16_t*) addr)[ndx]``
 
@@ -189,8 +190,8 @@ class MemLeak:
         """
         return self._b(addr, ndx, 2)
 
-    def d(self, addr, ndx = 0):
-        """d(addr, ndx = 0) -> int
+    def d(self, addr, ndx=0):
+        """d(addr, ndx=0) -> int
 
         Leak dword at ``((uint32_t*) addr)[ndx]``
 
@@ -208,8 +209,8 @@ class MemLeak:
         """
         return self._b(addr, ndx, 4)
 
-    def q(self, addr, ndx = 0):
-        """q(addr, ndx = 0) -> int
+    def q(self, addr, ndx=0):
+        """q(addr, ndx=0) -> int
 
         Leak qword at ``((uint64_t*) addr)[ndx]``
 
@@ -256,10 +257,10 @@ class MemLeak:
         orig = addr
         while self.b(addr):
             addr += 1
-        return self._leak(orig, addr-orig)
+        return self._leak(orig, addr - orig)
 
     def n(self, addr, numb):
-        """n(addr, ndx = 0) -> bytes
+        """n(addr, ndx=0) -> bytes
 
         Leak `numb` bytes at `addr`.
 
@@ -282,18 +283,17 @@ class MemLeak:
         """
         return self._leak(addr, numb) or None
 
-
     def _clear(self, addr, ndx, size):
         addr += ndx * size
-        data = list(map(lambda x: self.cache.pop(x, None), range(addr, addr+size)))
+        data = list(map(lambda x: self.cache.pop(x, None), range(addr, addr + size)))
 
         if not all(data):
             return None
 
-        return unpack(bytes(data), size*8)
+        return unpack(bytes(data), size * 8)
 
-    def clearb(self, addr, ndx = 0):
-        """clearb(addr, ndx = 0) -> int
+    def clearb(self, addr, ndx=0):
+        """clearb(addr, ndx=0) -> int
 
         Clears byte at ``((uint8_t*)addr)[ndx]`` from the cache and
         returns the removed value or `None` if the address was not completely set.
@@ -313,8 +313,8 @@ class MemLeak:
         """
         return self._clear(addr, ndx, 1)
 
-    def clearw(self, addr, ndx = 0):
-        """clearw(addr, ndx = 0) -> int
+    def clearw(self, addr, ndx=0):
+        """clearw(addr, ndx=0) -> int
 
         Clears word at ``((uint16_t*)addr)[ndx]`` from the cache and
         returns the removed value or `None` if the address was not completely set.
@@ -332,8 +332,8 @@ class MemLeak:
         """
         return self._clear(addr, ndx, 2)
 
-    def cleard(self, addr, ndx = 0):
-        """cleard(addr, ndx = 0) -> int
+    def cleard(self, addr, ndx=0):
+        """cleard(addr, ndx=0) -> int
 
         Clears dword at ``((uint32_t*)addr)[ndx]`` from the cache and
         returns the removed value or `None` if the address was not completely set.
@@ -351,8 +351,8 @@ class MemLeak:
         """
         return self._clear(addr, ndx, 4)
 
-    def clearq(self, addr, ndx = 0):
-        """clearq(addr, ndx = 0) -> int
+    def clearq(self, addr, ndx=0):
+        """clearq(addr, ndx=0) -> int
 
         Clears qword at ``((uint64_t*)addr)[ndx]`` from the cache and
         returns the removed value or `None` if the address was not completely set.
@@ -368,13 +368,12 @@ class MemLeak:
         """
         return self._clear(addr, ndx, 8)
 
-
     def _set(self, addr, val, ndx, size):
         addr += ndx * size
-        for i,b in enumerate(pack(val, size*8)):
-            self.cache[addr+i] = b
+        for i, b in enumerate(pack(val, size * 8)):
+            self.cache[addr + i] = b
 
-    def setb(self, addr, val, ndx = 0):
+    def setb(self, addr, val, ndx=0):
         """Sets byte at ``((uint8_t*)addr)[ndx]`` to `val` in the cache.
 
         Examples:
@@ -388,7 +387,7 @@ class MemLeak:
         """
         return self._set(addr, val, ndx, 1)
 
-    def setw(self, addr, val, ndx = 0):
+    def setw(self, addr, val, ndx=0):
         r"""Sets word at ``((uint16_t*)addr)[ndx]`` to `val` in the cache.
 
         Examples:
@@ -402,7 +401,7 @@ class MemLeak:
         """
         return self._set(addr, val, ndx, 2)
 
-    def setd(self, addr, val, ndx = 0):
+    def setd(self, addr, val, ndx=0):
         """Sets dword at ``((uint32_t*)addr)[ndx]`` to `val` in the cache.
 
         Examples:
@@ -410,7 +409,7 @@ class MemLeak:
         """
         return self._set(addr, val, ndx, 4)
 
-    def setq(self, addr, val, ndx = 0):
+    def setq(self, addr, val, ndx=0):
         """Sets qword at ``((uint64_t*)addr)[ndx]`` to `val` in the cache.
 
         Examples:
@@ -418,7 +417,7 @@ class MemLeak:
         """
         return self._set(addr, val, ndx, 8)
 
-    def sets(self, addr, val, null_terminate = True):
+    def sets(self, addr, val, null_terminate=True):
         r"""Set known string at `addr`, which will be optionally be null-terminated
 
         Note that this method is a bit dumb about how it handles the data.
@@ -436,5 +435,5 @@ class MemLeak:
         if null_terminate:
             val += b'\x00'
 
-        for i,b in enumerate(val):
-            self.cache[addr+i] = b
+        for i, b in enumerate(val):
+            self.cache[addr + i] = b

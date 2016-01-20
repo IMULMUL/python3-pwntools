@@ -21,6 +21,7 @@ from .. import packing
 
 
 class BitPolynom:
+
     def __init__(self, n):
         if not isinstance(n, int):
             raise TypeError("Polynomial must be called with an integer")
@@ -141,13 +142,15 @@ class BitPolynom:
             out.append("1")
         return ' + '.join(out)
 
+
 class Module(types.ModuleType):
+
     def __init__(self):
         super(Module, self).__init__(__name__)
         self._cached_crcs = None
         self.__dict__.update({
-            '__file__'    : __file__,
-            '__package__' : __package__,
+            '__file__': __file__,
+            '__package__': __package__,
         })
 
     def __getattr__(self, attr):
@@ -160,7 +163,16 @@ class Module(types.ModuleType):
         if not info:
             raise AttributeError("'module' object has no attribute %r" % attr)
 
-        func = self._make_crc(info['name'], info['poly'], info['width'], info['init'], info['refin'], info['refout'], info['xorout'], info['check'], 'See also: ' + info['link'])
+        func = self._make_crc(
+            info['name'],
+            info['poly'],
+            info['width'],
+            info['init'],
+            info['refin'],
+            info['refout'],
+            info['xorout'],
+            info['check'],
+            'See also: ' + info['link'])
 
         setattr(self, attr, func)
 
@@ -192,7 +204,7 @@ class Module(types.ModuleType):
         if polynom.degree() != width:
             raise ValueError("Polynomial is too large for that width")
 
-        init   &= (1 << width) - 1
+        init &= (1 << width) - 1
         xorout &= (1 << width) - 1
 
         if isinstance(data, list):
@@ -207,7 +219,7 @@ class Module(types.ModuleType):
 
         p = p << width
         p ^= init << inlen
-        p  = p % polynom
+        p = p % polynom
         res = p.n
         if refout:
             res = fiddling.bitswap_int(res, width)
@@ -220,7 +232,7 @@ class Module(types.ModuleType):
         def inner(data):
             return crc.generic_crc(data, polynom, width, init, refin, refout, xorout)
         inner.__qualname__ = 'crc_' + name
-        inner.__name__  = 'crc_' + name
+        inner.__name__ = 'crc_' + name
 
         inner.__doc__   = """%s(data) -> int
 

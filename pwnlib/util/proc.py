@@ -15,6 +15,7 @@ log = getLogger(__name__)
 if _ok_import:
     all_pids = psutil.pids
 
+
 def pidof(target):
     """pidof(target) -> int list
 
@@ -47,6 +48,7 @@ def pidof(target):
     else:
         return pid_by_name(target)
 
+
 def pid_by_name(name):
     """pid_by_name(name) -> int list
 
@@ -72,6 +74,7 @@ def pid_by_name(name):
 
     return [p.pid for p in psutil.process_iter() if match(p)]
 
+
 def name(pid):
     """name(pid) -> str
 
@@ -86,6 +89,7 @@ def name(pid):
         True
     """
     return psutil.Process(pid).name()
+
 
 def parent(pid):
     """parent(pid) -> int
@@ -102,6 +106,7 @@ def parent(pid):
     except:
         return 0
 
+
 def children(ppid):
     """children(ppid) -> int list
 
@@ -112,6 +117,7 @@ def children(ppid):
         List of PIDs of whose parent process is `pid`.
     """
     return [p.pid for p in psutil.Process(ppid).children()]
+
 
 def ancestors(pid):
     """ancestors(pid) -> int list
@@ -128,6 +134,7 @@ def ancestors(pid):
         pid = parent(pid)
     return pids
 
+
 def descendants(pid):
     """descendants(pid) -> dict
 
@@ -139,15 +146,19 @@ def descendants(pid):
     """
     allpids = all_pids()
     ppids = {}
+
     def _parent(pid):
         if pid not in ppids:
             ppids[pid] = parent(pid)
         return ppids[pid]
+
     def _children(ppid):
         return [pid for pid in allpids if _parent(pid) == ppid]
+
     def _loop(ppid):
         return {pid: _loop(pid) for pid in _children(ppid)}
     return _loop(pid)
+
 
 def exe(pid):
     """exe(pid) -> str
@@ -159,6 +170,7 @@ def exe(pid):
         The path of the binary of the process. I.e. what ``/proc/<pid>/exe`` points to.
     """
     return psutil.Process(pid).exe()
+
 
 def cwd(pid):
     """cwd(pid) -> str
@@ -172,6 +184,7 @@ def cwd(pid):
     """
     return psutil.Process(pid).cwd()
 
+
 def cmdline(pid):
     """cmdline(pid) -> str list
 
@@ -182,6 +195,7 @@ def cmdline(pid):
         A list of the fields in ``/proc/<pid>/cmdline``.
     """
     return psutil.Process(pid).cmdline()
+
 
 def stat(pid):
     """stat(pid) -> str list
@@ -200,6 +214,7 @@ def stat(pid):
     name = s[i + 1:j]
     return s[:i].split() + [name] + s[j + 1:].split()
 
+
 def starttime(pid):
     """starttime(pid) -> float
 
@@ -210,6 +225,7 @@ def starttime(pid):
         The time (in seconds) the process started after system boot
     """
     return psutil.Process(pid).create_time() - psutil.boot_time()
+
 
 def status(pid):
     """status(pid) -> dict
@@ -228,7 +244,7 @@ def status(pid):
             for line in fd:
                 i = line.index(':')
                 key = line[:i]
-                val = line[i + 2:-1] # initial :\t and trailing \n
+                val = line[i + 2:-1]  # initial :\t and trailing \n
                 out[key] = val
     except OSError as e:
         if e.errno == errno.ENOENT:
@@ -236,6 +252,7 @@ def status(pid):
         else:
             raise
     return out
+
 
 def tracer(pid):
     """tracer(pid) -> int
@@ -253,6 +270,7 @@ def tracer(pid):
     tpid = int(status(pid)['TracerPid'])
     return tpid if tpid > 0 else None
 
+
 def state(pid):
     """state(pid) -> str
 
@@ -267,6 +285,7 @@ def state(pid):
         'R (running)'
     """
     return status(pid)['State']
+
 
 def wait_for_debugger(pid):
     """wait_for_debugger(pid) -> None

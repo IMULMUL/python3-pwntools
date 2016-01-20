@@ -28,11 +28,14 @@ _graphics_mode = False
 
 fd = sys.stderr.buffer
 
+
 def show_cursor():
     do('cnorm')
 
+
 def hide_cursor():
     do('civis')
+
 
 def update_geometry():
     global width, height
@@ -48,25 +51,29 @@ def update_geometry():
                 cell.start = (cell.start[0] + delta, cell.start[1])
     height, width = h, w
 
+
 def handler_sigwinch(signum, stack):
     update_geometry()
     redraw()
     for cb in on_winch:
         cb()
 
+
 def handler_sigstop(signum, stack):
     resetterm()
     os.kill(os.getpid(), signal.SIGSTOP)
+
 
 def handler_sigcont(signum, stack):
     setupterm()
     redraw()
 
+
 def setupterm():
     global settings
     update_geometry()
     hide_cursor()
-    do('smkx') # keypad mode
+    do('smkx')  # keypad mode
     if not settings:
         settings = termios.tcgetattr(fd.fileno())
     mode = termios.tcgetattr(fd.fileno())
@@ -82,13 +89,15 @@ def setupterm():
     mode[CC][termios.VTIME] = 0
     termios.tcsetattr(fd, termios.TCSAFLUSH, mode)
 
+
 def resetterm():
     if settings:
         termios.tcsetattr(fd.fileno(), termios.TCSADRAIN, settings)
     show_cursor()
     do('rmkx')
-    fd.write(b' \x08') # XXX: i don't know why this is needed...
-                       #      only necessary when suspending the process
+    fd.write(b' \x08')  # XXX: i don't know why this is needed...
+    # only necessary when suspending the process
+
 
 def init():
     atexit.register(resetterm)
@@ -116,11 +125,15 @@ def init():
     cell.float = 0
     cell.indent = 0
     cells.append(cell)
+
     class Wrapper:
+
         def __init__(self, fd):
             self._fd = fd
+
         def write(self, s):
             output(s, frozen=True)
+
         def __getattr__(self, k):
             return self._fd.__getattribute__(k)
     if sys.stdout.isatty():
@@ -129,6 +142,7 @@ def init():
         sys.stderr = Wrapper(sys.stderr)
     # freeze all cells if an exception is thrown
     orig_hook = sys.excepthook
+
     def hook(*args):
         resetterm()
         for c in cells:
@@ -139,10 +153,12 @@ def init():
         else:
             traceback.print_exception(*args)
         # this is a bit esoteric
-        # look here for details: https://stackoverflow.com/questions/12790328/how-to-silence-sys-excepthook-is-missing-error
+        # look here for details:
+        # https://stackoverflow.com/questions/12790328/how-to-silence-sys-excepthook-is-missing-error
         if fd.fileno() == 2:
             os.close(fd.fileno())
     sys.excepthook = hook
+
 
 def put(s):
     if isinstance(s, str):
@@ -150,13 +166,16 @@ def put(s):
 
     fd.write(s)
 
+
 def flush():
     fd.flush()
+
 
 def do(c, *args):
     s = termcap.get(c, *args)
     if s:
         put(s)
+
 
 def goto(arg):
     r, c = arg
@@ -165,21 +184,29 @@ def goto(arg):
 cells = []
 scroll = 0
 
+
 class Cell:
     pass
 
+
 class Handle:
+
     def __init__(self, cell, is_floating):
         self.h = id(cell)
         self.is_floating = is_floating
+
     def update(self, s):
         update(self.h, s)
+
     def freeze(self):
         freeze(self.h)
+
     def delete(self):
         delete(self.h)
 
 STR, CSI, LF, BS, CR, SOH, STX, OOB = range(8)
+
+
 def parse_csi(buf, offset):
     i = offset
     while i < len(buf):
@@ -217,6 +244,7 @@ def parse_csi(buf, offset):
         i += 1
     return cmd, args, end + 1
 
+
 def parse_utf8(buf, offset):
     c0 = buf[offset]
     n = 0
@@ -232,6 +260,7 @@ def parse_utf8(buf, offset):
         n = 6
     if n:
         return offset + n
+
 
 def parse(s):
     global _graphics_mode
@@ -267,7 +296,8 @@ def parse(s):
                 #  here is supporting setting the terminal title and updating
                 #  the color map.  we promise to do it properly in the next
                 #  iteration of this terminal emulation/compatibility layer
-                #  related: https://unix.stackexchange.com/questions/5936/can-i-set-my-local-machines-terminal-colors-to-use-those-of-the-machine-i-ssh-i
+                # related:
+                # https://unix.stackexchange.com/questions/5936/can-i-set-my-local-machines-terminal-colors-to-use-those-of-the-machine-i-ssh-i
                 try:
                     j = s.index(b'\x07', i)
                 except:
@@ -277,10 +307,10 @@ def parse(s):
                         j = 1
                 x = (OOB, s[i:j + 1])
                 i = j + 1
-            elif c1 in map(ord, '()'): # select G0 or G1
+            elif c1 in map(ord, '()'):  # select G0 or G1
                 i += 3
                 continue
-            elif c1 in map(ord, '>='): # set numeric/application keypad mode
+            elif c1 in map(ord, '>='):  # set numeric/application keypad mode
                 i += 2
                 continue
             elif c1 == ord('P'):
@@ -301,7 +331,7 @@ def parse(s):
             x = (BS, None)
             i += 1
         elif c == 0x09:
-            x = (STR, [b'    ']) # who the **** uses tabs anyway?
+            x = (STR, [b'    '])  # who the **** uses tabs anyway?
             i += 1
         elif c == 0x0a:
             x = (LF, None)
@@ -322,6 +352,8 @@ def parse(s):
 
 saved_cursor = None
 # XXX: render cells that is half-way on the screen
+
+
 def render_cell(cell, clear_after=False):
     global scroll, saved_cursor
     row, col = cell.start
@@ -400,7 +432,7 @@ def render_cell(cell, clear_after=False):
                         row, col = saved_cursor
         elif t == LF:
             if clear_after and col <= width - 1:
-                put(b'\x1b[K') # clear line
+                put(b'\x1b[K')  # clear line
             put(b'\n')
             col = 0
             row += 1
@@ -424,6 +456,7 @@ def render_cell(cell, clear_after=False):
     row = row + scroll - height + 1
     cell.end = (row, col)
 
+
 def render_from(i, force=False, clear_after=False):
     e = None
     # `i` should always be a valid cell, but in case i f***ed up somewhere, I'll
@@ -443,6 +476,7 @@ def render_from(i, force=False, clear_after=False):
         put(b'\x1b[J')
     flush()
 
+
 def redraw():
     for i in reversed(range(len(cells))):
         row = cells[i].start[0]
@@ -454,6 +488,8 @@ def redraw():
     render_from(i, force=True, clear_after=True)
 
 lock = threading.Lock()
+
+
 def output(s='', float=False, priority=10, frozen=False,
            indent=0, before=None, after=None):
     with lock:
@@ -496,18 +532,21 @@ def output(s='', float=False, priority=10, frozen=False,
             render_from(i, clear_after=True)
         return h
 
+
 def find_cell(h):
     for i, c in enumerate(cells):
         if id(c) == h:
             return i, c
     raise KeyError
 
+
 def discard_frozen():
     # we assume that no cell will shrink very much and that noone has space
     # for more than MAX_TERM_HEIGHT lines in their terminal
     while len(cells) > 1 and scroll - cells[0].end[0] > MAX_TERM_HEIGHT:
         c = cells.pop(0)
-        del c # trigger GC maybe, kthxbai
+        del c  # trigger GC maybe, kthxbai
+
 
 def update(h, s):
     with lock:
@@ -519,6 +558,7 @@ def update(h, s):
             c.content = parse(s)
             render_from(i, clear_after=True)
 
+
 def freeze(h):
     try:
         i, c = find_cell(h)
@@ -529,6 +569,7 @@ def freeze(h):
         discard_frozen()
     except KeyError:
         return
+
 
 def delete(h):
     update(h, '')

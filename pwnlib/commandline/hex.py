@@ -7,7 +7,8 @@ parser = argparse.ArgumentParser(description='''
 Hex-encodes data provided on the command line or via stdin.
 ''')
 parser.add_argument('data', nargs='*',
-    help='Data to convert into hex')
+                    help='Data to convert into hex')
+
 
 def main():
     args = parser.parse_args()
@@ -16,4 +17,5 @@ def main():
     else:
         print(enhex(' '.join(args.data)))
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()

@@ -136,7 +136,8 @@ class ConstantsModule(ModuleType):
 
         key = context.os, context.arch
         if key not in self._env_store:
-            self._env_store[key] = {key: getattr(self, key) for key in dir(self) if not key.endswith('__')}
+            self._env_store[key] = {key: getattr(self, key)
+                                    for key in dir(self) if not key.endswith('__')}
 
         return safeeval.values(string, self._env_store[key])
 

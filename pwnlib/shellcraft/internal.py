@@ -5,6 +5,8 @@ __all__ = ['make_function']
 
 loaded = {}
 lookup = None
+
+
 def init_mako():
     global lookup, render_global
     from mako.lookup import TemplateLookup
@@ -16,6 +18,7 @@ def init_mako():
         return
 
     class IsInsideManager:
+
         def __init__(self, parent):
             self.parent = parent
 
@@ -97,8 +100,10 @@ def get_context_from_dirpath(directory):
         A, O = O, None
 
     rv = {}
-    if O: rv['os'] = O
-    if A: rv['arch'] = A
+    if O:
+        rv['os'] = O
+    if A:
+        rv['arch'] = A
     return rv
 
 
