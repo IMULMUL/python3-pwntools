@@ -351,7 +351,7 @@ class ELF(ELFFile):
             self.plt[name] = plt.header.sh_addr + header_size + i * entry_size
 
     def search(self, needle, writable=False):
-        """search(needle, writable=False) -> str generator
+        """search(needle, writable=False) -> int generator
 
         Search the ELF's virtual address space for the specified string.
 
@@ -467,7 +467,7 @@ class ELF(ELFFile):
 
         Examples:
           >>> bash = ELF(which('bash'))
-          >>> bash.read(bash.address+1, 3)
+          >>> bash.read(bash.address + 1, 3)
           b'ELF'
         """
         offset = self.vaddr_to_offset(address)
