@@ -21,8 +21,8 @@ Example
     # For the sake of this example, let's say that we
     # have any of these pointers.  One is a pointer into
     # the target binary, the other two are pointers into libc
-    main   = 0xfeedf4ce
-    libc   = 0xdeadb000
+    main = 0xfeedf4ce
+    libc = 0xdeadb000
     system = 0xdeadbeef
 
     # With our leaker, and a pointer into our target binary,
@@ -31,19 +31,19 @@ Example
     # We do not actually need to have a copy of the target
     # binary for this to work.
     d = DynELF(leak, main)
-    assert d.lookup(None,     'libc') == libc
-    assert d.lookup('system', 'libc') == system
+    assert d.lookup(None, 'libc') == libc
+    assert d.lookup(b'system', 'libc') == system
 
     # However, if we *do* have a copy of the target binary,
     # we can speed up some of the steps.
     d = DynELF(leak, main, elf=ELF('./pwnme'))
-    assert d.lookup(None,     'libc') == libc
-    assert d.lookup('system', 'libc') == system
+    assert d.lookup(None, 'libc') == libc
+    assert d.lookup(b'system', 'libc') == system
 
     # Alternately, we can resolve symbols inside another library,
     # given a pointer into it.
     d = DynELF(leak, libc + 0x1234)
-    assert d.lookup('system')      == system
+    assert d.lookup(b'system') == system
 
 DynELF
 """
@@ -471,7 +471,7 @@ class DynELF:
         Find the address of ``symbol``, which is found in ``lib``.
 
         Arguments:
-            symb(bytes, str): Named routine to look up
+            symb(bytes): Named routine to look up
             lib(bytes, str): Substring to match for the library name.
               If omitted, the current library is searched.
               If set to ``'libc'``, ``'libc.so'`` is assumed.
@@ -550,7 +550,7 @@ class DynELF:
         Looks up information about a loaded library via the link map.
 
         Arguments:
-            libname(str):  Name of the library to resolve, or a substring (e.g. 'libc.so')
+            libname(bytes):  Name of the library to resolve, or a substring (e.g. b'libc.so')
 
         Returns:
             A DynELF instance for the loaded library, or None.
