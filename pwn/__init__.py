@@ -8,9 +8,11 @@ def closure():
     import sys
     if not hasattr(sys, 'argv'):
         return
-    import string, collections
+    import string
+    import collections
     global args
     args = collections.defaultdict(str)
+
     def isident(s):
         first = string.ascii_uppercase + '_'
         body = string.digits + first
@@ -21,6 +23,7 @@ def closure():
         if not all(c in body for c in s[1:]):
             return False
         return True
+
     def asbool(s):
         if s.lower() == 'true':
             return True
@@ -68,7 +71,8 @@ def closure():
         context.log_level = args['LOG_LEVEL']
     if 'LOG_FILE' in args:
         # install a file logger
-        import logging, time
+        import logging
+        import time
         modes = ('w', 'wb', 'a', 'ab')
         filename = args['LOG_FILE']
         mode = 'a'

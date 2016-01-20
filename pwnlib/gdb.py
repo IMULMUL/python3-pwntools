@@ -15,6 +15,7 @@ from .util import proc
 
 log = getLogger(__name__)
 
+
 def debug_shellcode(data, execute=None, **kwargs):
     """
     Creates an ELF file, and launches it with GDB.
@@ -27,14 +28,15 @@ def debug_shellcode(data, execute=None, **kwargs):
         A ``process`` tube connected to the shellcode on stdin/stdout/stderr.
     """
     with context.local(**kwargs):
-        tmp_elf  = tempfile.mktemp(prefix='pwn', suffix='.elf')
+        tmp_elf = tempfile.mktemp(prefix='pwn', suffix='.elf')
         elf_data = make_elf(data)
-        with open(tmp_elf,'wb+') as f:
+        with open(tmp_elf, 'wb+') as f:
             f.write(elf_data)
             f.flush()
         os.chmod(tmp_elf, 0o777)
         atexit.register(lambda: os.unlink(tmp_elf))
         return debug(tmp_elf, execute=None, arch=context.arch)
+
 
 def get_qemu_arch(arch):
     if arch == 'mips' and context.endian == 'little':
@@ -47,6 +49,7 @@ def get_qemu_arch(arch):
     arch = arch.replace('powerpc', 'ppc')
 
     return arch
+
 
 def debug(args, exe=None, execute=None, ssh=None, arch=None):
     """debug(args) -> tube
@@ -75,11 +78,11 @@ def debug(args, exe=None, execute=None, ssh=None, arch=None):
         args = ['qemu-%s-static' % qemu_arch, '-g', str(qemu_port)] + args
 
     if not ssh:
-        runner  = tubes.process.process
-        which   = misc.which
+        runner = tubes.process.process
+        which = misc.which
     else:
-        runner  = ssh.run
-        which   = ssh.which
+        runner = ssh.run
+        which = ssh.which
 
     # Make sure gdbserver is installed
     if not which(args[0]):
@@ -92,7 +95,7 @@ def debug(args, exe=None, execute=None, ssh=None, arch=None):
         # Process /bin/bash created; pid = 14366
         # Listening on port 34816
         process_created = gdbserver.recvline()
-        listening_on    = gdbserver.recvline()
+        listening_on = gdbserver.recvline()
 
         port = int(listening_on.split()[-1])
     else:
@@ -101,9 +104,9 @@ def debug(args, exe=None, execute=None, ssh=None, arch=None):
     listener = remote = None
 
     if ssh:
-        remote   = ssh.connect_remote('127.0.0.1', port)
+        remote = ssh.connect_remote('127.0.0.1', port)
         listener = tubes.listen.listen(0)
-        port     = listener.lport
+        port = listener.lport
     elif not exe:
         exe = misc.which(orig_args[0])
 
@@ -114,6 +117,7 @@ def debug(args, exe=None, execute=None, ssh=None, arch=None):
 
     return gdbserver
 
+
 def get_gdb_arch(arch):
     return {
         'amd64': 'i386:x86-64',
@@ -122,8 +126,8 @@ def get_gdb_arch(arch):
     }.get(arch, arch)
 
 
-def attach(target, execute = None, exe = None, arch = None):
-    """attach(target, execute = None, exe = None, arch = None) -> None
+def attach(target, execute=None, exe=None, arch=None):
+    """attach(target, execute=None, exe=None, arch=None) -> None
 
     Start GDB in a new terminal and attach to `target`.
     :func:`pwnlib.util.proc.pidof` is used to find the PID of `target` except
@@ -152,7 +156,7 @@ def attach(target, execute = None, exe = None, arch = None):
     try:
         ptrace_scope = open('/proc/sys/kernel/yama/ptrace_scope').read().strip()
         if ptrace_scope != '0' and os.geteuid() != 0:
-            msg =  'Disable ptrace_scope to attach to running processes.\n'
+            msg = 'Disable ptrace_scope to attach to running processes.\n'
             msg += 'More info: https://askubuntu.com/q/41629'
             log.warning(msg)
             return
@@ -175,14 +179,14 @@ def attach(target, execute = None, exe = None, arch = None):
     pre = ''
     if arch:
         if not misc.which('gdb-multiarch'):
-            log.warn_once('Cross-architecture debugging usually requires gdb-multiarch\n' \
-                '$ apt-get install gdb-multiarch')
+            log.warn_once('Cross-architecture debugging usually requires gdb-multiarch\n'
+                          '$ apt-get install gdb-multiarch')
         pre += 'set endian %s\n' % context.endian
         pre += 'set architecture %s\n' % get_gdb_arch(arch)
 
     # let's see if we can find a pid to attach to
     pid = None
-    if   isinstance(target, int):
+    if isinstance(target, int):
         # target is a pid, easy peasy
         pid = target
     elif isinstance(target, str):
@@ -207,7 +211,8 @@ def attach(target, execute = None, exe = None, arch = None):
             cmd = ['sshpass', '-p', shell.password] + cmd
         if shell.keyfile:
             cmd += ['-i', shell.keyfile]
-        cmd += ['gdb %r %s -x "%s" ; rm "%s"' % (target.exe, target.pid, tmpfile, tmpfile)]
+        cmd += ['gdb %r %s -x "%s" ; rm "%s"' %
+                (target.exe, target.pid, tmpfile, tmpfile)]
 
         misc.run_in_new_terminal(' '.join(cmd))
         return
@@ -223,6 +228,7 @@ def attach(target, execute = None, exe = None, arch = None):
     elif isinstance(target, tuple) and len(target) == 2:
         host, port = target
         pre += 'target remote %s:%d\n' % (host, port)
+
         def findexe():
             # hm no PID then, but wait! we might not be totally out of luck yet: if
             # the gdbserver is running locally and we know the program who is
@@ -246,7 +252,7 @@ def attach(target, execute = None, exe = None, arch = None):
                         loc = line[1]
                         lport = int(loc.split(':')[1], 16)
                         st = int(line[3], 16)
-                        if st != 10: # TCP_LISTEN, see include/net/tcp_states.h
+                        if st != 10:  # TCP_LISTEN, see include/net/tcp_states.h
                             continue
                         if lport == port:
                             inode = int(line[9])
@@ -302,8 +308,8 @@ def attach(target, execute = None, exe = None, arch = None):
     execute = pre + (execute or '')
 
     if execute:
-        tmp = tempfile.NamedTemporaryFile(prefix = 'pwn', suffix = '.gdb',
-                                          mode = 'w+', delete = False)
+        tmp = tempfile.NamedTemporaryFile(prefix='pwn', suffix='.gdb',
+                                          mode='w+', delete=False)
         tmp.write(execute)
         tmp.close()
         atexit.register(lambda: os.unlink(tmp.name))
@@ -314,7 +320,8 @@ def attach(target, execute = None, exe = None, arch = None):
     if pid:
         proc.wait_for_debugger(pid)
 
-def ssh_gdb(ssh, process, execute = None, arch = None, **kwargs):
+
+def ssh_gdb(ssh, process, execute=None, arch=None, **kwargs):
     if isinstance(process, (list, tuple)):
         exe = process[0]
         process = ["gdbserver", "127.0.0.1:0"] + process
@@ -342,6 +349,7 @@ def ssh_gdb(ssh, process, execute = None, arch = None, **kwargs):
     attach(('127.0.0.1', forwardport), execute, local_exe, arch)
     l.wait_for_connection() | ssh.connect_remote('127.0.0.1', gdbport)
     return c
+
 
 def find_module_addresses(binary, ssh=None, ulimit=False):
     """
@@ -389,7 +397,7 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
     Example:
 
     >>> with context.local(log_level=9999): # doctest: +SKIP
-    ...     shell = ssh(host='bandit.labs.overthewire.org',user='bandit0',password='bandit0')
+    ...     shell = ssh(host='bandit.labs.overthewire.org', user='bandit0', password='bandit0')
     ...     bash_libs = gdb.find_module_addresses('/bin/bash', shell)
     >>> os.path.basename(bash_libs[0].path) # doctest: +SKIP
     'libc.so.6'
@@ -400,23 +408,23 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
     # Download all of the remote libraries
     #
     if ssh:
-        runner     = ssh.run
-        local_bin  = ssh.download_file(binary)
-        local_elf  = elf.ELF(os.path.basename(binary))
+        runner = ssh.run
+        local_bin = ssh.download_file(binary)
+        local_elf = elf.ELF(os.path.basename(binary))
         local_libs = ssh.libs(binary)
 
     else:
-        runner     = tubes.process.process
-        local_elf  = elf.ELF(binary)
+        runner = tubes.process.process
+        local_elf = elf.ELF(binary)
         local_libs = local_elf.libs
 
-    entry      = local_elf.header.e_entry
+    entry = local_elf.header.e_entry
 
     #
     # Get the addresses from GDB
     #
     libs = {}
-    cmd  = "gdb --args %s" % (binary)
+    cmd = "gdb --args %s" % (binary)
     expr = re.compile(r'(0x\S+)[^/]+(.*)'.encode('utf8'))
 
     if ulimit:
@@ -438,7 +446,7 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
         for line in lines.splitlines():
             m = expr.match(line)
             if m:
-                libs[m.group(2).decode('utf8')] = int(m.group(1),16)
+                libs[m.group(2).decode('utf8')] = int(m.group(1), 16)
         gdb.sendline('kill')
         gdb.sendline('y')
         gdb.sendline('quit')
@@ -448,19 +456,19 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
     #
     rv = []
 
-    for remote_path,text_address in sorted(libs.items()):
+    for remote_path, text_address in sorted(libs.items()):
         # Match up the local copy to the remote path
         try:
-            path     = next(p for p in local_libs.keys() if remote_path in p)
+            path = next(p for p in local_libs.keys() if remote_path in p)
         except StopIteration:
             print("Skipping %r" % remote_path)
             continue
 
         # Load it
-        lib      = elf.ELF(path)
+        lib = elf.ELF(path)
 
         # Find its text segment
-        text     = lib.get_section_by_name(b'.text')
+        text = lib.get_section_by_name(b'.text')
 
         # Fix the address
         lib.address = text_address - text.header.sh_addr

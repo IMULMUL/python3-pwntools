@@ -26,6 +26,7 @@ def unhex(s):
 """
     return codecs.decode(s, 'hex_codec')
 
+
 def enhex(x):
     """enhex(x) -> str
 
@@ -41,6 +42,7 @@ def enhex(x):
 
     return codecs.encode(x, 'hex_codec').decode('utf8')
 
+
 def urlencode(s):
     """urlencode(s) -> str
 
@@ -55,6 +57,7 @@ def urlencode(s):
         s = s.encode('utf8')
 
     return ''.join(['%%%02x' % c for c in s])
+
 
 def urldecode(s, ignore_invalid=False):
     """urldecode(s, ignore_invalid=False) -> str
@@ -89,6 +92,7 @@ def urldecode(s, ignore_invalid=False):
             else:
                 raise ValueError("Invalid input to urldecode")
     return res
+
 
 def bits(s, endian='big', zero=0, one=1):
     """bits(s, endian='big', zero=0, one=1) -> list
@@ -145,6 +149,7 @@ def bits(s, endian='big', zero=0, one=1):
 
     return out
 
+
 def bits_str(s, endian='big', zero='0', one='1'):
     """bits_str(s, endian='big', zero='0', one='1') -> str
 
@@ -154,10 +159,11 @@ def bits_str(s, endian='big', zero='0', one='1'):
 
        >>> bits_str(511)
        '0000000111111111'
-       >>> bits_str("bits_str", endian = "little")
+       >>> bits_str("bits_str", endian="little")
        '0100011010010110001011101100111011111010110011100010111001001110'
 """
     return ''.join(bits(s, endian, zero, one))
+
 
 def unbits(s, endian='big'):
     """unbits(s, endian='big') -> bytes
@@ -174,9 +180,9 @@ def unbits(s, endian='big'):
     Example:
        >>> unbits([1])
        b'\\x80'
-       >>> unbits([1], endian = 'little')
+       >>> unbits([1], endian='little')
        b'\\x01'
-       >>> unbits(bits('hello'), endian = 'little')
+       >>> unbits(bits('hello'), endian='little')
        b'\\x16\\xa666\\xf6'
     """
     if endian == 'little':
@@ -223,6 +229,7 @@ def bitswap(s):
 
     return b''.join(out)
 
+
 def bitswap_int(n, width):
     """bitswap_int(n) -> int
 
@@ -267,6 +274,7 @@ def b64e(s):
 
     return base64.b64encode(s).decode('utf8')
 
+
 def b64d(s):
     """b64d(s) -> bytes
 
@@ -280,6 +288,8 @@ def b64d(s):
     return base64.b64decode(s)
 
 # misc binary functions
+
+
 def xor(*args, **kwargs):
     """xor(*args, cut='max') -> bytes
 
@@ -331,6 +341,7 @@ def xor(*args, **kwargs):
         return functools.reduce(lambda x, y: x ^ y, [s[n % len(s)] for s in strs])
 
     return bytes([get(n) for n in range(cut)])
+
 
 def xor_pair(data, avoid=b'\x00\n'):
     """xor_pair(data, avoid=b'\\x00\\n') -> None or (bytes, bytes)
@@ -433,9 +444,11 @@ def rol(n, k, word_size=None):
     else:
         raise ValueError("rol(): 'n' must be an integer, string, list or tuple")
 
+
 def ror(n, k, word_size=None):
     """A simple wrapper around :func:`rol`, which negates the values of `k`."""
     return rol(n, -k, word_size)
+
 
 def naf(n):
     """naf(int) -> int generator
@@ -463,6 +476,7 @@ def naf(n):
         n = (n - z) // 2
         yield z
 
+
 def isprint(c):
     """isprint(c) -> bool
 
@@ -475,6 +489,7 @@ def isprint(c):
         return c in map(ord, chars)
     else:
         return c in chars
+
 
 def hexii(s, width=16, skip=True):
     """hexii(s, width=16, skip=True) -> str
@@ -491,6 +506,7 @@ def hexii(s, width=16, skip=True):
 """
     return hexdump(s, width, skip, True)
 
+
 def _hexiichar(c):
     HEXII = string.punctuation + string.digits + string.ascii_letters
     if c in map(ord, HEXII):
@@ -503,12 +519,13 @@ def _hexiichar(c):
         return "%02x " % c
 
 default_style = {
-    'marker'      : text.gray if text.has_gray else text.blue,
+    'marker': text.gray if text.has_gray else text.blue,
     'nonprintable': text.gray if text.has_gray else text.blue,
-    'highlight'   : text.white_on_red,
-    '00'          : text.red,
-    'ff'          : text.green,
+    'highlight': text.white_on_red,
+    '00': text.red,
+    'ff': text.green,
 }
+
 
 def hexdump_iter(fd, width=16, skip=True, hexii=False, begin=0,
                  style={}, highlight=[]):
@@ -537,25 +554,27 @@ def hexdump_iter(fd, width=16, skip=True, hexii=False, begin=0,
       A generator producing the hexdump-dump one line at a time.
 
     """
-    style     = style or {}
+    style = style or {}
     highlight = highlight or []
 
     _style = style
     style = default_style.copy()
     style.update(_style)
 
-    skipping    = False
-    lines       = []
+    skipping = False
+    lines = []
     last_unique = ''
-    byte_width  = len('00 ')
-    column_sep  = '  '
-    line_fmt    = '%%(offset)08x  %%(hexbytes)-%is │%%(printable)s│' % (len(column_sep) + (width*byte_width))
-    spacer      = ' '
-    marker      = (style.get('marker') or (lambda s: s))('│')
+    byte_width = len('00 ')
+    column_sep = '  '
+    line_fmt = '%%(offset)08x  %%(hexbytes)-%is │%%(printable)s│' % (len(column_sep) +
+                                                                     (width * byte_width))
+    spacer = ' '
+    marker = (style.get('marker') or (lambda s: s))('│')
 
     if hexii:
         column_sep = ''
-        line_fmt   = '%%(offset)08x  %%(hexbytes)-%is│' % (len(column_sep) + (width*byte_width))
+        line_fmt = '%%(offset)08x  %%(hexbytes)-%is│' % (len(column_sep) +
+                                                         (width * byte_width))
     else:
         def style_byte(b):
             hbyte = '%02x' % b
@@ -570,6 +589,7 @@ def hexdump_iter(fd, width=16, skip=True, hexii=False, begin=0,
                 hbyte = st(hbyte)
                 abyte = st(abyte)
             return hbyte, abyte
+
         def hl_byte(b):
             hbyte = '%02x' % b
             abyte = chr(b) if isprint(b) else '·'
@@ -597,6 +617,7 @@ def hexdump_iter(fd, width=16, skip=True, hexii=False, begin=0,
             return out
         highlight = list(map(canon, highlight))
         lookahead = max(map(len, highlight)) - 1
+
         def match(needle, haystack):
             for a, b in zip(needle, haystack):
                 if a is None:
@@ -677,6 +698,7 @@ def hexdump_iter(fd, width=16, skip=True, hexii=False, begin=0,
 
     line = "%08x" % offset
     yield line
+
 
 def hexdump(s, width=16, skip=True, hexii=False, begin=0,
             style={}, highlight=[]):

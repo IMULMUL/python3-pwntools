@@ -104,7 +104,9 @@ def which_binutils(util, **kwargs):
                 if context.arch in arches:
                     arches.append(None)
         except AttributeError:
-            log.warn_once("Your local binutils won't be used because architecture %r is not supported." % machine)
+            log.warn_once(
+                "Your local binutils won't be used because architecture %r is not supported." %
+                machine)
 
         for arch in arches:
             # hack for homebrew-installed binutils on mac
@@ -131,6 +133,7 @@ Try installing binutils for this architecture:
         raise Exception('Could not find %(util)r installed for %(context)s' % locals())
 
 checked_assembler_version = defaultdict(lambda: False)
+
 
 def _assembler():
     gas = which_binutils('as')
@@ -171,9 +174,11 @@ def _assembler():
                                          stderr=subprocess.STDOUT)
         version = re.search(r' (\d\.\d+)'.encode('utf8'), result).group(1)
         if version < b'2.19':
-            log.warn_once('Your binutils version is too old and may not work!\n'  + \
-                'Try updating with: https://pwntools.readthedocs.org/en/latest/install/binutils.html\n' + \
-                'Reported Version: %r' % result.strip())
+            log.warn_once(
+                'Your binutils version is too old and may not work!\n' +
+                'Try updating with: https://pwntools.readthedocs.org/en/latest/install/binutils.html\n' +
+                'Reported Version: %r' %
+                result.strip())
 
     return assembler
 
@@ -217,7 +222,7 @@ def _include_header():
         include = 'linux/%s.h' % arch
 
     if not include or not path.exists(path.join(_incdir, include)):
-        log.warn_once("Could not find system include headers for %s-%s" % (arch,os))
+        log.warn_once("Could not find system include headers for %s-%s" % (arch, os))
         return '\n'
 
     return '#include <%s>\n' % include

@@ -16,12 +16,13 @@ In no particular order the docstrings for each example:
 
 '''
 
+
 def append_example(_arg, top, names):
     global out
     for name in names:
         if not (name.endswith('.py') and name != __file__):
             continue
-        path = os.path.join(top, name)[2:] # strip './'
+        path = os.path.join(top, name)[2:]  # strip './'
         log.info('-> %s' % path)
         data = read(path).strip()
         if data[0:3] not in ('"""', "'''"):

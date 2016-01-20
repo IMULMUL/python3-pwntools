@@ -41,6 +41,7 @@ class _defaultdict(dict):
         ...
         KeyError: 'baz'
     """
+
     def __init__(self, default=None):
         super(_defaultdict, self).__init__()
         if default is None:
@@ -48,9 +49,9 @@ class _defaultdict(dict):
 
         self.default = default
 
-
     def __missing__(self, key):
         return self.default[key]
+
 
 class _DictStack:
     """
@@ -76,9 +77,10 @@ class _DictStack:
         >>> t
         {'key': 'value'}
     """
+
     def __init__(self, default):
         self._current = _defaultdict(default)
-        self.__stack  = []
+        self.__stack = []
 
     def push(self):
         self.__stack.append(self._current.copy())
@@ -91,19 +93,28 @@ class _DictStack:
         return self._current.copy()
 
     # Pass-through container emulation routines
-    def __len__(self):              return self._current.__len__()
-    def __delitem__(self, k):       return self._current.__delitem__(k)
-    def __getitem__(self, k):       return self._current.__getitem__(k)
-    def __setitem__(self, k, v):    return self._current.__setitem__(k, v)
-    def __contains__(self, k):      return self._current.__contains__(k)
-    def __iter__(self):             return self._current.__iter__()
-    def __repr__(self):             return self._current.__repr__()
-    def __eq__(self, other):        return self._current.__eq__(other)
+    def __len__(self): return self._current.__len__()
+
+    def __delitem__(self, k): return self._current.__delitem__(k)
+
+    def __getitem__(self, k): return self._current.__getitem__(k)
+
+    def __setitem__(self, k, v): return self._current.__setitem__(k, v)
+
+    def __contains__(self, k): return self._current.__contains__(k)
+
+    def __iter__(self): return self._current.__iter__()
+
+    def __repr__(self): return self._current.__repr__()
+
+    def __eq__(self, other): return self._current.__eq__(other)
 
     # Required for keyword expansion operator ** to work
-    def keys(self):                 return self._current.keys()
-    def values(self):               return self._current.values()
-    def items(self):                return self._current.items()
+    def keys(self): return self._current.keys()
+
+    def values(self): return self._current.values()
+
+    def items(self): return self._current.items()
 
 
 class _Tls_DictStack(threading.local, _DictStack):
@@ -134,7 +145,7 @@ def _validator(validator):
     """
 
     name = validator.__name__
-    doc  = validator.__doc__
+    doc = validator.__doc__
 
     def fget(self):
         return self._tls[name]
@@ -143,9 +154,10 @@ def _validator(validator):
         self._tls[name] = validator(self, val)
 
     def fdel(self):
-        self._tls._current.pop(name,None)
+        self._tls._current.pop(name, None)
 
     return property(fget, fset, fdel, doc)
+
 
 class Thread(threading.Thread):
     """
@@ -202,6 +214,7 @@ class Thread(threading.Thread):
         ``target=`` for ``__init__``, or that all subclasses invoke
         ``super(Subclass.self).set_up_context()`` or similar.
     """
+
     def __init__(self, *args, **kwargs):
         super(Thread, self).__init__(*args, **kwargs)
         self.old = context.copy()
@@ -215,6 +228,7 @@ class Thread(threading.Thread):
         """
         context.update(**self.old)
         super(Thread, self)._bootstrap()
+
 
 def _longest(d):
     """
@@ -234,9 +248,12 @@ def _longest(d):
     """
     return collections.OrderedDict((k, d[k]) for k in sorted(d, key=len, reverse=True))
 
+
 class TlsProperty:
+
     def __get__(self, obj, objtype=None):
         return obj._tls
+
 
 class ContextType:
     r"""
@@ -320,9 +337,9 @@ class ContextType:
     #: Valid values for :meth:`pwnlib.context.ContextType.os`
     oses = sorted(('linux', 'freebsd', 'windows'))
 
-    big_32    = {'endian': 'big', 'bits': 32}
-    big_64    = {'endian': 'big', 'bits': 64}
-    little_8  = {'endian': 'little', 'bits': 8}
+    big_32 = {'endian': 'big', 'bits': 32}
+    big_64 = {'endian': 'big', 'bits': 64}
+    little_8 = {'endian': 'little', 'bits': 8}
     little_16 = {'endian': 'little', 'bits': 16}
     little_32 = {'endian': 'little', 'bits': 32}
     little_64 = {'endian': 'little', 'bits': 64}
@@ -332,43 +349,43 @@ class ContextType:
     #: Values are defaults which are set when
     #: :attr:`pwnlib.context.ContextType.arch` is set
     architectures = _longest({
-        'aarch64':   little_64,
-        'alpha':     little_64,
-        'avr':       little_8,
-        'amd64':     little_64,
-        'arm':       little_32,
-        'cris':      little_32,
-        'i386':      little_32,
-        'ia64':      big_64,
-        'm68k':      big_32,
-        'mips':      little_32,
-        'mips64':    little_64,
-        'msp430':    little_16,
-        'powerpc':   big_32,
+        'aarch64': little_64,
+        'alpha': little_64,
+        'avr': little_8,
+        'amd64': little_64,
+        'arm': little_32,
+        'cris': little_32,
+        'i386': little_32,
+        'ia64': big_64,
+        'm68k': big_32,
+        'mips': little_32,
+        'mips64': little_64,
+        'msp430': little_16,
+        'powerpc': big_32,
         'powerpc64': big_64,
-        's390':      big_32,
-        'sparc':     big_32,
-        'sparc64':   big_64,
-        'thumb':     little_32,
-        'vax':       little_32,
+        's390': big_32,
+        'sparc': big_32,
+        'sparc64': big_64,
+        'thumb': little_32,
+        'vax': little_32,
     })
 
     #: Valid values for :attr:`endian`
     endiannesses = _longest({
-        'be':     'big',
-        'eb':     'big',
-        'big':    'big',
-        'le':     'little',
-        'el':     'little',
+        'be': 'big',
+        'eb': 'big',
+        'big': 'big',
+        'le': 'little',
+        'el': 'little',
         'little': 'little'
     })
 
     #: Valid string values for :attr:`signed`
     signednesses = {
         'unsigned': False,
-        'no':       False,
-        'yes':      True,
-        'signed':   True
+        'no': False,
+        'yes': True,
+        'signed': True
     }
 
     valid_signed = sorted(signednesses)
@@ -382,7 +399,6 @@ class ContextType:
         self._tls = _Tls_DictStack(_defaultdict(ContextType.defaults))
         self.update(**kwargs)
 
-
     def copy(self):
         """copy() -> dict
         Returns a copy of the current context as a dictionary.
@@ -390,12 +406,11 @@ class ContextType:
         Examples:
 
             >>> context.clear()
-            >>> context.os   = 'linux'
+            >>> context.os = 'linux'
             >>> vars(context) == {'os': 'linux'}
             True
         """
         return self._tls.copy()
-
 
     @property
     def __dict__(self):
@@ -426,7 +441,7 @@ class ContextType:
         Examples:
 
             >>> context.clear()
-            >>> context.update(arch = 'i386', os = 'linux')
+            >>> context.update(arch='i386', os='linux')
             >>> context.arch, context.os
             ('i386', 'linux')
         """
@@ -461,7 +476,7 @@ class ContextType:
             True
             >>> print(context.timeout)
             1.0
-            >>> with context.local(timeout = 2):
+            >>> with context.local(timeout=2):
             ...     print(context.timeout)
             ...     context.timeout = 3
             ...     print(context.timeout)
@@ -471,6 +486,7 @@ class ContextType:
             1.0
         """
         class LocalContext:
+
             def __enter__(a):
                 self._tls.push()
                 self.update(**{k: v for k, v in kwargs.items() if v is not None})
@@ -580,7 +596,8 @@ class ContextType:
         try:
             defaults = ContextType.architectures[arch]
         except KeyError:
-            raise AttributeError('AttributeError: arch must be one of %r' % sorted(ContextType.architectures))
+            raise AttributeError('AttributeError: arch must be one of %r' %
+                                 sorted(ContextType.architectures))
 
         for k, v in ContextType.architectures[arch].items():
             if k not in self._tls:
@@ -637,8 +654,8 @@ class ContextType:
 
         e = ELF(binary)
 
-        self.arch   = e.arch
-        self.bits   = e.bits
+        self.arch = e.arch
+        self.bits = e.bits
         self.endian = e.endian
 
         return e
@@ -666,7 +683,6 @@ class ContextType:
     @bytes.setter
     def bytes(self, value):
         self.bits = value * 8
-
 
     @_validator
     def endian(self, endianness):
@@ -700,10 +716,10 @@ class ContextType:
         endian = endianness.lower()
 
         if endian not in ContextType.endiannesses:
-            raise AttributeError("endian must be one of %r" % sorted(ContextType.endiannesses))
+            raise AttributeError("endian must be one of %r" %
+                                 sorted(ContextType.endiannesses))
 
         return ContextType.endiannesses[endian]
-
 
     @_validator
     def log_level(self, value):
@@ -769,8 +785,6 @@ class ContextType:
 
         return os
 
-
-
     @_validator
     def signed(self, signed):
         """
@@ -804,7 +818,8 @@ class ContextType:
             pass
 
         if isinstance(signed, str):
-            raise AttributeError('signed must be one of %r or a non-string truthy value' % sorted(ContextType.signednesses))
+            raise AttributeError('signed must be one of %r or a non-string truthy value' %
+                                 sorted(ContextType.signednesses))
 
         return bool(signed)
 
@@ -869,7 +884,6 @@ class ContextType:
     def endianness(self, value):
         self.endian = value
 
-
     @property
     def sign(self):
         """
@@ -891,7 +905,6 @@ class ContextType:
     @signedness.setter
     def signedness(self, value):
         self.signed = value
-
 
     @property
     def word_size(self):

@@ -101,8 +101,12 @@ added, to do this in an easy way.
 """
 
 __all__ = [
-    'getLogger', 'getPerformanceLogger', 'install_default_handler', 'rootlogger', 'console', 'ConsoleHandler'
-]
+    'getLogger',
+    'getPerformanceLogger',
+    'install_default_handler',
+    'rootlogger',
+    'console',
+    'ConsoleHandler']
 
 import logging
 import random
@@ -121,22 +125,23 @@ from .term import text
 # list of prefixes to use for the different message types.  note that the `text`
 # module won't add any escape codes if `sys.stderr.isatty()` is `False`
 _msgtype_prefixes = {
-    'status'       : (text.magenta, 'x'),
-    'success'      : (text.bold_green, '+'),
-    'failure'      : (text.bold_red, '-'),
-    'debug'        : (text.bold_red, 'DEBUG'),
-    'info'         : (text.bold_blue, '*'),
-    'warning'      : (text.bold_yellow, '!'),
-    'error'        : (text.on_red, 'ERROR'),
-    'exception'    : (text.on_red, 'ERROR'),
-    'critical'     : (text.on_red, 'CRITICAL'),
-    'info_once'    : (text.bold_blue, '*'),
-    'warning_once' : (text.bold_yellow, '!'),
-    }
+    'status': (text.magenta, 'x'),
+    'success': (text.bold_green, '+'),
+    'failure': (text.bold_red, '-'),
+    'debug': (text.bold_red, 'DEBUG'),
+    'info': (text.bold_blue, '*'),
+    'warning': (text.bold_yellow, '!'),
+    'error': (text.on_red, 'ERROR'),
+    'exception': (text.on_red, 'ERROR'),
+    'critical': (text.on_red, 'CRITICAL'),
+    'info_once': (text.bold_blue, '*'),
+    'warning_once': (text.bold_yellow, '!'),
+}
 
 # the text decoration to use for spinners.  the spinners themselves can be found
 # in the `pwnlib.term.spinners` module
 _spinner_style = text.bold_blue
+
 
 class Progress:
     """
@@ -149,6 +154,7 @@ class Progress:
     This class is intended for internal use.  Progress loggers should be created
     using :meth:`Logger.progress`.
     """
+
     def __init__(self, logger, msg, status, level, args, kwargs):
         global _progressid
         self._logger = logger
@@ -187,7 +193,7 @@ class Progress:
             self.last_status = now
             self._log(status, args, kwargs, 'status')
 
-    def success(self, status = 'Done', *args, **kwargs):
+    def success(self, status='Done', *args, **kwargs):
         """success(status = 'Done', *args, **kwargs)
 
         Logs that the running job succeeded.  No further status updates are
@@ -198,7 +204,7 @@ class Progress:
         self._log(status, args, kwargs, 'success')
         self._stopped = True
 
-    def failure(self, status = 'Failed', *args, **kwargs):
+    def failure(self, status='Failed', *args, **kwargs):
         """failure(message)
 
         Logs that the running job failed.  No further status updates are
@@ -218,6 +224,7 @@ class Progress:
             self.success()
         else:
             self.failure()
+
 
 class Logger:
     """
@@ -239,7 +246,7 @@ class Logger:
 
     Loggers instantiated with :func:`getLogger` will be of this class.
     """
-    _one_time_infos    = set()
+    _one_time_infos = set()
     _one_time_warnings = set()
 
     def __init__(self, logger):
@@ -434,6 +441,7 @@ class Logger:
         self._logger.addHandler(handler)
         return handler
 
+
 class ConsoleHandler(logging.StreamHandler):
     """
     A custom handler class.  This class will by default use whatever
@@ -449,6 +457,7 @@ class ConsoleHandler(logging.StreamHandler):
 
     This handler outputs to ``sys.stderr``.
     """
+
     def __init__(self, log_level='context'):
         super(ConsoleHandler, self).__init__()
         self.level = log_level
@@ -502,6 +511,7 @@ class ConsoleHandler(logging.StreamHandler):
             spinner_handle = term.output('')
             msg_handle = term.output(msg)
             stop = threading.Event()
+
             def spin():
                 '''Wheeeee!'''
                 state = 0
@@ -531,6 +541,7 @@ class ConsoleHandler(logging.StreamHandler):
             prefix = '[%s] ' % style(symb)
             progress._spinner_handle.update(prefix)
 
+
 class Formatter(logging.Formatter):
     """
     Logging formatter which performs custom formatting for log records
@@ -549,10 +560,10 @@ class Formatter(logging.Formatter):
 
     # Indentation from the left side of the terminal.
     # All log messages will be indented at list this far.
-    indent    = '    '
+    indent = '    '
 
     # Newline, followed by an indent.  Used to wrap multiple lines.
-    nlindent  = '\n' + indent
+    nlindent = '\n' + indent
 
     def format(self, record):
         # use the default formatter to actually format the record
@@ -587,6 +598,8 @@ class Formatter(logging.Formatter):
 # we keep a dictionary of loggers such that multiple calls to `getLogger` with
 # the same name will return the same logger
 _loggers = dict()
+
+
 def getLogger(name):
     '''getLogger(name) -> Logger
 
@@ -602,6 +615,7 @@ def getLogger(name):
         _loggers[name] = Logger(logging.getLogger(name))
     return _loggers[name]
 
+
 def getPerformanceLogger(name):
     '''getPerformanceLogger(name) -> Logger
 
@@ -612,6 +626,7 @@ def getPerformanceLogger(name):
     logger = getLogger(name)
     if not getattr(logger, "_pwnlib_initialized", False):
         class LogWrapper(logger._logger.__class__):
+
             @property
             def level(self):
                 if self._level == 'context':
@@ -628,6 +643,7 @@ def getPerformanceLogger(name):
         logger._logger._level = 'context'
         logger._pwnlib_initialized = True
     return logger
+
 
 def checkLevel(value):
     '''checkLevel(value) -> int
@@ -675,7 +691,8 @@ def checkLevel(value):
 #
 
 rootlogger = getLogger('pwnlib')
-console    = ConsoleHandler()
+console = ConsoleHandler()
+
 
 def install_default_handler():
     '''install_default_handler()
@@ -685,6 +702,6 @@ def install_default_handler():
     importing :mod:`pwn`.
     '''
     console.stream = sys.stderr
-    logger         = logging.getLogger('pwnlib')
+    logger = logging.getLogger('pwnlib')
     if console not in logger.handlers:
         logger.addHandler(console)

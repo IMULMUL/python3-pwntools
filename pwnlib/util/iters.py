@@ -3,51 +3,51 @@ This module includes and extends the standard module :mod:`itertools`.
 """
 
 __all__ = [
-    'bruteforce'                             ,
-    'mbruteforce'                            ,
-    'chained'                                ,
-    'consume'                                ,
-    'cyclen'                                 ,
-    'dotproduct'                             ,
-    'exp'                                    ,
-    'flatten'                                ,
-    'group'                                  ,
-    'iter_except'                            ,
-    'lexicographic'                          ,
-    'lookahead'                              ,
-    'nth'                                    ,
-    'pad'                                    ,
-    'pairwise'                               ,
-    'powerset'                               ,
-    'quantify'                               ,
-    'random_combination'                     ,
-    'random_combination_with_replacement'    ,
-    'random_permutation'                     ,
-    'random_product'                         ,
-    'repeat_func'                            ,
-    'roundrobin'                             ,
-    'tabulate'                               ,
-    'take'                                   ,
-    'unique_everseen'                        ,
-    'unique_justseen'                        ,
-    'unique_window'                          ,
+    'bruteforce',
+    'mbruteforce',
+    'chained',
+    'consume',
+    'cyclen',
+    'dotproduct',
+    'exp',
+    'flatten',
+    'group',
+    'iter_except',
+    'lexicographic',
+    'lookahead',
+    'nth',
+    'pad',
+    'pairwise',
+    'powerset',
+    'quantify',
+    'random_combination',
+    'random_combination_with_replacement',
+    'random_permutation',
+    'random_product',
+    'repeat_func',
+    'roundrobin',
+    'tabulate',
+    'take',
+    'unique_everseen',
+    'unique_justseen',
+    'unique_window',
     # these are re-exported from itertools
-    'chain'                                  ,
-    'combinations'                           ,
-    'combinations_with_replacement'          ,
-    'compress'                               ,
-    'count'                                  ,
-    'cycle'                                  ,
-    'dropwhile'                              ,
-    'groupby'                                ,
-    'filterfalse'                           ,
-    'islice'                                 ,
-    'zip_longest'                           ,
-    'permutations'                           ,
-    'product'                                ,
-    'repeat'                                 ,
-    'starmap'                                ,
-    'takewhile'                              ,
+    'chain',
+    'combinations',
+    'combinations_with_replacement',
+    'compress',
+    'count',
+    'cycle',
+    'dropwhile',
+    'groupby',
+    'filterfalse',
+    'islice',
+    'zip_longest',
+    'permutations',
+    'product',
+    'repeat',
+    'starmap',
+    'takewhile',
     'tee'
 ]
 
@@ -63,6 +63,7 @@ from ..context import *
 from ..log import getLogger
 
 log = getLogger(__name__)
+
 
 def take(n, iterable):
     """take(n, iterable) -> list
@@ -91,8 +92,9 @@ def take(n, iterable):
     """
     return list(islice(iterable, n))
 
+
 def tabulate(func, start=0):
-    """tabulate(func, start = 0) -> iterator
+    """tabulate(func, start=0) -> iterator
 
     Arguments:
       func(function):  The function to tabulate over.
@@ -108,6 +110,7 @@ def tabulate(func, start=0):
       [1, 4, 9, 16, 25]
     """
     return map(func, count(start))
+
 
 def consume(n, iterator):
     """consume(n, iterator)
@@ -140,6 +143,7 @@ def consume(n, iterator):
         # advance to the empty slice starting at position n
         next(islice(iterator, n, n), None)
 
+
 def nth(n, iterable, default=None):
     """nth(n, iterable, default=None) -> object
 
@@ -168,6 +172,7 @@ def nth(n, iterable, default=None):
     """
     return next(islice(iterable, n, None), default)
 
+
 def quantify(iterable, pred=bool):
     """quantify(iterable, pred=bool) -> int
 
@@ -189,6 +194,7 @@ def quantify(iterable, pred=bool):
       3
     """
     return sum(map(pred, iterable))
+
 
 def pad(iterable, value=None):
     """pad(iterable, value=None) -> iterator
@@ -217,6 +223,7 @@ def pad(iterable, value=None):
     """
     return chain(iterable, repeat(value))
 
+
 def cyclen(n, iterable):
     """cyclen(n, iterable) -> iterator
 
@@ -238,6 +245,7 @@ def cyclen(n, iterable):
     """
     return chain.from_iterable(repeat(tuple(iterable), n))
 
+
 def dotproduct(x, y):
     """dotproduct(x, y) -> int
 
@@ -256,6 +264,7 @@ def dotproduct(x, y):
       32
     """
     return sum(map(operator.mul, x, y))
+
 
 def flatten(xss):
     """flatten(xss) -> iterator
@@ -278,6 +287,7 @@ def flatten(xss):
       [43, 42, 41, 40, 0, 1]
     """
     return chain.from_iterable(xss)
+
 
 def repeat_func(func, *args, **kwargs):
     """repeat_func(func, *args, **kwargs) -> iterator
@@ -307,7 +317,7 @@ def repeat_func(func, *args, **kwargs):
       [3, 4]
       >>> def f(**kwargs):
       ...     return kwargs.get('x', 43)
-      >>> i = repeat_func(f, x = 42)
+      >>> i = repeat_func(f, x=42)
       >>> take(2, i)
       [42, 42]
       >>> i = repeat_func(f, 42)
@@ -322,6 +332,7 @@ def repeat_func(func, *args, **kwargs):
                        )
     else:
         return starmap(func, repeat(args))
+
 
 def pairwise(iterable):
     """pairwise(iterable) -> iterator
@@ -343,6 +354,7 @@ def pairwise(iterable):
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
+
 
 def group(n, iterable, fill_value=None):
     """group(n, iterable, fill_value=None) -> iterator
@@ -369,6 +381,7 @@ def group(n, iterable, fill_value=None):
     """
     args = [iter(iterable)] * n
     return zip_longest(fillvalue=fill_value, *args)
+
 
 def roundrobin(*iterables):
     """roundrobin(*iterables)
@@ -399,6 +412,7 @@ def roundrobin(*iterables):
             pending -= 1
             nexts = cycle(islice(nexts, pending))
 
+
 def powerset(iterable, include_empty=True):
     """powerset(iterable, include_empty=True) -> iterator
 
@@ -422,6 +436,7 @@ def powerset(iterable, include_empty=True):
     if not include_empty:
         next(i)
     return i
+
 
 def unique_everseen(iterable, key=None):
     """unique_everseen(iterable, key=None) -> iterator
@@ -458,6 +473,7 @@ def unique_everseen(iterable, key=None):
                 seen_add(k)
                 yield element
 
+
 def unique_justseen(iterable, key=None):
     """unique_everseen(iterable, key=None) -> iterator
 
@@ -481,6 +497,7 @@ def unique_justseen(iterable, key=None):
       'ABCAD'
     """
     return map(next, map(operator.itemgetter(1), groupby(iterable, key)))
+
 
 def unique_window(iterable, window, key=None):
     """unique_everseen(iterable, window, key=None) -> iterator
@@ -521,6 +538,7 @@ def unique_window(iterable, window, key=None):
                 yield element
             seen_add(k)
 
+
 def iter_except(func, exception):
     """iter_except(func, exception)
 
@@ -557,31 +575,34 @@ def iter_except(func, exception):
     except exception:
         pass
 
+
 def random_product(*args, **kwargs):
-    """random_product(*args, repeat = 1) -> tuple
+    """random_product(*args, repeat=1) -> tuple
 
     Arguments:
       args:  One or more iterables
       repeat(int):  Number of times to repeat `args`.
 
     Returns:
-      A random element from ``itertools.product(*args, repeat = repeat)``.
+      A random element from ``itertools.product(*args, repeat=repeat)``.
 
     Examples:
       >>> args = (range(2), range(2))
       >>> random_product(*args) in {(0, 0), (0, 1), (1, 0), (1, 1)}
       True
       >>> args = (range(3), range(3), range(3))
-      >>> random_product(*args, repeat = 2) in product(*args, repeat = 2)
+      >>> random_product(*args, repeat=2) in product(*args, repeat=2)
       True
     """
     repeat = kwargs.pop('repeat', 1)
 
     if kwargs != {}:
-        raise TypeError('random_product() does not support argument %s' % kwargs.popitem())
+        raise TypeError('random_product() does not support argument %s' %
+                        kwargs.popitem())
 
     pools = list(map(tuple, args)) * repeat
     return tuple(random.choice(pool) for pool in pools)
+
 
 def random_permutation(iterable, r=None):
     """random_product(iterable, r=None) -> tuple
@@ -604,6 +625,7 @@ def random_permutation(iterable, r=None):
     r = len(pool) if r is None else r
     return tuple(random.sample(pool, r))
 
+
 def random_combination(iterable, r):
     """random_combination(iterable, r) -> tuple
 
@@ -617,13 +639,14 @@ def random_combination(iterable, r):
     Examples:
       >>> random_combination(range(2), 2)
       (0, 1)
-      >>> random_combination(range(10), r = 2) in combinations(range(10), r = 2)
+      >>> random_combination(range(10), r=2) in combinations(range(10), r=2)
       True
     """
     pool = tuple(iterable)
     n = len(pool)
     indices = sorted(random.sample(range(n), r))
     return tuple(pool[i] for i in indices)
+
 
 def random_combination_with_replacement(iterable, r):
     """random_combination(iterable, r) -> tuple
@@ -634,20 +657,21 @@ def random_combination_with_replacement(iterable, r):
 
     Returns:
       A random element from ``itertools.combinations_with_replacement(iterable,
-      r = r)``.
+      r=r)``.
 
     Examples:
       >>> cs = {(0, 0), (0, 1), (1, 1)}
       >>> random_combination_with_replacement(range(2), 2) in cs
       True
-      >>> i = combinations_with_replacement(range(10), r = 2)
-      >>> random_combination_with_replacement(range(10), r = 2) in i
+      >>> i = combinations_with_replacement(range(10), r=2)
+      >>> random_combination_with_replacement(range(10), r=2) in i
       True
     """
     pool = tuple(iterable)
     n = len(pool)
     indices = sorted(random.randrange(n) for i in range(r))
     return tuple(pool[i] for i in indices)
+
 
 def lookahead(n, iterable):
     """lookahead(n, iterable) -> object
@@ -680,6 +704,7 @@ def lookahead(n, iterable):
         return value
     raise IndexError(n)
 
+
 def lexicographic(alphabet):
     """lexicographic(alphabet) -> iterator
 
@@ -700,6 +725,7 @@ def lexicographic(alphabet):
     for n in count():
         for e in product(alphabet, repeat=n):
             yield e
+
 
 def chained(func):
     """chained(func)
@@ -727,6 +753,7 @@ def chained(func):
                 yield x
     return wrapper
 
+
 def exp(s, n):
     """exp(s, n)
 
@@ -744,10 +771,10 @@ def exp(s, n):
       >>> list(exp((0, 1), 3))
       [(0, 0, 0), (0, 0, 1), (0, 1, 0), (0, 1, 1), (1, 0, 0), (1, 0, 1), (1, 1, 0), (1, 1, 1)]
     """
-    return product(*[s]*n)
+    return product(*[s] * n)
+
 
 def bruteforce(func, alphabet, length, method='upto', start=None, databag=None):
-
     """bruteforce(func, alphabet, length, method='upto', start=None)
 
     Bruteforce `func` to return :const:`True`.  `func` should take a string
@@ -773,7 +800,7 @@ def bruteforce(func, alphabet, length, method='upto', start=None, databag=None):
       if the search space was exhausted.
 
     Example:
-      >>> bruteforce(lambda x: x == 'hello', string.ascii_lowercase, length = 10)
+      >>> bruteforce(lambda x: x == 'hello', string.ascii_lowercase, length=10)
       'hello'
       >>> bruteforce(lambda x: x == 'hello', 'hllo', 5) is None
       True
@@ -860,7 +887,8 @@ def mbruteforce(func, alphabet, length, method='upto', start=None, threads=None)
     def bruteforcewrap(func, alphabet, length, method, start, databag):
         oldloglevel = context.log_level
         context.log_level = 'critical'
-        res = bruteforce(func, alphabet, length, method=method, start=start, databag=databag)
+        res = bruteforce(func, alphabet, length, method=method,
+                         start=start, databag=databag)
         context.log_level = oldloglevel
         databag["result"] = res
 
@@ -890,8 +918,9 @@ def mbruteforce(func, alphabet, length, method='upto', start=None, threads=None)
         chunkid = (i2 - 1) + (i * N2) + 1
 
         processes[i] = multiprocessing.Process(target=bruteforcewrap,
-                args=(func, alphabet, length, method, (chunkid, totalchunks),
-                        shareddata[i]))
+                                               args=(func, alphabet, length, method,
+                                                     (chunkid, totalchunks),
+                                                     shareddata[i]))
         processes[i].start()
 
     done = False
@@ -899,7 +928,7 @@ def mbruteforce(func, alphabet, length, method='upto', start=None, threads=None)
     while not done:
         # log status
         current_item_list = ",".join(["\"%s\"" % x["current_item"]
-                                for x in shareddata if x is not None])
+                                      for x in shareddata if x is not None])
         items_done = sum([x["items_done"] for x in shareddata if x is not None])
         items_total = sum([x["items_total"] for x in shareddata if x is not None])
 
@@ -918,7 +947,7 @@ def mbruteforce(func, alphabet, length, method='upto', start=None, threads=None)
                 # if successful, kill all other threads and return success
                 if res is not None:
                     for i in range(threads):
-                        if processes[i] != None:
+                        if processes[i] is not None:
                             processes[i].terminate()
                             processes[i].join()
                             processes[i] = None

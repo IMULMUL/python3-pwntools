@@ -11,7 +11,9 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os, subprocess
+import sys
+import os
+import subprocess
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -64,8 +66,8 @@ source_encoding = 'utf-8-sig'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pwntools'
-copyright = u'2014, Gallopsled et al'
+project = 'pwntools'
+copyright = '2014, Gallopsled et al'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -194,25 +196,27 @@ htmlhelp_basename = 'pwntoolsdoc'
 # -- Options for LaTeX output --------------------------------------------------
 
 latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+    # The paper size ('letterpaper' or 'a4paper').
+    #'papersize': 'letterpaper',
 
-# The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+    # The font size ('10pt', '11pt' or '12pt').
+    #'pointsize': '10pt',
 
-# Additional stuff for the LaTeX preamble.
-#'preamble': '',
+    # Additional stuff for the LaTeX preamble.
+    #'preamble': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'pwntools.tex', u'pwntools Documentation',
-   u'Gallopsled et al', 'manual'),
+    ('index', 'pwntools.tex', 'pwntools Documentation',
+     'Gallopsled et al', 'manual'),
 ]
 
-intersphinx_mapping = {'python': ('https://docs.python.org/2.7', None),
-                       'paramiko': ('https://paramiko-docs.readthedocs.org/en/1.15/', None)}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/2.7', None),
+    'paramiko': ('https://paramiko-docs.readthedocs.org/en/1.15/', None)
+}
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -254,9 +258,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'pwntools', 'pwntools Documentation',
-   'Gallopsled et al', 'pwntools', 'One line description of project.',
-   'Miscellaneous'),
+    ('index', 'pwntools', 'pwntools Documentation',
+     'Gallopsled et al', 'pwntools', 'One line description of project.',
+     'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -271,15 +275,17 @@ texinfo_documents = [
 branch = release
 
 try:
-    git_branch = subprocess.check_output('git describe --tags', shell = True).decode('utf8')
+    git_branch = subprocess.check_output('git describe --tags', shell=True).decode('utf8')
 except subprocess.CalledProcessError:
     git_branch = '-'
 
 try:
     if '-' in git_branch:
-        branch = subprocess.check_output('git rev-parse HEAD', shell = True).decode('utf8').strip()[:10]
+        branch = subprocess.check_output('git rev-parse HEAD',
+                                         shell=True).decode('utf8').strip()[:10]
 except subprocess.CalledProcessError:
     pass
+
 
 def linkcode_resolve(domain, info):
     if domain != 'py':
@@ -287,14 +293,16 @@ def linkcode_resolve(domain, info):
     if not info['module']:
         return None
 
-    import importlib, inspect, types
+    import importlib
+    import inspect
+    import types
     mod = importlib.import_module(info['module'])
 
     # Try to find the value
     val = mod
     for k in info['fullname'].split('.'):
         val = getattr(val, k, None)
-        if val == None:
+        if val is None:
             break
 
     # Special case for shellcraft
@@ -305,7 +313,14 @@ def linkcode_resolve(domain, info):
     else:
         filename = info['module'].replace('.', '/') + '.py'
 
-        if isinstance(val, (type, types.ModuleType, types.MethodType, types.FunctionType, types.TracebackType, types.FrameType, types.CodeType)):
+        if isinstance(val,
+                      (type,
+                       types.ModuleType,
+                       types.MethodType,
+                       types.FunctionType,
+                       types.TracebackType,
+                       types.FrameType,
+                       types.CodeType)):
             try:
                 lines, first = inspect.getsourcelines(val)
                 filename += '#L%d-%d' % (first, first + len(lines) - 1)

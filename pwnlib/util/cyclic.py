@@ -18,6 +18,7 @@ def de_bruijn(alphabet=string.ascii_lowercase, n=4):
 """
     k = len(alphabet)
     a = [0] * k * n
+
     def db(t, p):
         if t > n:
             if n % p == 0:
@@ -35,6 +36,7 @@ def de_bruijn(alphabet=string.ascii_lowercase, n=4):
 
     return db(1, 1)
 
+
 def cyclic(length=None, alphabet=string.ascii_lowercase, n=4):
     """cyclic(length=None, alphabet=string.ascii_lowercase, n=4) -> list/str
 
@@ -50,12 +52,12 @@ def cyclic(length=None, alphabet=string.ascii_lowercase, n=4):
       n(int): The length of subsequences that should be unique.
 
     Example:
-      >>> cyclic(alphabet = "ABC", n = 3)
+      >>> cyclic(alphabet = "ABC", n=3)
       'AAABAACABBABCACBACCBBBCBCCC'
       >>> cyclic(20)
       'aaaabaaacaaadaaaeaaa'
       >>> alphabet, n = range(30), 3
-      >>> len(alphabet)**n, len(cyclic(alphabet = alphabet, n = n))
+      >>> len(alphabet)**n, len(cyclic(alphabet=alphabet, n=n))
       (27000, 27000)
 """
 
@@ -70,6 +72,7 @@ def cyclic(length=None, alphabet=string.ascii_lowercase, n=4):
         return ''.join(out)
     else:
         return bytes(out)
+
 
 def cyclic_find(subseq, alphabet=string.ascii_lowercase, n=None):
     """cyclic_find(subseq, alphabet=string.ascii_lowercase, n=None) -> int
@@ -108,6 +111,7 @@ def cyclic_find(subseq, alphabet=string.ascii_lowercase, n=None):
     n = n or len(subseq)
 
     return _gen_find(subseq, de_bruijn(alphabet, n))
+
 
 def _gen_find(subseq, generator):
     """Returns the first position of subseq in the generator or -1 if there is no such position."""

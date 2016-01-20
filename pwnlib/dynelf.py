@@ -62,8 +62,9 @@ from .util.fiddling import enhex
 from .util.packing import unpack
 from .util.web import wget
 
-log    = getLogger(__name__)
+log = getLogger(__name__)
 sizeof = ctypes.sizeof
+
 
 def sysv_hash(symbol):
     """sysv_hash(bytes) -> int
@@ -79,6 +80,7 @@ def sysv_hash(symbol):
         h &= ~g
     return h & 0xffffffff
 
+
 def gnu_hash(s):
     """gnu_hash(bytes) -> int
 
@@ -88,6 +90,7 @@ def gnu_hash(s):
     for c in s:
         h = h * 33 + c
     return h & 0xffffffff
+
 
 class DynELF:
     '''
@@ -155,9 +158,9 @@ class DynELF:
         '''
         self._elfclass = None
         self._link_map = None
-        self._waitfor  = None
-        self._bases    = {}
-        self._dynamic  = None
+        self._waitfor = None
+        self._bases = {}
+        self._dynamic = None
 
         if not (pointer or (elf and elf.address)):
             log.error("Must specify either a pointer into a module and/or an ELF file with a valid base address")
@@ -167,7 +170,7 @@ class DynELF:
         if not isinstance(leak, MemLeak):
             leak = MemLeak(leak)
 
-        self.leak    = leak
+        self.leak = leak
         self.libbase = self._find_base(pointer or elf.address)
 
         if elf:
@@ -193,7 +196,7 @@ class DynELF:
         """32 or 64"""
         if not self._elfclass:
             elfclass = self.leak.field(self.libbase, elf.Elf_eident.EI_CLASS)
-            self._elfclass =  {constants.ELFCLASS32: 32,
+            self._elfclass = {constants.ELFCLASS32: 32,
                               constants.ELFCLASS64: 64}[elfclass]
         return self._elfclass
 
@@ -239,7 +242,7 @@ class DynELF:
 
         # Get useful pointers for resolving the linkmap faster
         pltgot = self._find_dt(constants.DT_PLTGOT)
-        debug  = self._find_dt(constants.DT_DEBUG)
+        debug = self._find_dt(constants.DT_DEBUG)
 
         # Restore the real leaker
         self.leak = real_leak
@@ -271,18 +274,17 @@ class DynELF:
 
         return ptr
 
-
     def _find_dynamic_phdr(self):
         """
         Returns the address of the first Program Header with the type
         PT_DYNAMIC.
         """
-        leak  = self.leak
-        base  = self.libbase
+        leak = self.leak
+        base = self.libbase
 
-        #First find PT_DYNAMIC
-        Ehdr  = {32: elf.Elf32_Ehdr, 64: elf.Elf64_Ehdr}[self.elfclass]
-        Phdr  = {32: elf.Elf32_Phdr, 64: elf.Elf64_Phdr}[self.elfclass]
+        # First find PT_DYNAMIC
+        Ehdr = {32: elf.Elf32_Ehdr, 64: elf.Elf64_Ehdr}[self.elfclass]
+        Phdr = {32: elf.Elf32_Phdr, 64: elf.Elf64_Phdr}[self.elfclass]
 
         self.status("PT_DYNAMIC")
 
@@ -303,7 +305,7 @@ class DynELF:
         dynamic = leak.field(phead, Phdr.p_vaddr)
         self.status("PT_DYNAMIC @ %#x" % dynamic)
 
-        #Sometimes this is an offset instead of an address
+        # Sometimes this is an offset instead of an address
         if 0 < dynamic < 0x400000:
             dynamic += base
 
@@ -322,12 +324,12 @@ class DynELF:
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
 
-        leak    = self.leak
-        base    = self.libbase
+        leak = self.leak
+        base = self.libbase
         dynamic = self.dynamic
-        name    = lambda tag: next(k for k,v in ENUM_D_TAG.items() if v == tag)
+        name = lambda tag: next(k for k, v in ENUM_D_TAG.items() if v == tag)
 
-        Dyn = {32: elf.Elf32_Dyn,    64: elf.Elf64_Dyn}     [self.elfclass]
+        Dyn = {32: elf.Elf32_Dyn, 64: elf.Elf64_Dyn}[self.elfclass]
 
         # Found the _DYNAMIC program header, now find PLTGOT entry in it
         # An entry with a DT_NULL tag marks the end of the DYNAMIC array.
@@ -339,7 +341,7 @@ class DynELF:
             elif d_tag in tags:
                 break
 
-            #Skip to next
+            # Skip to next
             dynamic += sizeof(Dyn)
         else:
             self.failure("Could not find any of %r" % list(map(name, tags)))
@@ -353,7 +355,6 @@ class DynELF:
             ptr += self.libbase
 
         return ptr
-
 
     def _find_linkmap(self, pltgot=None, debug=None):
         """
@@ -369,7 +370,7 @@ class DynELF:
         """
         w = self.waitfor("Finding linkmap")
 
-        Got     = {32: elf.Elf_i386_GOT, 64: elf.Elf_x86_64_GOT}[self.elfclass]
+        Got = {32: elf.Elf_i386_GOT, 64: elf.Elf_x86_64_GOT}[self.elfclass]
         r_debug = {32: elf.Elf32_r_debug, 64: elf.Elf64_r_debug}[self.elfclass]
 
         result = None
@@ -444,7 +445,7 @@ class DynELF:
             libbase = self.libbase
 
             if lib is not None:
-                libbase = self.lookup(symb = None, lib = lib)
+                libbase = self.lookup(symb=None, lib=lib)
 
             for offset in libcdb.get_build_id_offsets():
                 address = libbase + offset
@@ -464,8 +465,8 @@ class DynELF:
             libc.address = dynlib.libbase
             return libc
 
-    def lookup (self, symb = None, lib = None):
-        """lookup(symb = None, lib = None) -> int
+    def lookup(self, symb=None, lib=None):
+        """lookup(symb=None, lib=None) -> int
 
         Find the address of ``symbol``, which is found in ``lib``.
 
@@ -503,20 +504,26 @@ class DynELF:
         # If we are loading from a different library, create
         # a DynELF instance for it.
         #
-        if lib: dynlib = self._dynamic_load_dynelf(lib)
-        else:   dynlib = self
+        if lib:
+            dynlib = self._dynamic_load_dynelf(lib)
+        else:
+            dynlib = self
 
         #
         # If we are resolving a symbol in the library, find it.
         #
-        if symb: result = dynlib._lookup(symb)
-        else:    result = dynlib.libbase
+        if symb:
+            result = dynlib._lookup(symb)
+        else:
+            result = dynlib.libbase
 
         #
         # Did we win?
         #
-        if result: self.success("%#x" % result)
-        else:      self.failure("Could not find %s" % pretty)
+        if result:
+            self.success("%#x" % result)
+        else:
+            self.failure("Could not find %s" % pretty)
 
         return result
 
@@ -526,15 +533,15 @@ class DynELF:
         Return a dictionary mapping library path to its base address.
         '''
         if not self._bases:
-            leak    = self.leak
+            leak = self.leak
             LinkMap = {32: elf.Elf32_Link_Map, 64: elf.Elf64_Link_Map}[self.elfclass]
 
             cur = self.link_map
             while cur:
                 p_name = leak.field(cur, LinkMap.l_name)
-                name   = leak.s(p_name)
-                addr   = leak.field(cur, LinkMap.l_addr)
-                cur    = leak.field(cur, LinkMap.l_next)
+                name = leak.s(p_name)
+                addr = leak.field(cur, LinkMap.l_addr)
+                cur = leak.field(cur, LinkMap.l_next)
 
                 self._bases[name] = addr
 
@@ -551,14 +558,14 @@ class DynELF:
         Returns:
             A DynELF instance for the loaded library, or None.
         """
-        cur     = self.link_map
-        leak    = self.leak
+        cur = self.link_map
+        leak = self.leak
         LinkMap = {32: elf.Elf32_Link_Map, 64: elf.Elf64_Link_Map}[self.elfclass]
 
         while cur:
             self.status("link_map entry %#x" % cur)
             p_name = leak.field(cur, LinkMap.l_name)
-            name   = leak.s(p_name)
+            name = leak.s(p_name)
 
             if libname in name:
                 break
@@ -583,23 +590,23 @@ class DynELF:
     def _lookup(self, symb):
         """Performs the actual symbol lookup within one ELF file."""
         leak = self.leak
-        Dyn  = {32: elf.Elf32_Dyn, 64: elf.Elf64_Dyn}[self.elfclass]
-        name = lambda tag: next(k for k,v in ENUM_D_TAG.items() if v == tag)
+        Dyn = {32: elf.Elf32_Dyn, 64: elf.Elf64_Dyn}[self.elfclass]
+        name = lambda tag: next(k for k, v in ENUM_D_TAG.items() if v == tag)
 
         self.status('.gnu.hash/.hash, .strtab and .symtab offsets')
 
         #
         # We need all three of the hash, string table, and symbol table.
         #
-        hshtab  = self._find_dt(constants.DT_GNU_HASH)
-        strtab  = self._find_dt(constants.DT_STRTAB)
-        symtab  = self._find_dt(constants.DT_SYMTAB)
+        hshtab = self._find_dt(constants.DT_GNU_HASH)
+        strtab = self._find_dt(constants.DT_STRTAB)
+        symtab = self._find_dt(constants.DT_SYMTAB)
 
         # Assume GNU hash will hit, since it is the default for GCC.
         if hshtab:
             hshtype = 'gnu'
         else:
-            hshtab  = self._find_dt(constants.DT_HASH)
+            hshtab = self._find_dt(constants.DT_HASH)
             hshtype = 'sysv'
 
         if not all([strtab, symtab, hshtab]):
@@ -607,15 +614,15 @@ class DynELF:
 
         # glibc pointers are relocated but uclibc are not
         if 0 < strtab < 0x400000:
-            strtab  += self.libbase
-            symtab  += self.libbase
-            hshtab  += self.libbase
+            strtab += self.libbase
+            symtab += self.libbase
+            hshtab += self.libbase
 
         #
         # Perform the hash lookup
         #
         routine = {'sysv': self._resolve_symbol_sysv,
-                   'gnu':  self._resolve_symbol_gnu}[hshtype]
+                   'gnu': self._resolve_symbol_gnu}[hshtype]
         return routine(self.libbase, symb, hshtab, strtab, symtab)
 
     def _resolve_symbol_sysv(self, libbase, symb, hshtab, strtab, symtab):
@@ -636,12 +643,12 @@ class DynELF:
             with 'gcc -Wl,--hash-style=sysv'
         """
         self.status('.hash parms')
-        leak       = self.leak
-        Sym        = {32: elf.Elf32_Sym, 64: elf.Elf64_Sym}[self.elfclass]
+        leak = self.leak
+        Sym = {32: elf.Elf32_Sym, 64: elf.Elf64_Sym}[self.elfclass]
 
-        nbucket   = leak.field(hshtab, elf.Elf_HashTable.nbucket)
+        nbucket = leak.field(hshtab, elf.Elf_HashTable.nbucket)
         bucketaddr = hshtab + sizeof(elf.Elf_HashTable)
-        chain      = bucketaddr + (nbucket * 4)
+        chain = bucketaddr + (nbucket * 4)
 
         self.status('hashmap')
         hsh = sysv_hash(symb) % nbucket
@@ -651,7 +658,7 @@ class DynELF:
 
         while idx != constants.STN_UNDEF:
             # Look up the symbol corresponding to the specified index
-            sym     = symtab + (idx * sizeof(Sym))
+            sym = symtab + (idx * sizeof(Sym))
             symtype = leak.field(sym, Sym.st_info) & 0xf
 
             # We only care about functions
@@ -662,7 +669,7 @@ class DynELF:
 
                 # Make sure it matches the name of the symbol we were looking for.
                 if name == symb:
-                    #Bingo
+                    # Bingo
                     addr = libbase + leak.field(sym, Sym.st_value)
                     return addr
 
@@ -690,14 +697,14 @@ class DynELF:
         """
         self.status('.gnu.hash parms')
         leak = self.leak
-        Sym  = {32: elf.Elf32_Sym, 64: elf.Elf64_Sym}[self.elfclass]
+        Sym = {32: elf.Elf32_Sym, 64: elf.Elf64_Sym}[self.elfclass]
 
         # The number of hash buckets (hash % nbuckets)
-        nbuckets  = leak.field(hshtab, elf.GNU_HASH.nbuckets)
+        nbuckets = leak.field(hshtab, elf.GNU_HASH.nbuckets)
 
         # Index of the first accessible symbol in the hash table
         # Numbering doesn't start at zero, it starts at symndx
-        symndx    = leak.field(hshtab, elf.GNU_HASH.symndx)
+        symndx = leak.field(hshtab, elf.GNU_HASH.symndx)
 
         # Number of things in the bloom filter.
         # We don't care about the contents, but we have to skip over it.
@@ -708,29 +715,29 @@ class DynELF:
         buckets = hshtab + sizeof(elf.GNU_HASH) + (elfword * maskwords)
 
         # The chains come after the buckets
-        chains  = buckets + (4 * nbuckets)
+        chains = buckets + (4 * nbuckets)
 
         self.status('hash chain index')
 
         # Hash the symbol, find its bucket
-        hsh    = gnu_hash(symb)
+        hsh = gnu_hash(symb)
         bucket = hsh % nbuckets
 
         # Get the first index in the chain for that bucket
-        ndx    = leak.d(buckets, bucket)
+        ndx = leak.d(buckets, bucket)
         if ndx == 0:
             self.failure('Empty chain')
             return None
 
         # Find the start of the chain, taking into account that numbering
         # effectively starts at 'symndx' within the chains.
-        chain  = chains + 4 * (ndx - symndx)
+        chain = chains + 4 * (ndx - symndx)
 
         self.status('hash chain')
 
         # Iteratively get the I'th entry from the hash chain, until we find
         # one that matches.
-        i    = 0
+        i = 0
         hsh &= ~1
 
         # The least significant bit is used as a stopper bit.
@@ -740,13 +747,13 @@ class DynELF:
             hsh2 = leak.d(chain, i)
             if hsh == (hsh2 & ~1):
                 # Check for collision on hash values
-                sym  = symtab + sizeof(Sym) * (ndx + i)
+                sym = symtab + sizeof(Sym) * (ndx + i)
                 name = leak.s(strtab + leak.field(sym, Sym.st_name))
 
                 if name == symb:
                     # No collision, get offset and calculate address
                     offset = leak.field(sym, Sym.st_value)
-                    addr   = offset + libbase
+                    addr = offset + libbase
                     return addr
 
                 self.status("%s (hash collision)" % name)

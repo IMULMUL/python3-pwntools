@@ -38,6 +38,7 @@ from ..context import context
 
 mod = sys.modules[__name__]
 
+
 def pack(number, word_size=None, endianness=None, sign=None, **kwargs):
     """pack(number, word_size=None, endianness=None, sign=None, **kwargs) -> bytes
 
@@ -94,9 +95,9 @@ def pack(number, word_size=None, endianness=None, sign=None, **kwargs):
 
     with context.local(**kwargs):
         # Lookup in context if not found
-        word_size  = 'all' if word_size == 'all' else context.word_size
+        word_size = 'all' if word_size == 'all' else context.word_size
         endianness = context.endianness
-        sign       = context.sign
+        sign = context.sign
 
         if not isinstance(number, int):
             raise ValueError("pack(): number must be of type int (got %r)" % type(number))
@@ -105,7 +106,8 @@ def pack(number, word_size=None, endianness=None, sign=None, **kwargs):
             raise ValueError("pack(): sign must be either True or False (got %r)" % sign)
 
         if endianness not in ['little', 'big']:
-            raise ValueError("pack(): endianness must be either 'little' or 'big' (got %r)" % endianness)
+            raise ValueError("pack(): endianness must be either 'little' or 'big' (got %r)" %
+                             endianness)
 
         # Verify that word_size make sense
         if word_size == 'all':
@@ -127,7 +129,8 @@ def pack(number, word_size=None, endianness=None, sign=None, **kwargs):
         else:
             limit = 1 << word_size
             if not 0 <= number < limit:
-                raise ValueError("pack(): number does not fit within word_size [%i, %r, %r]" % (0, number, limit))
+                raise ValueError("pack(): number does not fit within word_size [%i, %r, %r]" %
+                                 (0, number, limit))
 
         # Normalize number and size now that we have verified them
         # From now on we can treat positive and negative numbers the same
@@ -143,6 +146,7 @@ def pack(number, word_size=None, endianness=None, sign=None, **kwargs):
             return bytes(out)
         else:
             return bytes(reversed(out))
+
 
 def unpack(data, word_size=None, endianness=None, sign=None, **kwargs):
     """unpack(data, word_size=None, endianness=None, sign=None, **kwargs) -> int
@@ -184,9 +188,9 @@ def unpack(data, word_size=None, endianness=None, sign=None, **kwargs):
 
     with context.local(**kwargs):
         # Lookup in context if not found
-        word_size  = word_size  or context.word_size
+        word_size = word_size or context.word_size
         endianness = endianness or context.endianness
-        sign       = sign       or context.sign
+        sign = sign or context.sign
 
         # Verify that word_size make sense
         if word_size == 'all':
@@ -197,7 +201,8 @@ def unpack(data, word_size=None, endianness=None, sign=None, **kwargs):
         byte_size = (word_size + 7) // 8
 
         if byte_size != len(data):
-            raise ValueError("unpack(): data must have length %d, since word_size was %d" % (byte_size, word_size))
+            raise ValueError("unpack(): data must have length %d, since word_size was %d" %
+                             (byte_size, word_size))
 
         number = 0
 
@@ -217,6 +222,7 @@ def unpack(data, word_size=None, endianness=None, sign=None, **kwargs):
 
         signbit = number & (1 << (word_size - 1))
         return number - 2 * signbit
+
 
 def unpack_many(data, word_size=None, endianness=None, sign=None, **kwargs):
     """unpack(data, word_size=None, endianness=None, sign=None) -> int list
@@ -269,14 +275,15 @@ def unpack_many(data, word_size=None, endianness=None, sign=None, **kwargs):
 #
 # Make individual packers, e.g. _p8lu
 #
-ops   = {'p': struct.pack, 'u': lambda *a: struct.unpack(*a)[0]}
+ops = {'p': struct.pack, 'u': lambda *a: struct.unpack(*a)[0]}
 sizes = {8: 'b', 16: 'h', 32: 'i', 64: 'q'}
-ends  = ['b', 'l']
+ends = ['b', 'l']
 signs = ['s', 'u']
+
 
 def make_single(op, size, end, sign):
     name = '_%s%s%s%s' % (op, size, end, sign)
-    fmt  = sizes[size]
+    fmt = sizes[size]
     end = '>' if end == 'b' else '<'
 
     if sign == 'u':
@@ -294,16 +301,18 @@ for op, size, end, sign in iters.product(ops, sizes, ends, signs):
     name, routine = make_single(op, size, end, sign)
     setattr(mod, name, routine)
 
-return_types     = {'p': 'str', 'u': 'int'}
-op_verbs         = {'p': 'pack', 'u': 'unpack'}
-arg_doc          = {'p': 'number (int): Number to convert',
-                    'u': 'data (bytes): Bytes to convert'}
-rv_doc           = {'p': 'The packed number as a string',
-                    'u': 'The unpacked number'}
+return_types = {'p': 'str', 'u': 'int'}
+op_verbs = {'p': 'pack', 'u': 'unpack'}
+arg_doc = {'p': 'number (int): Number to convert',
+           'u': 'data (bytes): Bytes to convert'}
+rv_doc = {'p': 'The packed number as a string',
+          'u': 'The unpacked number'}
 
 #
 # Make normal user-oriented packers, e.g. p8
 #
+
+
 def make_multi(op, size):
     name = "%s%s" % (op, size)
 
@@ -316,10 +325,10 @@ def make_multi(op, size):
         with context.local(endianness=endianness, sign=sign, **kwargs):
             endian = context.endian
             signed = context.signed
-            return {("little", True  ): ls,
-                    ("little", False):  lu,
-                    ("big",    True  ): bs,
-                    ("big",    False):  bu}[endian, signed](number)
+            return {("little", True): ls,
+                    ("little", False): lu,
+                    ("big", True): bs,
+                    ("big", False): bu}[endian, signed](number)
 
     routine.__name__ = name
     routine.__qualname__ = name
@@ -345,6 +354,7 @@ def make_multi(op, size):
 for op, size in iters.product(ops, sizes):
     name, routine = make_multi(op, size)
     setattr(mod, name, routine)
+
 
 def make_packer(word_size=None, endianness=None, sign=None, **kwargs):
     """make_packer(word_size=None, endianness=None, sign=None) -> number → bytes
@@ -379,18 +389,18 @@ def make_packer(word_size=None, endianness=None, sign=None, **kwargs):
         <function make_packer.<locals>.<lambda> at 0x...>
 """
     with context.local(endianness=endianness, sign=sign, **kwargs):
-        word_size  = word_size or context.word_size
+        word_size = word_size or context.word_size
         endianness = context.endianness
-        sign       = context.sign
+        sign = context.sign
 
         if word_size in [8, 16, 32, 64]:
             endianness = 1 if endianness == 'big' else 0
 
             return {
-                (8, 0, 0):  _p8lu,
-                (8, 0, 1):  _p8ls,
-                (8, 1, 0):  _p8bu,
-                (8, 1, 1):  _p8bs,
+                (8, 0, 0): _p8lu,
+                (8, 0, 1): _p8ls,
+                (8, 1, 0): _p8bu,
+                (8, 1, 1): _p8bs,
                 (16, 0, 0): _p16lu,
                 (16, 0, 1): _p16ls,
                 (16, 1, 0): _p16bu,
@@ -407,8 +417,9 @@ def make_packer(word_size=None, endianness=None, sign=None, **kwargs):
         else:
             return lambda number: pack(number, word_size, endianness, sign)
 
+
 def make_unpacker(word_size=None, endianness=None, sign=None, **kwargs):
-    """make_unpacker(word_size=None, endianness=None, sign=None,  **kwargs) -> str → number
+    """make_unpacker(word_size=None, endianness=None, sign=None, **kwargs) -> str → number
 
     Creates a unpacker by "freezing" the given arguments.
 
@@ -441,18 +452,18 @@ def make_unpacker(word_size=None, endianness=None, sign=None, **kwargs):
 """
     # Validate
     with context.local(endianness=endianness, sign=sign, **kwargs):
-        word_size  = word_size or context.word_size
+        word_size = word_size or context.word_size
         endianness = context.endianness
-        sign       = context.sign
+        sign = context.sign
 
         if word_size in [8, 16, 32, 64]:
             endianness = 1 if endianness == 'big' else 0
 
             return {
-                (8, 0, 0):  _u8lu,
-                (8, 0, 1):  _u8ls,
-                (8, 1, 0):  _u8bu,
-                (8, 1, 1):  _u8bs,
+                (8, 0, 0): _u8lu,
+                (8, 0, 1): _u8ls,
+                (8, 1, 0): _u8bu,
+                (8, 1, 1): _u8bs,
                 (16, 0, 0): _u16lu,
                 (16, 0, 1): _u16ls,
                 (16, 1, 0): _u16bu,
@@ -468,7 +479,6 @@ def make_unpacker(word_size=None, endianness=None, sign=None, **kwargs):
             }[word_size, endianness, sign]
         else:
             return lambda number: unpack(number, word_size, endianness, sign)
-
 
 
 def _flat(args, preprocessor, packer):
@@ -491,12 +501,13 @@ def _flat(args, preprocessor, packer):
         elif isinstance(arg, bytearray):
             out.append(bytes(arg))
         else:
-            raise ValueError("flat(): Flat does not support values of type %s" % type(arg))
+            raise ValueError("flat(): Flat does not support values of type %s" %
+                             type(arg))
     return b''.join(out)
 
 
 def flat(*args, **kwargs):
-    """flat(*args, preprocessor = None, word_size = None, endianness = None, sign = None)
+    """flat(*args, preprocessor=None, word_size=None, endianness=None, sign=None)
 
     Flattens the arguments into a bytes.
 
@@ -518,21 +529,22 @@ def flat(*args, **kwargs):
       sign (str): Signedness of the converted integer (False/True)
 
     Examples:
-      >>> flat(1, "test", [[["AB"]*2]*3], endianness = 'little', word_size = 16, sign = False)
+      >>> flat(1, "test", [[["AB"] * 2] * 3], endianness='little', word_size=16, sign=False)
       b'\\x01\\x00testABABABABABAB'
-      >>> flat([1, [2, 3]], preprocessor = lambda x: str(x+1))
+      >>> flat([1, [2, 3]], preprocessor=lambda x: str(x+1))
       b'234'
 """
 
     preprocessor = kwargs.pop('preprocessor', lambda x: None)
-    word_size    = kwargs.pop('word_size', None)
-    endianness   = kwargs.pop('endianness', None)
-    sign         = kwargs.pop('sign', None)
+    word_size = kwargs.pop('word_size', None)
+    endianness = kwargs.pop('endianness', None)
+    sign = kwargs.pop('sign', None)
 
     if kwargs != {}:
         raise TypeError("flat() does not support argument %r" % kwargs.popitem()[0])
 
     return _flat(args, preprocessor, make_packer(word_size, endianness, sign))
+
 
 def _to_byte(s):
     if isinstance(s, (bytes, str)):
@@ -541,6 +553,7 @@ def _to_byte(s):
         return s
     else:
         raise TypeError("_to_byte() does not support type %s" % type(s))
+
 
 def fit(pieces, **kwargs):
     """fit(pieces, filler=de_bruijn(), length=None, preprocessor=None, word_size=None, endianness=None, sign=None) -> bytes
@@ -586,7 +599,7 @@ def fit(pieces, **kwargs):
       b'aaaabaaa'
       >>> fit({12: b'XXXX'}, filler=b'AB', length=20)
       b'ABABABABABABXXXXABAB'
-      >>> fit({ 8: [0x41414141, 0x42424242],
+      >>> fit({8: [0x41414141, 0x42424242],
       ...      20: b'CCCC'})
       b'aaaabaaaAAAABBBBcaaaCCCC'
 
@@ -594,12 +607,12 @@ def fit(pieces, **kwargs):
     # HACK: To avoid circular imports we need to delay the import of `cyclic`
     from . import cyclic
 
-    filler       = kwargs.pop('filler', cyclic.de_bruijn())
-    length       = kwargs.pop('length', None)
+    filler = kwargs.pop('filler', cyclic.de_bruijn())
+    length = kwargs.pop('length', None)
     preprocessor = kwargs.pop('preprocessor', lambda x: None)
-    word_size    = kwargs.pop('word_size', None)
-    endianness   = kwargs.pop('endianness', None)
-    sign         = kwargs.pop('sign', None)
+    word_size = kwargs.pop('word_size', None)
+    endianness = kwargs.pop('endianness', None)
+    sign = kwargs.pop('sign', None)
 
     if kwargs != {}:
         raise TypeError("fit() does not support argument %r" % kwargs.popitem()[0])
@@ -618,7 +631,8 @@ def fit(pieces, **kwargs):
                 out += bytes([_to_byte(next(filler))])
             k = out.index(k)
         else:
-            raise TypeError("fit(): offset must be of type int or bytes, but got '%s'" % type(k))
+            raise TypeError("fit(): offset must be of type int or bytes, but got '%s'" %
+                            type(k))
         pieces_[k] = v
     pieces = pieces_
 
@@ -637,7 +651,8 @@ def fit(pieces, **kwargs):
     # truncate/pad output
     if length:
         if l > length:
-            raise ValueError("fit(): Pieces does not fit within `length` (= %d) bytes" % length)
+            raise ValueError("fit(): Pieces does not fit within `length` (= %d) bytes" %
+                             length)
         while len(out) < length:
             out.append(_to_byte(next(filler)))
     else:

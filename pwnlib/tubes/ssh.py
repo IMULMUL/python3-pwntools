@@ -66,7 +66,8 @@ class ssh_channel(sock):
     #: Only valid when instantiated through :meth:`ssh.process`
     argv = None
 
-    def __init__(self, parent, process=None, tty=False, wd=None, env=None, timeout=Timeout.default):
+    def __init__(self, parent, process=None, tty=False, wd=None, env=None,
+                 timeout=Timeout.default):
         super(ssh_channel, self).__init__(timeout)
 
         # keep the parent from being garbage collected in some cases
@@ -217,6 +218,7 @@ class ssh_channel(sock):
         term.term.show_cursor()
 
         event = threading.Event()
+
         def recv_thread(event):
             while not event.is_set():
                 try:
@@ -242,7 +244,7 @@ class ssh_channel(sock):
                 try:
                     data = bytes(term.key.getraw(0.1))
                 except KeyboardInterrupt:
-                    data = b'\x03' # This is ctrl-c
+                    data = b'\x03'  # This is ctrl-c
                 except IOError:
                     if not event.is_set():
                         raise
@@ -278,6 +280,7 @@ class ssh_channel(sock):
 
 
 class ssh_connecter(sock):
+
     def __init__(self, parent, host, port, timeout=Timeout.default):
         super(ssh_connecter, self).__init__(timeout)
 
@@ -305,10 +308,12 @@ class ssh_connecter(sock):
         log.error("Cannot use spawn_process on an SSH channel.""")
 
     def _close_msg(self):
-        log.info("Closed remote connection to %s:%d via SSH connection to %s" % (self.rhost, self.rport, self.host))
+        log.info("Closed remote connection to %s:%d via SSH connection to %s" %
+                 (self.rhost, self.rport, self.host))
 
 
 class ssh_listener(sock):
+
     def __init__(self, parent, bind_address, port, timeout=Timeout.default):
         super(ssh_listener, self).__init__(timeout)
 
@@ -341,7 +346,8 @@ class ssh_listener(sock):
         self._accepter.start()
 
     def _close_msg(self):
-        log.info("Closed remote connection to %s:%d via SSH listener on port %d via %s" % (self.rhost, self.rport, self.port, self.host))
+        log.info("Closed remote connection to %s:%d via SSH listener on port %d via %s" %
+                 (self.rhost, self.rport, self.port, self.host))
 
     def spawn_process(self, *args, **kwargs):
         log.error("Cannot use spawn_process on an SSH channel.""")
@@ -405,15 +411,15 @@ class ssh(Timeout):
         fairly new version of paramiko is used."""
         super(ssh, self).__init__(timeout)
 
-        self.host            = host
-        self.port            = port
-        self.user            = user
-        self.password        = password
-        self.key             = key
-        self.keyfile         = keyfile
-        self._cachedir       = os.path.join(tempfile.gettempdir(), 'pwntools-ssh-cache')
-        self.cwd             = '.'
-        self.cache           = cache
+        self.host = host
+        self.port = port
+        self.user = user
+        self.password = password
+        self.key = key
+        self.keyfile = keyfile
+        self._cachedir = os.path.join(tempfile.gettempdir(), 'pwntools-ssh-cache')
+        self.cwd = '.'
+        self.cache = cache
 
         misc.mkdir_p(self._cachedir)
 
@@ -455,9 +461,11 @@ class ssh(Timeout):
 
                 if proxy_command:
                     proxy_sock = paramiko.ProxyCommand(proxy_command)
-                self.client.connect(host, port, user, password, key, keyfiles, self.timeout, compress=True, sock=proxy_sock)
+                self.client.connect(host, port, user, password, key, keyfiles,
+                                    self.timeout, compress=True, sock=proxy_sock)
             else:
-                self.client.connect(host, port, user, password, key, keyfiles, self.timeout, compress=True)
+                self.client.connect(host, port, user, password, key, keyfiles,
+                                    self.timeout, compress=True)
 
             self.transport = self.client.get_transport()
 
@@ -508,8 +516,8 @@ class ssh(Timeout):
 
         return self.run(shell, tty, timeout=timeout)
 
-    def process(self, argv=None, executable=None, tty=True, cwd=None, env=None, timeout=Timeout.default, run=True,
-                stdin=0, stdout=1, stderr=2):
+    def process(self, argv=None, executable=None, tty=True, cwd=None, env=None,
+                timeout=Timeout.default, run=True, stdin=0, stdout=1, stderr=2):
         r"""
         Executes a process on the remote server, in the same fashion
         as pwnlib.tubes.process.process.
@@ -638,7 +646,8 @@ class ssh(Timeout):
                     k = k.encode('utf8')
 
                 if not isinstance(v, (bytes, str)):
-                    log.error('Environment values must be bytes or strings: %r=%r' % (k, v))
+                    log.error('Environment values must be bytes or strings: %r=%r' %
+                              (k, v))
                 if isinstance(v, str):
                     v = v.encode('utf8')
 
@@ -663,9 +672,9 @@ class ssh(Timeout):
         script = r"""
 #!/usr/bin/env python2
 import os, sys
-exe   = %r
-argv  = %r
-env   = %r
+exe = %r
+argv = %r
+env = %r
 
 os.chdir(%r)
 
@@ -1076,7 +1085,8 @@ os.execve(exe, argv, env)
             local_tmp = self._download_to_cache(remote, p)
 
         # Check to see if an identical copy of the file already exists
-        if not os.path.exists(local) or hashes.sha256filehex(local_tmp) != hashes.sha256filehex(local):
+        if not os.path.exists(local) or hashes.sha256filehex(
+                local_tmp) != hashes.sha256filehex(local):
             shutil.copy2(local_tmp, local)
 
     def download_dir(self, remote=None, local=None):
@@ -1209,7 +1219,8 @@ os.execve(exe, argv, env)
                 message = untar.recvrepeat(2)
 
                 if untar.wait() != 0:
-                    log.error("Could not untar %r on the remote end\n%s" % (remote_tar, message))
+                    log.error("Could not untar %r on the remote end\n%s" %
+                              (remote_tar, message))
 
     def upload(self, file_or_directory, remote=None):
         if os.path.isfile(file_or_directory):
@@ -1314,7 +1325,8 @@ os.execve(exe, argv, env)
             wd = wd.decode('utf8').strip()
 
             if status:
-                log.error("Could not generate a temporary directory (%i)\n%s" % (status, wd))
+                log.error("Could not generate a temporary directory (%i)\n%s" %
+                          (status, wd))
         else:
             _, status = self.run_to_end('ls ' + misc.sh_string(wd), wd='.')
 

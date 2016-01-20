@@ -21,13 +21,16 @@ from .datatypes import *
 
 log = getLogger(__name__)
 
-__all__ = ['load', 'ELF'] + sorted(filter(lambda x: not x.startswith('_'), datatypes.__dict__.keys()))
+__all__ = ['load', 'ELF'] + \
+    sorted(filter(lambda x: not x.startswith('_'), datatypes.__dict__.keys()))
+
 
 def load(*args, **kwargs):
     """Compatibility wrapper for pwntools v1"""
     return ELF(*args, **kwargs)
 
 # Monkey-patch some things inside elftools to make life easier
+
 
 class ELF(ELFFile):
 
@@ -67,6 +70,7 @@ class ELF(ELFFile):
        # 6:   68 59 00 00 00          push   0x59
        # b:   e9 50 fa ff ff          jmp    0xfffffffffffffa60
     """
+
     def __init__(self, path):
         # elftools uses the backing file for all reads and writes
         # in order to permit writing without being able to write to disk,
@@ -74,7 +78,7 @@ class ELF(ELFFile):
         self.file = open(path, 'rb')
         self.mmap = mmap.mmap(self.file.fileno(), 0, access=mmap.ACCESS_COPY)
 
-        super(ELF,self).__init__(self.mmap)
+        super(ELF, self).__init__(self.mmap)
 
         self.path = os.path.abspath(path)
         self.arch = self.get_machine_arch().lower()
@@ -102,8 +106,8 @@ class ELF(ELFFile):
 
     def _describe(self):
         log.info_once('\n'.join((repr(self.path),
-                                'Arch:          %s-%s-%s' % (self.arch, self.bits, self.endian),
-                                self.checksec())))
+                                 'Arch:          %s-%s-%s' % (self.arch, self.bits, self.endian),
+                                 self.checksec())))
 
     def __repr__(self):
         return "ELF(%r)" % self.path
@@ -111,7 +115,7 @@ class ELF(ELFFile):
     def get_machine_arch(self):
         return {
             'EM_X86_64': 'amd64',
-            'EM_386' :'i386',
+            'EM_386': 'i386',
             'EM_486': 'i386',
             'EM_ARM': 'arm',
             'EM_AARCH64': 'aarch64',
@@ -128,7 +132,7 @@ class ELF(ELFFile):
         """Entry point to the ELF"""
         return self.address + (self.header.e_entry - self.load_addr)
     entrypoint = entry
-    start      = entry
+    start = entry
 
     @property
     def elfclass(self):
@@ -178,12 +182,12 @@ class ELF(ELFFile):
 
     @address.setter
     def address(self, new):
-        delta     = new-self._address
-        update    = lambda x: x+delta
+        delta = new - self._address
+        update = lambda x: x + delta
 
-        self.symbols = {k:update(v) for k,v in self.symbols.items()}
-        self.plt     = {k:update(v) for k,v in self.plt.items()}
-        self.got     = {k:update(v) for k,v in self.got.items()}
+        self.symbols = {k: update(v) for k, v in self.symbols.items()}
+        self.plt = {k: update(v) for k, v in self.plt.items()}
+        self.got = {k: update(v) for k, v in self.got.items()}
 
         self._address = update(self.address)
 
@@ -238,7 +242,7 @@ class ELF(ELFFile):
             cmd = '(ulimit -s unlimited; ldd %s > /dev/null && (LD_TRACE_LOADED_OBJECTS=1 %s || ldd %s)) 2>/dev/null'
             arg = misc.sh_string(self.path)
 
-            data = subprocess.check_output(cmd % (arg, arg, arg), shell = True)
+            data = subprocess.check_output(cmd % (arg, arg, arg), shell=True)
             self.libs = misc.parse_ldd_output(data.decode('utf8'))
         except subprocess.CalledProcessError:
             self.libs = {}
@@ -275,7 +279,6 @@ class ELF(ELFFile):
             if addr not in self.symbols.values():
                 self.symbols[b'got.' + sym] = addr
 
-
     def _populate_got_plt(self):
         """Loads the GOT and the PLT symbols and addresses.
 
@@ -288,8 +291,8 @@ class ELF(ELFFile):
         >>> def validate_got_plt(sym):
         ...     got      = bash.got[sym]
         ...     plt      = bash.plt[sym]
-        ...     got_addr = unpack(bash.read(got, bash.elfclass/8), bash.elfclass)
-        ...     return got_addr in range(plt,plt+0x10)
+        ...     got_addr = unpack(bash.read(got, bash.elfclass // 8), bash.elfclass)
+        ...     return got_addr in range(plt, plt+0x10)
         ...
         >>> all(map(validate_got_plt, bash.got.keys()))
         True
@@ -306,10 +309,11 @@ class ELF(ELFFile):
         # Find the relocation section for PLT
         try:
             rel_plt = next(s for s in self.sections if
-                            s.header.sh_info == self.sections.index(plt) and
-                            isinstance(s, RelocationSection))
+                           s.header.sh_info == self.sections.index(plt) and
+                           isinstance(s, RelocationSection))
         except StopIteration:
-            # Evidently whatever android-ndk uses to build binaries zeroes out sh_info for rel.plt
+            # Evidently whatever android-ndk uses to build binaries zeroes out sh_info
+            # for rel.plt
             rel_plt = self.get_section_by_name(b'.rel.plt') or self.get_section_by_name(b'.rela.plt')
 
         if not rel_plt:
@@ -322,32 +326,32 @@ class ELF(ELFFile):
 
             # Populate the GOT
             for rel in rel_plt.iter_relocations():
-                sym_idx  = rel.entry.r_info_sym
-                symbol   = sym_rel_plt.get_symbol(sym_idx)
-                name     = symbol.name
+                sym_idx = rel.entry.r_info_sym
+                symbol = sym_rel_plt.get_symbol(sym_idx)
+                name = symbol.name
 
                 self.got[name] = rel.entry.r_offset
 
         # Depending on the architecture, the beginning of the .plt will differ
         # in size, and each entry in the .plt will also differ in size.
-        offset     = None
+        offset = None
         multiplier = None
 
         # Map architecture: offset, multiplier
         header_size, entry_size = {
-            'i386':   (0x10, 0x10),
+            'i386': (0x10, 0x10),
             'amd64': (0x10, 0x10),
-            'arm':   (0x14, 0xC),
+            'arm': (0x14, 0xC),
             'aarch64': (0x20, 0x20),
-        }.get(self.arch, (0,0))
-
+        }.get(self.arch, (0, 0))
 
         # Based on the ordering of the GOT symbols, populate the PLT
-        for i,(addr,name) in enumerate(sorted((addr,name) for name, addr in self.got.items())):
-            self.plt[name] = plt.header.sh_addr + header_size + i*entry_size
+        for i, (addr, name) in enumerate(sorted((addr, name)
+                                                for name, addr in self.got.items())):
+            self.plt[name] = plt.header.sh_addr + header_size + i * entry_size
 
-    def search(self, needle, writable = False):
-        """search(needle, writable = False) -> str generator
+    def search(self, needle, writable=False):
+        """search(needle, writable=False) -> str generator
 
         Search the ELF's virtual address space for the specified string.
 
@@ -382,8 +386,8 @@ class ELF(ELFFile):
             segments = self.segments
 
         for seg in segments:
-            addr   = seg.header.p_vaddr
-            data   = seg.data()
+            addr = seg.header.p_vaddr
+            data = seg.data()
             offset = 0
             while True:
                 offset = data.find(needle, offset)
@@ -413,13 +417,12 @@ class ELF(ELFFile):
 
         for segment in self.segments:
             begin = segment.header.p_offset
-            size  = segment.header.p_filesz
-            end   = begin + size
+            size = segment.header.p_filesz
+            end = begin + size
             if begin <= offset and offset <= end:
                 delta = offset - begin
                 return segment.header.p_vaddr + delta + load_address_fixup
         return None
-
 
     def vaddr_to_offset(self, address):
         """Translates the specified virtual address to a file address
@@ -443,8 +446,8 @@ class ELF(ELFFile):
 
         for segment in self.segments:
             begin = segment.header.p_vaddr
-            size  = segment.header.p_memsz
-            end   = begin + size
+            size = segment.header.p_memsz
+            end = begin + size
             if begin <= load_address and load_address <= end:
                 delta = load_address - begin
                 return segment.header.p_offset + delta
@@ -491,7 +494,7 @@ class ELF(ELFFile):
 
         Examples:
           >>> bash = ELF(which('bash'))
-          >>> bash.read(bash.address+1, 3)
+          >>> bash.read(bash.address + 1, 3)
           b'ELF'
           >>> bash.write(bash.address, b"HELO")
           >>> bash.read(bash.address, 4)
@@ -567,7 +570,7 @@ class ELF(ELFFile):
         return "ELF(%r)" % self.path
 
     def dynamic_by_tag(self, tag):
-        dt      = None
+        dt = None
         dynamic = self.get_section_by_name(b'.dynamic')
 
         if not dynamic:
@@ -586,13 +589,12 @@ class ELF(ELFFile):
         if not dt_strtab:
             return None
 
-        address   = dt_strtab.entry.d_ptr + offset
-        string    = b''
+        address = dt_strtab.entry.d_ptr + offset
+        string = b''
         while b'\x00' not in string:
-            string  += self.read(address, 1)
+            string += self.read(address, 1)
             address += 1
         return string.rstrip(b'\x00')
-
 
     @property
     def relro(self):
@@ -627,7 +629,7 @@ class ELF(ELFFile):
     @property
     def pie(self):
         return self.elftype == 'DYN'
-    aslr=pie
+    aslr = pie
 
     @property
     def rpath(self):
@@ -648,22 +650,22 @@ class ELF(ELFFile):
         return self.dynamic_string(dt_rpath.entry.d_ptr)
 
     def checksec(self, banner=True):
-        red    = text.red
-        green  = text.green
+        red = text.red
+        green = text.green
         yellow = text.yellow
 
         res = [
             "RELRO:".ljust(15) + {
-                'Full':    green("Full RELRO"),
+                'Full': green("Full RELRO"),
                 'Partial': yellow("Partial RELRO"),
-                None:      red("No RELRO")
+                None: red("No RELRO")
             }[self.relro],
             "Stack Canary:".ljust(15) + {
-                True:  green("Canary found"),
+                True: green("Canary found"),
                 False: red("No canary found")
             }[self.canary],
             "NX:".ljust(15) + {
-                True:  green("NX enabled"),
+                True: green("NX enabled"),
                 False: red("NX disabled"),
             }[self.nx],
             "PIE:".ljust(15) + {
@@ -679,13 +681,13 @@ class ELF(ELFFile):
         rwx = self.rwx_segments
 
         if self.nx and rwx:
-            res += [ "RWX:".ljust(15) + red("Has RWX segments") ]
+            res += ["RWX:".ljust(15) + red("Has RWX segments")]
 
         if self.rpath:
-            res += [ "RPATH:".ljust(15) + red(repr(self.rpath)) ]
+            res += ["RPATH:".ljust(15) + red(repr(self.rpath))]
 
         if self.runpath:
-            res += [ "RUNPATH:".ljust(15) + red(repr(self.runpath)) ]
+            res += ["RUNPATH:".ljust(15) + red(repr(self.runpath))]
 
         if self.packed:
             res.append('Packer:'.ljust(15) + red("Packed with UPX"))

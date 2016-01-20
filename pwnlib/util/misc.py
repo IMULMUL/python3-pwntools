@@ -12,6 +12,7 @@ from ..log import getLogger
 
 log = getLogger(__name__)
 
+
 def align(alignment, x):
     """align(alignment, x) -> int
 
@@ -65,7 +66,7 @@ def size(n, abbriv='B', si=False):
         '1000B'
         >>> size(1024)
         '1.00KB'
-        >>> size(1024, si = True)
+        >>> size(1024, si=True)
         '1.02KB'
         >>> [size(1024 ** n) for n in range(7)]
         ['1B', '1.00KB', '1.00MB', '1.00GB', '1.00TB', '1.00PB', '1024.00PB']
@@ -110,6 +111,7 @@ def write(path, data='', create_dir=False, mode='w'):
     with open(path, mode) as f:
         f.write(data)
 
+
 def which(name, all=False):
     """which(name, flags=os.X_OK, all=False) -> str or str set
 
@@ -145,7 +147,7 @@ def which(name, all=False):
                 continue
             # work around this issue: https://bugs.python.org/issue9311
             if isroot and not \
-              st.st_mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH):
+                    st.st_mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH):
                 continue
             if all:
                 out.add(p)
@@ -155,6 +157,7 @@ def which(name, all=False):
         return out
     else:
         return None
+
 
 def run_in_new_terminal(command, terminal=None, args=None):
     """run_in_new_terminal(command, terminal=None) -> None
@@ -182,13 +185,13 @@ def run_in_new_terminal(command, terminal=None, args=None):
     if not terminal:
         if context.terminal:
             terminal = context.terminal[0]
-            args     = context.terminal[1:]
+            args = context.terminal[1:]
         elif 'DISPLAY' in os.environ:
             terminal = 'x-terminal-emulator'
-            args     = ['-e']
+            args = ['-e']
         elif 'TMUX' in os.environ:
             terminal = 'tmux'
-            args     = ['splitw']
+            args = ['splitw']
 
     if not terminal:
         log.error('Argument `terminal` is not set, and could not determine a default')
@@ -208,6 +211,7 @@ def run_in_new_terminal(command, terminal=None, args=None):
         os.execv(argv[0], argv)
         os._exit(1)
 
+
 def parse_ldd_output(output):
     """Parses the output from a run of 'ldd' on a binary.
     Returns a dictionary of {path: address} for
@@ -226,7 +230,7 @@ def parse_ldd_output(output):
         ... ''').keys())
         ['/lib/x86_64-linux-gnu/libc.so.6', '/lib/x86_64-linux-gnu/libdl.so.2', '/lib/x86_64-linux-gnu/libtinfo.so.5', '/lib64/ld-linux-x86-64.so.2']
     """
-    expr_linux   = re.compile(r'\s(?P<lib>\S?/\S+)\s+\((?P<addr>0x.+)\)')
+    expr_linux = re.compile(r'\s(?P<lib>\S?/\S+)\s+\((?P<addr>0x.+)\)')
     expr_openbsd = re.compile(r'^\s+(?P<addr>[0-9a-f]+)\s+[0-9a-f]+\s+\S+\s+[01]\s+[0-9]+\s+[0-9]+\s+(?P<lib>\S+)$')
     libs = {}
 
@@ -239,6 +243,7 @@ def parse_ldd_output(output):
 
     return libs
 
+
 def mkdir_p(path):
     """Emulates the behavior of ``mkdir -p``."""
 
@@ -249,6 +254,7 @@ def mkdir_p(path):
             pass
         else:
             raise
+
 
 def sh_string(s):
     """Outputs a string in a format that will be understood by /bin/sh.
@@ -271,7 +277,7 @@ def sh_string(s):
         "foo\\\\'bar"
         >>> print(sh_string("foo\\x01'bar"))
         "$( (echo Zm9vASdiYXI=|(base64 -d||openssl enc -d -base64)||echo -en 'foo\\x01\\x27bar') 2>/dev/null)"
-        >>> print(subprocess.check_output("echo -n " + sh_string("foo\\\\'bar"), shell = True))
+        >>> print(subprocess.check_output("echo -n " + sh_string("foo\\\\'bar"), shell=True))
         b"foo\\\\'bar"
     """
     if isinstance(s, str):
@@ -306,6 +312,7 @@ def sh_string(s):
                 fixed += '\\x%02x' % c
         return '"$( (echo %s|(base64 -d||openssl enc -d -base64)||echo -en \'%s\') 2>/dev/null)"' % (base64.b64encode(s).decode('utf8'), fixed)
 
+
 def dealarm_shell(tube):
     """Given a tube which is a shell, dealarm it.
     """
@@ -322,6 +329,7 @@ def dealarm_shell(tube):
         return tube
 
     return None
+
 
 def register_sizes(regs, in_sizes):
     """Create dictionaries over register sizes and relations

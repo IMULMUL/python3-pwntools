@@ -2,7 +2,9 @@
 from setuptools import setup, find_packages
 from distutils.util import convert_path
 from distutils.command.install import INSTALL_SCHEMES
-import os, glob, platform
+import os
+import glob
+import platform
 
 # Get all template files
 templates = []
@@ -32,14 +34,14 @@ for filename in glob.glob('pwnlib/commandline/*'):
     script = '%s=pwnlib.commandline.%s:main' % (filename, filename)
     console_scripts.append(script)
 
-install_requires     = ['paramiko>=1.15.2',
-                        'argparse',
-                        'mako>=1.0.0',
-                        'pyelftools>=0.2.3',
-                        'capstone',
-                        'ropgadget>=5.3',
-                        'pyserial>=2.7',
-                        'requests>=2.0']
+install_requires = ['paramiko>=1.15.2',
+                    'argparse',
+                    'mako>=1.0.0',
+                    'pyelftools>=0.2.3',
+                    'capstone',
+                    'ropgadget>=5.3',
+                    'pyserial>=2.7',
+                    'requests>=2.0']
 
 # This is a hack until somebody ports psutil to OpenBSD
 if platform.system() != 'OpenBSD':
@@ -49,10 +51,7 @@ setup(
     name                 = 'pwntools',
     packages             = find_packages(),
     version              = version,
-    data_files           = [('',
-                             ['LICENSE-pwntools.txt',
-                             ]),
-                            ],
+    data_files           = [('', ['LICENSE-pwntools.txt']), ],
     package_data         = {
         'pwnlib': [
             'data/crcsums.txt',
@@ -61,7 +60,7 @@ setup(
             'data/includes/*/*.h',
         ] + templates,
     },
-    entry_points = {'console_scripts': console_scripts},
+    entry_points         = {'console_scripts': console_scripts},
     scripts              = glob.glob("bin/*"),
     description          = "This is the CTF framework used by Gallopsled in every CTF.",
     author               = "Gallopsled et al.",

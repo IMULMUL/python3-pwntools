@@ -9,15 +9,16 @@ from pwnlib.util.packing import *
 
 log = getLogger(__name__)
 
+
 class FmtStr:
-    def __init__(self, execute_fmt, offset = None, padlen = 0, numbwritten = 0):
+
+    def __init__(self, execute_fmt, offset=None, padlen=0, numbwritten=0):
         self.execute_fmt = execute_fmt
         self.offset = offset
         self.padlen = padlen
         self.numbwritten = numbwritten
 
-
-        if self.offset == None:
+        if self.offset is None:
             self.offset, self.padlen = self.find_offset()
             log.info("Found format string offset: %d", self.offset)
 
@@ -25,7 +26,7 @@ class FmtStr:
         self.leaker = MemLeak(self._leaker)
 
     def leak_stack(self, offset, prefix=""):
-        leak = self.execute_fmt(prefix+"START%%%d$pEND" % offset)
+        leak = self.execute_fmt(prefix + "START%%%d$pEND" % offset)
         try:
             leak = re.findall(r"START(.*)END", leak, re.MULTILINE | re.DOTALL)[0]
             leak = int(leak, 16)
@@ -35,7 +36,7 @@ class FmtStr:
 
     def find_offset(self):
         marker = cyclic(20)
-        for off in range(1,1000):
+        for off in range(1, 1000):
             leak = self.leak_stack(off, marker)
             leak = pack(leak)
 
@@ -53,7 +54,7 @@ class FmtStr:
         # Thus the solution to this problem is to check if the next 3 bytes are
         # "ELF" and if so we lie and leak "\x7f"
         # unless it is leaked otherwise.
-        if addr & 0xfff == 0 and self.leaker._leak(addr+1, 3, False) == "ELF":
+        if addr & 0xfff == 0 and self.leaker._leak(addr + 1, 3, False) == "ELF":
             return "\x7f"
 
         fmtstr = randoms(self.padlen) + pack(addr) + "START%%%d$sEND" % self.offset
@@ -69,11 +70,11 @@ class FmtStr:
         addrs = []
         bytes = []
 
-        #convert every write into single-byte writes
+        # convert every write into single-byte writes
         for addr, data in self.writes:
             data = flat(data)
             for off, b in enumerate(data):
-                addrs.append(addr+off)
+                addrs.append(addr + off)
                 bytes.append(u8(b))
 
         fmtstr = randoms(self.padlen) + flat(addrs)

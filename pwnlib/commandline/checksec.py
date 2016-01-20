@@ -7,7 +7,7 @@ from pwn import *
 from . import common
 
 parser = argparse.ArgumentParser(
-    description = 'Check binary security settings'
+    description='Check binary security settings'
 )
 
 parser.add_argument(
@@ -17,9 +17,11 @@ parser.add_argument(
     help='Files to check'
 )
 
+
 def main():
-    args   = parser.parse_args()
+    args = parser.parse_args()
     for f in args.elf:
         e = ELF(f.name)
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()

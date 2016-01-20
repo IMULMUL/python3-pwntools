@@ -9,21 +9,25 @@ from ..context import context
 
 
 class module(ModuleType):
+
     def __init__(self, name, directory):
         super(module, self).__init__(name)
 
         # Insert nice properties
         self.__dict__.update({
-            '__file__':    __file__,
+            '__file__': __file__,
             '__package__': __package__,
-            '__path__':    __path__,
+            '__path__': __path__,
         })
 
         # Save the shellcode directory
         self._dir = directory
 
         # Find the absolute path of the directory
-        self._absdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates', self._dir)
+        self._absdir = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            'templates',
+            self._dir)
 
         # Get the docstring
         with open(os.path.join(self._absdir, "__doc__")) as fd:
@@ -39,7 +43,9 @@ class module(ModuleType):
         for name in os.listdir(self._absdir):
             path = os.path.join(self._absdir, name)
             if os.path.isdir(path):
-                self._submodules[name] = module(self.__name__ + '.' + name, os.path.join(self._dir, name))
+                self._submodules[name] = module(
+                    self.__name__ + '.' + name,
+                    os.path.join(self._dir, name))
             elif os.path.isfile(path) and name != '__doc__' and name[0] != '.':
                 funcname, _ext = os.path.splitext(name)
                 if not re.match('^[a-zA-Z][a-zA-Z0-9_]*$', funcname):
@@ -129,6 +135,7 @@ shellcraft = module(__name__, '')
 
 
 class LazyImporter:
+
     def find_module(self, fullname, path):
         if not fullname.startswith('pwnlib.shellcraft.'):
             return None

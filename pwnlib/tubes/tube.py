@@ -99,7 +99,7 @@ class tube(Timeout):
         self.buffer.unget(data)
 
     def _fillbuffer(self, timeout=default):
-        """_fillbuffer(timeout = default) -> bytes
+        """_fillbuffer(timeout=default) -> bytes
 
         Fills the internal buffer from the pipe, by calling
         :meth:`recv_raw` exactly once.
@@ -232,7 +232,9 @@ class tube(Timeout):
         # It will be pasted together at the end if a
         # timeout does not occur, or put into the tube buffer.
         with self.countdown(timeout):
-            while self.countdown_active() and len(self.buffer) < numb and self._fillbuffer(self.timeout):
+            while (self.countdown_active() and
+                   len(self.buffer) < numb and
+                   self._fillbuffer(self.timeout)):
                 pass
 
         if len(self.buffer) < numb:
@@ -770,7 +772,7 @@ class tube(Timeout):
         return res
 
     def sendlineafter(self, delim, data, timeout=default):
-        """sendlineafter(delim, data, timeout = default) -> bytes
+        """sendlineafter(delim, data, timeout=default) -> bytes
 
         A combination of ``recvuntil(delim, timeout)`` and ``sendline(data)``."""
 
@@ -797,7 +799,7 @@ class tube(Timeout):
         return self.recvuntil(delim, timeout)
 
     def interactive(self, prompt=term.text.bold_red('$') + ' '):
-        """interactive(prompt = pwnlib.term.text.bold_red('$') + ' ')
+        """interactive(prompt=pwnlib.term.text.bold_red('$') + ' ')
 
         Does simultaneous reading and writing to the tube. In principle this just
         connects the tube to standard in and standard out, but in practice this
@@ -810,6 +812,7 @@ class tube(Timeout):
         log.info('Switching to interactive mode')
 
         go = threading.Event()
+
         def recv_thread():
             while not go.isSet():
                 try:
@@ -1095,14 +1098,13 @@ class tube(Timeout):
         """
         self.timeout = timeout
 
-
     shutdown_directions = {
-        'in':    'recv',
-        'read':  'recv',
-        'recv':  'recv',
-        'out':   'send',
+        'in': 'recv',
+        'read': 'recv',
+        'recv': 'recv',
+        'out': 'send',
         'write': 'send',
-        'send':  'send',
+        'send': 'send',
     }
 
     connected_directions = shutdown_directions.copy()
@@ -1254,7 +1256,7 @@ class tube(Timeout):
         raise NotImplementedError()
 
     def connected_raw(self, direction):
-        """connected(direction = 'any') -> bool
+        """connected(direction='any') -> bool
 
         Should not be called directly.  Returns True iff the
         tube is connected in the given direction.
@@ -1288,56 +1290,82 @@ class tube(Timeout):
 
     #: Alias for :meth:`recv`
     def read(self, *a, **kw): return self.recv(*a, **kw)
+
     #: Alias for :meth:`recvpred`
     def readpred(self, *a, **kw): return self.recvpred(*a, **kw)
+
     #: Alias for :meth:`recvn`
     def readn(self, *a, **kw): return self.recvn(*a, **kw)
+
     #: Alias for :meth:`recvuntil`
     def readuntil(self, *a, **kw): return self.recvuntil(*a, **kw)
+
     #: Alias for :meth:`recvlines`
     def readlines(self, *a, **kw): return self.recvlines(*a, **kw)
+
     #: Alias for :meth:`recvline`
     def readline(self, *a, **kw): return self.recvline(*a, **kw)
+
     #: Alias for :meth:`recvline_pred`
     def readline_pred(self, *a, **kw): return self.recvline_pred(*a, **kw)
+
     #: Alias for :meth:`recvline_contains`
     def readline_contains(self, *a, **kw): return self.recvline_contains(*a, **kw)
+
     #: Alias for :meth:`recvline_startswith`
     def readline_startswith(self, *a, **kw): return self.recvline_startswith(*a, **kw)
+
     #: Alias for :meth:`recvline_endswith`
     def readline_endswith(self, *a, **kw): return self.recvline_endswith(*a, **kw)
+
     #: Alias for :meth:`recvregex`
     def readregex(self, *a, **kw): return self.recvregex(*a, **kw)
+
     #: Alias for :meth:`recvline_regex`
     def readline_regex(self, *a, **kw): return self.recvline_regex(*a, **kw)
+
     #: Alias for :meth:`recvrepeat`
     def readrepeat(self, *a, **kw): return self.recvrepeat(*a, **kw)
+
     #: Alias for :meth:`recvall`
     def readall(self, *a, **kw): return self.recvall(*a, **kw)
 
     #: Alias for :meth:`send`
     def write(self, *a, **kw): return self.send(*a, **kw)
+
     #: Alias for :meth:`sendline`
     def writeline(self, *a, **kw): return self.sendline(*a, **kw)
+
     #: Alias for :meth:`sendafter`
     def writeafter(self, *a, **kw): return self.sendafter(*a, **kw)
+
     #: Alias for :meth:`sendlineafter`
     def writelineafter(self, *a, **kw): return self.sendlineafter(*a, **kw)
+
     #: Alias for :meth:`sendthen`
     def writethen(self, *a, **kw): return self.sendthen(*a, **kw)
+
     #: Alias for :meth:`sendlinethen`
     def writelinethen(self, *a, **kw): return self.sendlinethen(*a, **kw)
 
-    def p64(self, *a, **kwdata):    return self.send(packing.p64(*a, **kw))
-    def p32(self, *a, **kw):        return self.send(packing.p32(*a, **kw))
-    def p16(self, *a, **kw):        return self.send(packing.p16(*a, **kw))
-    def p8(self, *a, **kw):         return self.send(packing.p8(*a, **kw))
-    def pack(self, *a, **kw):       return self.send(packing.pack(*a, **kw))
+    def p64(self, *a, **kwdata): return self.send(packing.p64(*a, **kw))
 
-    def u64(self, *a, **kw):        return packing.u64(self.recvn(8), *a, **kw)
-    def u32(self, *a, **kw):        return packing.u32(self.recvn(4), *a, **kw)
-    def u16(self, *a, **kw):        return packing.u16(self.recvn(2), *a, **kw)
-    def u8(self, *a, **kw):         return packing.u8(self.recvn(1), *a, **kw)
-    def unpack(self, *a, **kw):     return packing.unpack(self.recvn(context.bytes), *a, **kw)
+    def p32(self, *a, **kw): return self.send(packing.p32(*a, **kw))
 
-    def flat(self, *a, **kw):       return self.send(packing.flat(*a,**kw))
+    def p16(self, *a, **kw): return self.send(packing.p16(*a, **kw))
+
+    def p8(self, *a, **kw): return self.send(packing.p8(*a, **kw))
+
+    def pack(self, *a, **kw): return self.send(packing.pack(*a, **kw))
+
+    def u64(self, *a, **kw): return packing.u64(self.recvn(8), *a, **kw)
+
+    def u32(self, *a, **kw): return packing.u32(self.recvn(4), *a, **kw)
+
+    def u16(self, *a, **kw): return packing.u16(self.recvn(2), *a, **kw)
+
+    def u8(self, *a, **kw): return packing.u8(self.recvn(1), *a, **kw)
+
+    def unpack(self, *a, **kw): return packing.unpack(self.recvn(context.bytes), *a, **kw)
+
+    def flat(self, *a, **kw): return self.send(packing.flat(*a, **kw))

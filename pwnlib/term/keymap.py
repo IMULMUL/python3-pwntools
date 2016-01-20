@@ -4,6 +4,7 @@ from . import key
 
 
 class Keymap:
+
     def __init__(self, bindings, on_match=None, on_nomatch=None,
                  on_key=None):
         self._on_match = on_match

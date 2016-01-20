@@ -54,9 +54,9 @@ class remote(sock):
 
         if sock:
             self.family = sock.family
-            self.type   = sock.type
-            self.proto  = sock.proto
-            self.sock   = sock
+            self.type = sock.type
+            self.proto = sock.proto
+            self.sock = sock
         else:
             typ = self._get_type(typ)
             fam = self._get_family(fam)
@@ -98,7 +98,7 @@ class remote(sock):
         return typ
 
     def _connect(self, fam, typ):
-        sock    = None
+        sock = None
         timeout = self.timeout
 
         h = log.waitfor('Opening connection to %s on port %d' % (self.rhost, self.rport))

@@ -12,51 +12,61 @@ __all__ = ['getifaddrs', 'interfaces', 'interfaces4', 'interfaces6', 'sockaddr']
 sa_family_t = ctypes.c_ushort
 
 # /usr/src/linux-headers-3.12-1-common/include/linux/socket.h
+
+
 class struct_sockaddr(ctypes.Structure):
     _fields_ = [
-        ('sa_family', sa_family_t)       ,
-        ('sa_data'  , ctypes.c_char * 14),
+        ('sa_family', sa_family_t),
+        ('sa_data', ctypes.c_char * 14),
     ]
 
 # /usr/src/linux-headers-3.12-1-common/include/uapi/linux/in.h
 struct_in_addr = ctypes.c_uint8 * 4
+
+
 class struct_sockaddr_in(ctypes.Structure):
     _fields_ = [
-        ('sin_family', sa_family_t)    ,
-        ('sin_port'  , ctypes.c_uint16),
-        ('sin_addr'  , struct_in_addr) ,
+        ('sin_family', sa_family_t),
+        ('sin_port', ctypes.c_uint16),
+        ('sin_addr', struct_in_addr),
     ]
 
 # /usr/src/linux-headers-3.12-1-common/include/uapi/linux/in6.h
 struct_in6_addr = ctypes.c_uint8 * 16
+
+
 class struct_sockaddr_in6(ctypes.Structure):
     _fields_ = [
-        ('sin6_family'  , ctypes.c_ushort),
-        ('sin6_port'    , ctypes.c_uint16),
+        ('sin6_family', ctypes.c_ushort),
+        ('sin6_port', ctypes.c_uint16),
         ('sin6_flowinfo', ctypes.c_uint32),
-        ('sin6_addr'    , struct_in6_addr),
+        ('sin6_addr', struct_in6_addr),
         ('sin6_scope_id', ctypes.c_uint32),
     ]
 
 # /usr/include/ifaddrs.h
+
+
 class union_ifa_ifu(ctypes.Union):
     _fields_ = [
         ('ifu_broadaddr', ctypes.POINTER(struct_sockaddr)),
-        ('ifu_dstaddr'  , ctypes.POINTER(struct_sockaddr)),
+        ('ifu_dstaddr', ctypes.POINTER(struct_sockaddr)),
     ]
 
+
 class struct_ifaddrs(ctypes.Structure):
-    pass # recursively defined
+    pass  # recursively defined
 
 struct_ifaddrs._fields_ = [
-    ('ifa_next'   , ctypes.POINTER(struct_ifaddrs)) ,
-    ('ifa_name'   , ctypes.c_char_p)                ,
-    ('ifa_flags'  , ctypes.c_uint)                  ,
-    ('ifa_addr'   , ctypes.POINTER(struct_sockaddr)),
+    ('ifa_next', ctypes.POINTER(struct_ifaddrs)),
+    ('ifa_name', ctypes.c_char_p),
+    ('ifa_flags', ctypes.c_uint),
+    ('ifa_addr', ctypes.POINTER(struct_sockaddr)),
     ('ifa_netmask', ctypes.POINTER(struct_sockaddr)),
-    ('ifa_ifu'    , union_ifa_ifu)                  ,
-    ('ifa_data'   , ctypes.c_void_p)                ,
+    ('ifa_ifu', union_ifa_ifu),
+    ('ifa_data', ctypes.c_void_p),
 ]
+
 
 def sockaddr_fixup(saptr):
     family = saptr.contents.sa_family
@@ -72,6 +82,7 @@ def sockaddr_fixup(saptr):
         addr['addr'] = socket.inet_ntop(family, sa.sin6_addr)
         addr['scope_id'] = sa.sin6_scope_id
     return family, addr
+
 
 def getifaddrs():
     """getifaddrs() -> dict list
@@ -123,6 +134,7 @@ def getifaddrs():
     finally:
         freeifaddrs(ifaptr)
 
+
 def interfaces(all=False):
     """interfaces(all=False) -> dict
 
@@ -149,6 +161,7 @@ def interfaces(all=False):
         out = {k: v for k, v in out.items() if v}
     return out
 
+
 def interfaces4(all=False):
     """interfaces4(all=False) -> dict
 
@@ -170,6 +183,7 @@ def interfaces4(all=False):
             out[name] = addrs
     return out
 
+
 def interfaces6(all=False):
     """interfaces6(all=False) -> dict
 
@@ -190,6 +204,7 @@ def interfaces6(all=False):
         if addrs or all:
             out[name] = addrs
     return out
+
 
 def sockaddr(host, port, network='ipv4'):
     """sockaddr(host, port, network='ipv4') -> (data, length, family)
@@ -216,14 +231,15 @@ def sockaddr(host, port, network='ipv4'):
     info = socket.getaddrinfo(host, None, address_family)
     host = socket.inet_pton(address_family, ip)
     sockaddr = p16(address_family)
-    sockaddr += pack(port, word_size=16, endianness='big') # Port should be big endian = network byte order
+    # Port should be big endian = network byte order
+    sockaddr += pack(port, word_size=16, endianness='big')
     length = 0
 
     if network == 'ipv4':
         sockaddr += host
-        length = 16 # Save ten bytes by skipping two 'push 0'
+        length = 16  # Save ten bytes by skipping two 'push 0'
     else:
-        sockaddr += p32(0xffffffff) # Save three bytes 'push -1' vs 'push 0'
+        sockaddr += p32(0xffffffff)  # Save three bytes 'push -1' vs 'push 0'
         sockaddr += host
-        length = len(sockaddr) + 4 # Save five bytes 'push 0'
+        length = len(sockaddr) + 4  # Save five bytes 'push 0'
     return (sockaddr, length, address_family)
