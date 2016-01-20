@@ -1,7 +1,8 @@
 sudo: false
 language: python
 python:
-  - "3.2"
+# Sphinx requires at least Python 3.3 to run.
+#  - "3.2"
   - "3.3"
   - "3.4"
   - "3.5"
