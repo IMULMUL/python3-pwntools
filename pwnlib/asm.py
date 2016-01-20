@@ -611,8 +611,13 @@ def disasm(data, vma=0, byte=True, offset=True, **kwargs):
     lines = []
     pattern = '^( *[0-9a-f]+: *)((?:[0-9a-f]+ )+ *)(.*)'
     for line in result.splitlines():
-        o, b, i = re.search(pattern, line).groups()
+        match = re.search(pattern, line)
 
+        if not match:
+            lines.append(line)
+            continue
+
+        o, b, i = match.groups()
         line = ''
 
         if offset:
