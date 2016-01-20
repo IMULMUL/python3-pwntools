@@ -25,18 +25,18 @@ def yesno(prompt, default=None):
         term.output(' [?] %s [' % prompt)
         yesfocus, yes = term.text.bold('Yes'), 'yes'
         nofocus, no = term.text.bold('No'), 'no'
-        hy = term.output(yesfocus if default else yes)
+        hy = term.output(yesfocus if default is True else yes)
         term.output('/')
-        hn = term.output(nofocus if default == False else no)
+        hn = term.output(nofocus if default is False else no)
         term.output(']\n')
         cur = default
         while True:
             k = term.key.get()
-            if k in ('y', 'Y', '<left>') and not cur:
+            if k in ('y', 'Y', '<left>') and cur is not True:
                 cur = True
                 hy.update(yesfocus)
                 hn.update(no)
-            elif k in ('n', 'N', '<right>') and cur:
+            elif k in ('n', 'N', '<right>') and cur is not False:
                 cur = False
                 hy.update(yes)
                 hn.update(nofocus)
@@ -45,8 +45,8 @@ def yesno(prompt, default=None):
                     return cur
     else:
         prompt = ' [?] %s [%s/%s] ' % (prompt,
-                                       'Yes' if default else 'yes',
-                                       'No' if not default else 'no',
+                                       'Yes' if default is True else 'yes',
+                                       'No' if default is False else 'no',
                                        )
         while True:
             opt = input(prompt).lower()
