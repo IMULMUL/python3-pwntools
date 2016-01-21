@@ -290,7 +290,7 @@ class ContextType:
         >>> context.bits
         32
         >>> def nop():
-        ...   print(codecs.encode(pwnlib.asm.asm('nop'), 'hex').decode('utf8'))
+        ...   print(enhex(pwnlib.asm.asm('nop')))
         >>> nop()
         00f020e3
         >>> with context.local(arch = 'i386'):

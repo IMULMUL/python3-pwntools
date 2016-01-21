@@ -209,9 +209,6 @@ def unpack(data, word_size=None, endianness=None, sign=None, **kwargs):
         if endianness == "little":
             data = reversed(data)
 
-        if isinstance(data, str):
-            data = data.encode('utf8')
-
         for c in data:
             number = (number << 8) + c
 

@@ -1,7 +1,8 @@
 .. testsetup:: *
 
    import pwnlib
-   from   pwnlib.context import context
+   from pwnlib.context import context
+   from pwnlib.util.fiddling import enhex
    import threading, logging, codecs
 
 

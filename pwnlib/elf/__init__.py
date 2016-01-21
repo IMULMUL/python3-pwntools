@@ -17,6 +17,7 @@ from ..asm import disasm
 from ..log import getLogger
 from ..term import text
 from ..util import misc
+from ..util import fiddling
 from .datatypes import *
 
 log = getLogger(__name__)
@@ -375,9 +376,7 @@ class ELF(ELFFile):
             >>> len(list(libc.search('/bin/sh'))) > 0
             True
         """
-        if isinstance(needle, str):
-            needle = needle.encode('utf8')
-
+        needle = fiddling.force_bytes(needle)
         load_address_fixup = (self.address - self.load_addr)
 
         if writable:

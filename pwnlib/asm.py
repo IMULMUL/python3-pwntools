@@ -390,7 +390,7 @@ def make_elf(data, vma=None, strip=True, **kwargs):
         >>> context.arch = 'i386'
         >>> context.bits = 32
         >>> filename = tempfile.mktemp()
-        >>> bin_sh = codecs.decode('6a68682f2f2f73682f62696e89e331c96a0b5899cd80', 'hex')
+        >>> bin_sh = unhex('6a68682f2f2f73682f62696e89e331c96a0b5899cd80')
         >>> data = make_elf(bin_sh)
         >>> with open(filename, 'wb+') as f:
         ...     _ = f.write(data)
@@ -547,20 +547,20 @@ def disasm(data, vma=0, byte=True, offset=True, **kwargs):
 
         .. doctest::
 
-          >>> print(disasm(codecs.decode('b85d000000', 'hex'), arch='i386'))
+          >>> print(disasm(unhex('b85d000000'), arch='i386'))
              0:   b8 5d 00 00 00          mov    eax,0x5d
-          >>> print(disasm(codecs.decode('b85d000000', 'hex'), arch='i386', byte=0))
+          >>> print(disasm(unhex('b85d000000'), arch='i386', byte=0))
              0:   mov    eax,0x5d
-          >>> print(disasm(codecs.decode('b85d000000', 'hex'), arch='i386', byte=0, offset=0))
+          >>> print(disasm(unhex('b85d000000'), arch='i386', byte=0, offset=0))
           mov    eax,0x5d
-          >>> print(disasm(codecs.decode('b817000000', 'hex'), arch='amd64'))
+          >>> print(disasm(unhex('b817000000'), arch='amd64'))
              0:   b8 17 00 00 00          mov    eax,0x17
-          >>> print(disasm(codecs.decode('48c7c017000000', 'hex'), arch='amd64'))
+          >>> print(disasm(unhex('48c7c017000000'), arch='amd64'))
              0:   48 c7 c0 17 00 00 00    mov    rax,0x17
-          >>> print(disasm(codecs.decode('04001fe552009000', 'hex'), arch='arm'))
+          >>> print(disasm(unhex('04001fe552009000'), arch='arm'))
              0:   e51f0004        ldr     r0, [pc, #-4]   ; 0x4
              4:   00900052        addseq  r0, r0, r2, asr r0
-          >>> print(disasm(codecs.decode('4ff00500', 'hex'), arch='thumb', bits=32))
+          >>> print(disasm(unhex('4ff00500'), arch='thumb', bits=32))
              0:   f04f 0005       mov.w   r0, #5
           >>>
     """

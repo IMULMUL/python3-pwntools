@@ -68,9 +68,7 @@ def main():
         sys.exit(0)
 
     output = formatters[fmt[0]](output)
-    if isinstance(output, str):
-        output = output.encode('utf8')
-    args.output.write(output)
+    args.output.write(force_bytes(output))
 
     if tty and fmt is not 'raw':
         args.output.write(b'\n')
