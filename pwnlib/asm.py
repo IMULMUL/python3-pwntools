@@ -322,7 +322,7 @@ def _run(cmd, stdin=None):
 
 
 def cpp(shellcode, **kwargs):
-    r"""cpp(shellcode, ...) -> bytes
+    r"""cpp(shellcode, ...) -> str
 
     Runs CPP over the given shellcode.
 
@@ -339,13 +339,13 @@ def cpp(shellcode, **kwargs):
         .. doctest::
 
             >>> cpp("mov al, SYS_setresuid", arch="i386", os="linux")
-            b'mov al, 164\n'
+            'mov al, 164\n'
             >>> cpp("weee SYS_setresuid", arch="arm", os="linux")
-            b'weee (0x900000+164)\n'
+            'weee (0x900000+164)\n'
             >>> cpp("SYS_setresuid", arch="thumb", os="linux")
-            b'(0+164)\n'
+            '(0+164)\n'
             >>> cpp("SYS_setresuid", os="freebsd")
-            b'311\n'
+            '311\n'
     """
 
     with context.local(**kwargs):
@@ -361,7 +361,7 @@ def cpp(shellcode, **kwargs):
             '-I' + _incdir,
             '/dev/stdin'
         ]
-        return _run(cmd, code).strip(b'\n').rstrip() + b'\n'
+        return _run(cmd, code).decode('utf8').strip('\n').rstrip() + '\n'
 
 elf_template = '''
 .global _start
@@ -476,11 +476,11 @@ def asm(shellcode, vma=0, **kwargs):
         assembler = _assembler()
         linker = _linker()
         objcopy = _objcopy() + ['-j', '.shellcode', '-Obinary']
-        code = b''
-        code += _arch_header().encode('utf8')
+        code = ''
+        code += _arch_header()
         code += cpp(shellcode)
 
-        log.debug('Assembling\n%r' % code)
+        log.debug('Assembling\n%s' % code)
 
         tmpdir = tempfile.mkdtemp(prefix='pwn-asm-')
         step1 = path.join(tmpdir, 'step1')
@@ -489,7 +489,7 @@ def asm(shellcode, vma=0, **kwargs):
         step4 = path.join(tmpdir, 'step4')
 
         try:
-            with open(step1, 'wb') as fd:
+            with open(step1, 'w') as fd:
                 fd.write(code)
 
             _run(assembler + ['-o', step2, step1])

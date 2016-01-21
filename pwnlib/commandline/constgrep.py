@@ -128,7 +128,7 @@ def main():
         # Output all matching constants
         for _, k in sorted(out):
             print('#define %s %s' % (k.ljust(maxlen),
-                                     asm.cpp(k, os=os, arch=arch).strip().decode('utf8')))
+                                     asm.cpp(k, os=os, arch=arch).strip()))
 
         # If we are in match_mode, then try to find a combination of
         # constants that yield the exact given value

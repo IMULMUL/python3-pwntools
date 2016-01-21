@@ -188,7 +188,7 @@ def main():
         args.out.write(code.encode('utf8'))
         exit()
     if args.format == 'p':
-        args.out.write(cpp(code))
+        args.out.write(cpp(code).encode('utf8'))
         exit()
 
     code = asm(code)
