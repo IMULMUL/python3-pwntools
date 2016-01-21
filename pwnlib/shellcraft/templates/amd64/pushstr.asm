@@ -56,8 +56,7 @@ Args:
   append_null (bool): Whether to append a single NULL-byte before pushing.
 </%docstring>
 <%
-    if isinstance(string, str):
-        string = string.encode('utf8')
+    string = fiddling.force_bytes(string)
 
     if append_null:
         string += b'\x00'

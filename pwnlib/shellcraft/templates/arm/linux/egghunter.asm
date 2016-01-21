@@ -1,5 +1,6 @@
 <% from pwnlib.shellcraft.arm import mov %>
 <% from pwnlib.util.packing import unpack %>
+<% from pwnlib.util.fiddling import force_bytes %>
 <% from pwnlib import constants %>
 <%page args="egg, start_address=0, double_check=True"/>
 <%docstring>
@@ -15,8 +16,7 @@
 </%docstring>
 <%
     if not isinstance(egg, int):
-        if isinstance(egg, str):
-            egg = egg.encode('utf8')
+        egg = force_bytes(egg)
 
         if not len(egg) == 4:
             raise Exception('Egg should be either an integer or a four byte string')

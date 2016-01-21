@@ -175,7 +175,6 @@ class Module(types.ModuleType):
             'See also: ' + info['link'])
 
         setattr(self, attr, func)
-
         return func
 
     def __dir__(self):
@@ -212,6 +211,9 @@ class Module(types.ModuleType):
             inlen = len(data)
             p = BitPolynom(int(''.join('1' if v else '0' for v in data), 2))
         elif isinstance(data, (bytes, str)):
+            if isinstance(data, str):
+                data = data.encode('utf8')
+
             inlen = len(data) * 8
             if refin:
                 data = fiddling.bitswap(data)
@@ -234,7 +236,7 @@ class Module(types.ModuleType):
         inner.__qualname__ = 'crc_' + name
         inner.__name__ = 'crc_' + name
 
-        inner.__doc__   = """%s(data) -> int
+        inner.__doc__ = """%s(data) -> int
 
         Calculates the %s checksum.
 

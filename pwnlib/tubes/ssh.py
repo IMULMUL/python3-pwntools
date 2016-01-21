@@ -16,6 +16,7 @@ from ..timeout import Timeout
 from ..util import hashes
 from ..util import misc
 from ..util import safeeval
+from ..util import fiddling
 from .process import process
 from .sock import sock
 
@@ -610,8 +611,7 @@ class ssh(Timeout):
         for i, arg in enumerate(argv):
             if not isinstance(arg, (bytes, str)):
                 log.error("argv must only contain bytes or strings: %r" % argv)
-            if isinstance(arg, str):
-                arg = arg.encode('utf8')
+            arg = fiddling.force_bytes(arg)
 
             if b'\x00' in arg[:-1]:
                 log.error('Inappropriate null byte in argv[%i]: %r' % (i, arg))
@@ -621,15 +621,13 @@ class ssh(Timeout):
         executable = executable or argv[0]
         if not isinstance(executable, (bytes, str)):
             log.error("executable / argv[0] must be a bytes or string: %r" % executable)
-        if isinstance(executable, str):
-            executable = executable.encode('utf8')
+        executable = fiddling.force_bytes(executable)
 
         # Validate cwd
         cwd = cwd or self.cwd or '.'
         if not isinstance(cwd, (bytes, str)):
             log.error("cwd must be a bytes or string: %r" % cwd)
-        if isinstance(cwd, str):
-            cwd = cwd.encode('utf8')
+        cwd = fiddling.force_bytes(cwd)
 
         # Validate env
         if env is not None and not isinstance(env, dict):
@@ -642,14 +640,12 @@ class ssh(Timeout):
             for k, v in env_vars:
                 if not isinstance(k, (bytes, str)):
                     log.error('Environment keys must be bytes or strings: %r' % k)
-                if isinstance(k, str):
-                    k = k.encode('utf8')
+                k = fiddling.force_bytes(k)
 
                 if not isinstance(v, (bytes, str)):
                     log.error('Environment values must be bytes or strings: %r=%r' %
                               (k, v))
-                if isinstance(v, str):
-                    v = v.encode('utf8')
+                v = fiddling.force_bytes(v)
 
                 if b'\x00' in k[:-1]:
                     log.error('Inappropriate null byte in env key: %r' % k)
@@ -662,12 +658,12 @@ class ssh(Timeout):
         stdin = {sys.stdin: 0, sys.stdout: 1, sys.stderr: 2}.get(stdin, stdin)
         stdout = {sys.stdin: 0, sys.stdout: 1, sys.stderr: 2}.get(stdout, stdout)
         stderr = {sys.stdin: 0, sys.stdout: 1, sys.stderr: 2}.get(stderr, stderr)
-        if isinstance(stdin, str):
-            stdin = stdin.encode('utf8')
-        if isinstance(stdout, str):
-            stdout = stdout.encode('utf8')
-        if isinstance(stderr, str):
-            stderr = stderr.encode('utf8')
+        if isinstance(stdin, (bytes, str)):
+            stdin = fiddling.force_bytes(stdin)
+        if isinstance(stdout, (bytes, str)):
+            stdout = fiddling.force_bytes(stdout)
+        if isinstance(stderr, (bytes, str)):
+            stderr = fiddling.force_bytes(stderr)
 
         script = r"""
 #!/usr/bin/env python2

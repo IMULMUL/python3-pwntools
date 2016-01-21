@@ -58,7 +58,7 @@ from .elf import ELF
 from .elf import constants
 from .log import getLogger
 from .memleak import MemLeak
-from .util.fiddling import enhex
+from .util.fiddling import force_bytes, enhex
 from .util.packing import unpack
 from .util.web import wget
 
@@ -479,10 +479,7 @@ class DynELF:
         Returns:
             Address of the named symbol, or ``None``.
         """
-        if isinstance(symb, str):
-            symb = symb.encode('utf8')
-        if isinstance(lib, str):
-            lib = lib.encode('utf8')
+        lib = force_bytes(lib)
 
         if lib == b'libc':
             lib = b'libc.so'

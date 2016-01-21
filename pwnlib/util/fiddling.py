@@ -14,93 +14,113 @@ from ..term import text
 from .cyclic import cyclic_find
 
 
+def force_bytes(s):
+    """force_bytes(s) -> bytes
+
+    Ensures the given argument is of type bytes
+
+    Example:
+
+      >>> force_bytes(b'abc')
+      b'abc'
+      >>> force_bytes('abc')
+      b'abc'
+      >>> force_bytes(1)
+      Traceback (most recent call last):
+          ...
+      TypeError: Expecting a value of type bytes or str, got 1
+"""
+    if isinstance(s, bytes):
+        return s
+    elif isinstance(s, str):
+        return s.encode('utf8')
+    else:
+        raise TypeError('Expecting a value of type bytes or str, got %r' % s)
+
+
 def unhex(s):
     """unhex(s) -> bytes
 
-    Hex-decodes a string.
+    Hex-decodes a bytes or string.
 
     Example:
 
       >>> unhex("74657374")
       b'test'
 """
-    return codecs.decode(s, 'hex_codec')
+    return codecs.decode(force_bytes(s), 'hex_codec')
 
 
 def enhex(x):
     """enhex(x) -> str
 
-    Hex-encodes a string.
+    Hex-encodes a bytes or string.
 
     Example:
 
       >>> enhex("test")
       '74657374'
 """
-    if isinstance(x, str):
-        x = x.encode('utf8')
-
-    return codecs.encode(x, 'hex_codec').decode('utf8')
+    return codecs.encode(force_bytes(x), 'hex_codec').decode('utf8')
 
 
 def urlencode(s):
     """urlencode(s) -> str
 
-    URL-encodes a string.
+    URL-encodes a bytes or string.
 
     Example:
 
       >>> urlencode("test")
       '%74%65%73%74'
 """
-    if isinstance(s, str):
-        s = s.encode('utf8')
-
-    return ''.join(['%%%02x' % c for c in s])
+    return ''.join(['%%%02x' % c for c in force_bytes(s)])
 
 
 def urldecode(s, ignore_invalid=False):
-    """urldecode(s, ignore_invalid=False) -> str
+    """urldecode(s, ignore_invalid=False) -> bytes
 
-    URL-decodes a string.
+    URL-decodes a bytes or string.
 
     Example:
 
       >>> urldecode("test%20%41")
-      'test A'
+      b'test A'
       >>> urldecode("%qq")
       Traceback (most recent call last):
           ...
       ValueError: Invalid input to urldecode
       >>> urldecode("%qq", ignore_invalid=True)
-      '%qq'
+      b'%qq'
 """
-    res = ''
+    s = force_bytes(s)
+    res = []
     n = 0
     while n < len(s):
-        if s[n] != '%':
-            res += s[n]
+        if s[n] != ord('%'):
+            res.append(s[n])
             n += 1
         else:
             cur = s[n + 1:n + 3]
-            if re.match('[0-9a-fA-F]{2}', cur):
-                res += chr(int(cur, 16))
+            if re.match(b'[0-9a-fA-F]{2}', cur):
+                res.append(int(cur, 16))
                 n += 3
             elif ignore_invalid:
-                res += '%'
+                res.append(ord('%'))
                 n += 1
             else:
                 raise ValueError("Invalid input to urldecode")
-    return res
+
+    return bytes(res)
 
 
 def bits(s, endian='big', zero=0, one=1):
     """bits(s, endian='big', zero=0, one=1) -> list
 
-    Converts the argument a list of bits.
+    Converts the argument to a list of bits.
 
     Arguments:
-      s: A string or number to be converted into bits.
+      s(bytes, str, int): A string or number to be converted into bits.
       endian (str): The binary endian, default 'big'.
       zero: The representing a 0-bit.
       one: The representing a 1-bit.
@@ -117,19 +137,19 @@ def bits(s, endian='big', zero=0, one=1):
       >>> bits(0)
       [0, 0, 0, 0, 0, 0, 0, 0]
 """
-    if endian not in ['little', 'big']:
+    if endian not in ('little', 'big'):
         raise ValueError("bits(): 'endian' must be either 'little' or 'big'")
     else:
         little = endian == 'little'
 
     out = []
-    if isinstance(s, str):
+    if isinstance(s, (bytes, str)):
+        s = force_bytes(s)
         for c in s:
-            b = ord(c)
             byte = []
             for _ in range(8):
-                byte.append(one if b & 1 else zero)
-                b >>= 1
+                byte.append(one if c & 1 else zero)
+                c >>= 1
             if little:
                 out += byte
             else:
@@ -196,9 +216,9 @@ def unbits(s, endian='big'):
     cur = ''
 
     for c in s:
-        if c in ['1', 1, True]:
+        if c in ('1', 1, True):
             cur += '1'
-        elif c in ['0', 0, False]:
+        elif c in ('0', 0, False):
             cur += '0'
         else:
             raise ValueError("unbits(): cannot decode the value %r into a bit" % c)
@@ -262,30 +282,27 @@ def bitswap_int(n, width):
 def b64e(s):
     """b64e(s) -> str
 
-    Base64 encodes a string
+    Base64 encodes a bytes or string
 
     Example:
 
        >>> b64e("test")
        'dGVzdA=='
        """
-    if isinstance(s, str):
-        s = s.encode('utf8')
-
-    return base64.b64encode(s).decode('utf8')
+    return base64.b64encode(force_bytes(s)).decode('utf8')
 
 
 def b64d(s):
     """b64d(s) -> bytes
 
-    Base64 decodes a string
+    Base64 decodes a bytes or string
 
     Example:
 
        >>> b64d('dGVzdA==')
        b'test'
     """
-    return base64.b64decode(s)
+    return base64.b64decode(force_bytes(s))
 
 # misc binary functions
 
@@ -350,8 +367,8 @@ def xor_pair(data, avoid=b'\x00\n'):
     using a given alphabet.
 
     Arguments:
-      data (str, bytes): The desired string.
-      avoid: The list of disallowed characters. Defaults to nulls and newlines.
+      data (bytes, str): The desired string.
+      avoid (bytes, str): The list of disallowed characters. Defaults to nulls and newlines.
 
     Returns:
       Two strings which will xor to the given string. If no such two strings exist, then None is returned.
@@ -361,9 +378,8 @@ def xor_pair(data, avoid=b'\x00\n'):
       >>> xor_pair("test")
       (b'\\x01\\x01\\x01\\x01', b'udru')
 """
-    if isinstance(data, str):
-        data = data.encode('utf8')
-
+    data = force_bytes(data)
+    avoid = force_bytes(avoid)
     alphabet = [n for n in range(256) if n not in avoid]
 
     res1 = []
@@ -389,7 +405,7 @@ def randoms(count, alphabet=string.ascii_lowercase):
 
     Arguments:
       count (int): The length of the desired string.
-      alphabet: The alphabet of allowed characters. Defaults to all lowercase characters.
+      alphabet (str): The alphabet of allowed characters. Defaults to all lowercase characters.
 
     Returns:
       A random string.
@@ -477,18 +493,32 @@ def naf(n):
         yield z
 
 
-def isprint(c):
-    """isprint(c) -> bool
+def isprint(s):
+    """isprint(s) -> bool
 
-    Return True if a character is printable"""
+    Return True if the argument is printable
+
+    Example:
+
+      >>> isprint(ord('a'))
+      True
+      >>> isprint('abc')
+      True
+      >>> isprint('\x01')
+      False
+      >>> isprint(b'abc')
+      True
+      >>> isprint(b'\x01')
+      False
+    """
     chars = string.ascii_letters + string.digits + string.punctuation + ' '
 
-    if isinstance(c, int):
-        return chr(c) in chars
-    elif isinstance(c, bytes):
-        return c in map(ord, chars)
+    if isinstance(s, int):
+        return chr(s) in chars
+    elif isinstance(s, bytes):
+        return all(c in map(ord, chars) for c in s)
     else:
-        return c in chars
+        return all(c in chars for c in s)
 
 
 def hexii(s, width=16, skip=True):
@@ -509,6 +539,7 @@ def hexii(s, width=16, skip=True):
 
 def _hexiichar(c):
     HEXII = string.punctuation + string.digits + string.ascii_letters
+
     if c in map(ord, HEXII):
         return ".%c " % c
     elif c == 0:

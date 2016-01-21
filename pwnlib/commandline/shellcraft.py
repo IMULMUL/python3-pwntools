@@ -211,10 +211,7 @@ def main():
     if not sys.stdin.isatty():
         args.out.write(sys.stdin.buffer.read())
 
-    if isinstance(code, str):
-        code = code.encode('utf8')
-
-    args.out.write(code)
+    args.out.write(force_bytes(code))
 
 if __name__ == '__main__':
     main()

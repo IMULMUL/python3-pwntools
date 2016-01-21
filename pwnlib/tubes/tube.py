@@ -294,8 +294,7 @@ class tube(Timeout):
             delims = (delims,)
 
         # Make sure all items are bytes
-        delims = [delim.encode('utf8') if isinstance(delim, str) else delim
-                  for delim in delims]
+        delims = list(map(fiddling.force_bytes, delims))
 
         # Longest delimiter for tracking purposes
         longest = max(map(len, delims))
@@ -514,8 +513,7 @@ class tube(Timeout):
             items = (items,)
 
         # Make sure all items are bytes
-        items = [item.encode('utf8') if isinstance(item, str) else item
-                 for item in items]
+        items = list(map(fiddling.force_bytes, items))
 
         def pred(line):
             return any(d in line for d in items)
@@ -557,8 +555,7 @@ class tube(Timeout):
             delims = (delims,)
 
         # Make sure all items are bytes
-        delims = [delim.encode('utf8') if isinstance(delim, str) else delim
-                  for delim in delims]
+        delims = list(map(fiddling.force_bytes, delims))
 
         return self.recvline_pred(lambda line: any(map(line.startswith, delims)),
                                   keepends=keepends,
@@ -593,8 +590,7 @@ class tube(Timeout):
             delims = (delims,)
 
         # Make sure all items are bytes
-        delims = [delim.encode('utf8') if isinstance(delim, str) else delim
-                  for delim in delims]
+        delims = list(map(fiddling.force_bytes, delims))
 
         delims = [delim + self.newline for delim in delims]
 
@@ -614,11 +610,8 @@ class tube(Timeout):
         If the request is not satisfied before ``timeout`` seconds pass,
         all data is buffered and an empty bytes (``b''``) is returned.
         """
-
-        if isinstance(regex, bytes):
-            regex = re.compile(regex)
-        elif isinstance(regex, str):
-            regex = re.compile(regex.encode('utf8'))
+        if isinstance(regex, (bytes, str)):
+            regex = re.compile(fiddling.force_bytes(regex))
 
         if exact:
             pred = regex.match
@@ -640,10 +633,8 @@ class tube(Timeout):
         all data is buffered and an empty bytes (``b''``) is returned.
         """
 
-        if isinstance(regex, bytes):
-            regex = re.compile(regex)
-        elif isinstance(regex, str):
-            regex = re.compile(regex.encode('utf8'))
+        if isinstance(regex, (bytes, str)):
+            regex = re.compile(fiddling.force_bytes(regex))
 
         if exact:
             pred = regex.match
@@ -725,8 +716,7 @@ class tube(Timeout):
             >>> t.send('hello')
             b'hello'
         """
-        if isinstance(data, str):
-            data = data.encode('utf8')
+        data = fiddling.force_bytes(data)
 
         if dumplog.isEnabledFor(logging.DEBUG):
             log.debug('Sent %#x bytes:' % len(data))
@@ -756,10 +746,7 @@ class tube(Timeout):
             >>> t.sendline('hello')
             b'hello\r\n'
         """
-        if isinstance(line, str):
-            line = line.encode('utf8')
-
-        self.send(line + self.newline)
+        self.send(fiddling.force_bytes(line) + self.newline)
 
     def sendafter(self, delim, data, timeout=default):
         """sendafter(delim, data, timeout=default) -> bytes
@@ -792,10 +779,7 @@ class tube(Timeout):
         """sendlinethen(delim, data, timeout=default) -> bytes
 
         A combination of ``sendline(data)`` and ``recvuntil(delim, timeout)``."""
-        if isinstance(data, str):
-            data = data.encode('utf8')
-
-        self.send(data + self.newline)
+        self.send(fiddling.force_bytes(data) + self.newline)
         return self.recvuntil(delim, timeout)
 
     def interactive(self, prompt=term.text.bold_red('$') + ' '):
