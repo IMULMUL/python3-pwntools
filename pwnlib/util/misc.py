@@ -86,17 +86,17 @@ def size(n, abbriv='B', si=False):
     return '%.02fP%s' % (n / base, abbriv)
 
 
-def read(path, count=-1, skip=0):
-    """read(path, count=-1, skip=0) -> bytes
+def read(path, count=-1, skip=0, mode='r'):
+    """read(path, count=-1, skip=0, mode='r') -> bytes or str
 
     Open file, return content.
 
     Examples:
-        >>> read('pwnlib/util/misc.py').split(b'\\n')[0]
-        b'import base64'
+        >>> read('pwnlib/util/misc.py').split('\\n')[0]
+        'import base64'
     """
     path = os.path.expanduser(os.path.expandvars(path))
-    with open(path, 'rb') as fd:
+    with open(path, mode) as fd:
         if skip:
             fd.seek(skip)
         return fd.read(count)

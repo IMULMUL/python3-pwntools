@@ -30,7 +30,7 @@ class MemLeak:
         .. doctest:: leaker
 
             >>> import pwnlib
-            >>> binsh = pwnlib.util.misc.read('/bin/sh')
+            >>> binsh = pwnlib.util.misc.read('/bin/sh', mode='rb')
             >>> @pwnlib.memleak.MemLeak
             ... def leaker(addr):
             ...     print("leaking 0x%x" % addr)
