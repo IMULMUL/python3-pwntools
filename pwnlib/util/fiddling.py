@@ -38,6 +38,27 @@ def force_bytes(s):
         raise TypeError('Expecting a value of type bytes or str, got %r' % s)
 
 
+def uniform_strings(*args):
+    """uniform_strings(*args) -> bytes or str list
+
+    Returns all arguments casted into the less exclusive string type (bytes or str)
+
+    Example:
+
+      >>> uniform_strings('a', 'b', 'c')
+      ('a', 'b', 'c')
+      >>> uniform_strings('a', b'b', 'c')
+      (b'a', b'b', b'c')
+      >>> uniform_strings(b'a', b'b', b'c')
+      (b'a', b'b', b'c')
+
+"""
+    if all(isinstance(s, str) for s in args):
+        return args
+    else:
+        return tuple(map(force_bytes, args))
+
+
 def unhex(s):
     """unhex(s) -> bytes
 

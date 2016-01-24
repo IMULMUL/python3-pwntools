@@ -104,7 +104,7 @@ class ssh_channel(sock):
         # If this object is enabled for DEBUG-level logging, don't hide
         # anything about the command that's actually executed.
         if process and log.isEnabledFor(logging.DEBUG):
-            msg = 'Opening new channel: %r' % ((process,) or 'shell')
+            msg = 'Opening new channel: %s' % (process or 'shell')
 
         with log.waitfor(msg) as h:
             import paramiko
@@ -375,7 +375,7 @@ class ssh(Timeout):
     #: Remote port (``int``)
     port = None
 
-    #: Working directory (``str``)
+    #: Working directory (``bytes`` or ``str``)
     cwd = None
 
     #: Enable caching of SSH downloads (``bool``)
@@ -719,14 +719,14 @@ os.execve(exe, argv, env)
 
         if not run:
             with context.local(log_level='error'):
-                tmpfile = self.mktemp('-t', 'pwnlib-execve-XXXXXXXXXX')
+                tmpfile = self.mktemp('-t', 'pwnlib-execve-XXXXXXXXXX').decode('utf8')
                 self.chmod('+x', tmpfile)
 
-            log.info("Uploading execve script to %r" % tmpfile)
+            log.info("Uploading execve script to %s" % tmpfile)
             self.upload_data(script, tmpfile)
             return tmpfile
 
-        execve_repr = "execve(%r, %s, %s)" % (executable, argv, env or 'os.environ')
+        execve_repr = "execve(%r, %r, %r)" % (executable, argv, env or 'os.environ')
 
         with log.progress('Opening new channel: %s' % execve_repr) as h:
             script = misc.sh_string(script)
@@ -742,7 +742,7 @@ os.execve(exe, argv, env)
             if result == 0:
                 log.error("%r does not exist or is not executable" % executable)
             elif result == 2:
-                log.error("python is not installed on the remote system %r" % self.host)
+                log.error("python is not installed on the remote system %s" % self.host)
             elif result != 1:
                 h.failure("something bad happened:\n%r" % error_message)
 
@@ -896,9 +896,9 @@ os.execve(exe, argv, env)
 
         def runner(*args):
             if len(args) == 1 and isinstance(args[0], (list, tuple)):
-                command = [attr] + args[0]
+                command = (attr,) + tuple(args[0])
             else:
-                command = ' '.join((attr,) + args)
+                command = (attr,) + args
 
             return self.run(command).recvall().strip()
         return runner
@@ -938,6 +938,7 @@ os.execve(exe, argv, env)
         return misc.parse_ldd_output(data)
 
     def _get_fingerprint(self, remote):
+        """_get_fingerprint(remote) -> str"""
         arg = misc.sh_string(remote)
         cmd = '(openssl sha256 || sha256 || sha256sum) 2>/dev/null < %s' % arg
         data, status = self.run_to_end(cmd)
@@ -956,9 +957,11 @@ os.execve(exe, argv, env)
         return data.decode('utf8').strip()
 
     def _get_cachefile(self, fingerprint):
+        """_get_cachefile(fingerprint) -> str"""
         return os.path.join(self._cachedir, fingerprint)
 
     def _verify_local_fingerprint(self, fingerprint):
+        """_verify_local_fingerprint(fingerprint) -> bool"""
         if not set(fingerprint).issubset(string.hexdigits) or \
                 len(fingerprint) != 64:
             log.error('Invalid fingerprint %r' % fingerprint)
@@ -1010,18 +1013,20 @@ os.execve(exe, argv, env)
             fd.write(data)
 
     def _download_to_cache(self, remote, p):
+        is_encoded = isinstance(remote, str)
+
         with context.local(log_level='error'):
-            remote = self.readlink('-f', remote).decode('utf8')
+            remote = self.readlink('-f', remote)
 
         fingerprint = self._get_fingerprint(remote)
         if fingerprint is None:
             local = os.path.normpath(remote)
             local = os.path.basename(local)
-            local += time.strftime('-%Y-%m-%d-%H:%M:%S')
-            local = os.path.join(self._cachedir, local)
+            local += time.strftime('-%Y-%m-%d-%H:%M:%S').encode('utf8')
+            local = os.path.join(self._cachedir.encode('utf8'), local)
 
             self._download_raw(remote, local, p)
-            return local
+            return local.decode('utf8') if is_encoded else local
 
         local = self._get_cachefile(fingerprint)
 
@@ -1033,14 +1038,13 @@ os.execve(exe, argv, env)
             if not self._verify_local_fingerprint(fingerprint):
                 p.failure('Could not download file %r' % remote)
 
-        return local
+        return local if is_encoded else local.encode('utf8')
 
     def download_data(self, remote):
         """Downloads a file from the remote server and returns it as a string.
 
         Arguments:
-            remote(str): The remote filename to download.
-
+            remote(bytes, str): The remote filename to download.
 
         Examples:
             >>> with open('/tmp/bar','w+') as f:
@@ -1068,14 +1072,15 @@ os.execve(exe, argv, env)
         calling the function twice has little overhead.
 
         Arguments:
-            remote(str): The remote filename to download
-            local(str): The local filename to save it to. Default is to infer it from the remote filename.
+            remote(bytes, str): The remote filename to download
+            local(bytes, str): The local filename to save it to. Default is to infer it from the remote filename.
         """
         if not local:
             local = os.path.basename(os.path.normpath(remote))
 
         if self.cwd and os.path.basename(remote) == remote:
-            remote = os.path.join(self.cwd, remote)
+            cwd, remote = fiddling.uniform_strings(self.cwd, remote)
+            remote = os.path.join(cwd, remote)
 
         with log.progress('Downloading %r to %r' % (remote, local)) as p:
             local_tmp = self._download_to_cache(remote, p)
@@ -1089,16 +1094,13 @@ os.execve(exe, argv, env)
         """Recursively uploads a directory onto the remote server
 
         Arguments:
-            local: Local directory
-            remote: Remote directory
+            remote(bytes, str): Remote directory
+            local(str): Local directory
         """
         remote = remote or self.cwd or '.'
 
-        if self.sftp:
-            remote = str(self.sftp.normalize(remote))
-        else:
-            with context.local(log_level='error'):
-                remote = self.readlink('-f', remote).decode('utf8')
+        with context.local(log_level='error'):
+            remote = self.readlink('-f', remote)
 
         dirname = os.path.dirname(remote)
         basename = os.path.basename(remote)
@@ -1110,7 +1112,7 @@ os.execve(exe, argv, env)
 
         with context.local(log_level='error'):
             remote_tar = self.mktemp()
-            tar = self.system('tar -C %s -czf %s %s' % (dirname, remote_tar, basename))
+            tar = self.system(['tar', '-C', dirname, '-czf', remote_tar, basename])
 
             if 0 != tar.wait():
                 log.error("Could not create remote tar")
@@ -1125,8 +1127,8 @@ os.execve(exe, argv, env)
         """Uploads some data into a file on the remote server.
 
         Arguments:
-            data(str): The data to upload.
-            remote(str): The filename to upload it to.
+            data(bytes, str): The data to upload.
+            remote(bytes, str): The filename to upload it to.
 
         Examoles:
             >>> s = ssh(host='example.pwnme',
@@ -1140,9 +1142,12 @@ os.execve(exe, argv, env)
             >>> open('/tmp/upload_bar', 'rb').read()
             b'Hello, world'
         """
+        data = fiddling.force_bytes(data)
+
         # If a relative path was provided, prepend the cwd
         if os.path.normpath(remote) == os.path.basename(remote):
-            remote = os.path.join(self.cwd or '.', remote)
+            cwd, remote = fiddling.uniform_strings(self.cwd or '.', remote)
+            remote = os.path.join(cwd, remote)
 
         if self.sftp:
             with tempfile.NamedTemporaryFile() as f:
@@ -1164,36 +1169,33 @@ os.execve(exe, argv, env)
         """Uploads a file to the remote server. Returns the remote filename.
 
         Arguments:
-        filename(str): The local filename to download
-        remote(str): The remote filename to save it to. Default is to infer it from the local filename."""
-
+        filename(bytes, str): The local filename to download
+        remote(bytes, str): The remote filename to save it to. Default is to infer it from the local filename."""
         if remote is None:
             remote = os.path.normpath(filename)
             remote = os.path.basename(remote)
 
             if self.cwd:
-                remote = os.path.join(self.cwd, remote)
+                cwd, remote = fiddling.uniform_strings(self.cwd, remote)
+                remote = os.path.join(cwd, remote)
 
         with open(filename, 'rb') as fd:
             data = fd.read()
 
         log.info("Uploading %r to %r" % (filename, remote))
         self.upload_data(data, remote)
-
         return remote
 
     def upload_dir(self, local, remote=None):
         """Recursively uploads a directory onto the remote server
 
         Arguments:
-            local: Local directory
-            remote: Remote directory
+            local(str): Local directory
+            remote(bytes, str): Remote directory
         """
-
         remote = remote or self.cwd or '.'
 
         local = os.path.expanduser(local)
-        dirname = os.path.dirname(local)
         basename = os.path.basename(local)
 
         if not os.path.isdir(local):
@@ -1211,7 +1213,8 @@ os.execve(exe, argv, env)
                 remote_tar = self.mktemp('--suffix=.tar.gz')
                 self.upload_file(local_tar, remote_tar)
 
-                untar = self.run('cd %s && tar -xzf %s' % (remote, remote_tar))
+                untar = self.run('cd %s && tar -xzf %s' % (misc.sh_string(remote),
+                                                           misc.sh_string(remote_tar)))
                 message = untar.recvrepeat(2)
 
                 if untar.wait() != 0:
@@ -1229,7 +1232,7 @@ os.execve(exe, argv, env)
         if not self.sftp:
             log.error("Cannot determine remote file type without SFTP")
 
-        if 0 == self.system('test -d %s' % file_or_directory).wait():
+        if 0 == self.system(['test', '-d', file_or_directory]).wait():
             self.download_dir(file_or_directory, remote)
         else:
             self.download_file(file_or_directory, remote)
@@ -1245,21 +1248,21 @@ os.execve(exe, argv, env)
 
         The directory argument specified where to download the files. This defaults
         to './$HOSTNAME' where $HOSTNAME is the hostname of the remote server."""
+        directory = directory or self.host
+        directory = os.path.realpath(directory)
+        directory = fiddling.force_bytes(directory)
 
         libs = self._libs_remote(remote)
-
-        remote = self.readlink('-f', remote).decode('utf8').strip()
+        remote = self.readlink('-f', remote).decode('utf8', 'surrogateescape')
         libs[remote] = 0
 
-        if directory is None:
-            directory = self.host
-
-        directory = os.path.realpath(directory)
         res = {}
         seen = set()
-
         for lib, addr in libs.items():
-            local = os.path.realpath(os.path.join(directory, '.' + os.path.sep + lib))
+            local = os.path.join(directory,
+                                 fiddling.force_bytes('.' + os.path.sep + lib))
+            local = os.path.realpath(local)
+
             if not local.startswith(directory):
                 log.warning('This seems fishy: %r' % lib)
                 continue
@@ -1269,7 +1272,8 @@ os.execve(exe, argv, env)
             if lib not in seen:
                 self.download_file(lib, local)
                 seen.add(lib)
-            res[local] = addr
+
+            res[local.decode('utf8', 'surrogateescape')] = addr
 
         return res
 
