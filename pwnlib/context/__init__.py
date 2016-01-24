@@ -423,11 +423,11 @@ class ContextType:
 
         It is a simple shorthand such that::
 
-            context.update(os = 'linux', arch = 'arm', ...)
+            context.update(os='linux', arch='arm', ...)
 
         is equivalent to::
 
-            context.os   = 'linux'
+            context.os = 'linux'
             context.arch = 'arm'
             ...
 

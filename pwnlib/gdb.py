@@ -47,7 +47,6 @@ def get_qemu_arch(arch):
         return 'x86_64'
 
     arch = arch.replace('powerpc', 'ppc')
-
     return arch
 
 

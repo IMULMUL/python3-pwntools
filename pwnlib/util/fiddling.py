@@ -326,7 +326,6 @@ def xor(*args, **kwargs):
        >>> xor('lol', 'hello', 42)
        b'. ***'
 """
-
     cut = kwargs.pop('cut', 'max')
 
     if kwargs != {}:
@@ -593,7 +592,6 @@ def hexdump_iter(fd, width=16, skip=True, hexii=False, begin=0,
     style.update(_style)
 
     skipping = False
-    lines = []
     last_unique = ''
     byte_width = len('00 ')
     column_sep = '  '

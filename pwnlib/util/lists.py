@@ -17,7 +17,7 @@ def partition(lst, f, save_keys=False):
                        returned instead of just the values
 
     Example:
-      >>> partition([1,2,3,4,5], lambda x: x&1)
+      >>> partition([1, 2, 3, 4, 5], lambda x: x & 1)
       [[1, 3, 5], [2, 4]]
     """
     d = collections.OrderedDict()
@@ -59,7 +59,7 @@ def group(n, lst, underfull_action='ignore', fill_value=None):
       [['A', 'B', 'C'], ['D', 'E', 'F'], ['G', None, None]]
     """
 
-    if underfull_action not in ['ignore', 'drop', 'fill']:
+    if underfull_action not in ('ignore', 'drop', 'fill'):
         raise ValueError("group(): underfull_action must be either 'ignore', 'drop' or 'fill'")
 
     if underfull_action == 'fill':
@@ -161,7 +161,7 @@ def findall(haystack, needle):
     Knuth-Morris-Pratt algorithm.
 
     Example:
-      >>> foo = findall([1,2,3,4,4,3,4,2,1], 4)
+      >>> foo = findall([1, 2, 3, 4, 4, 3, 4, 2, 1], 4)
       >>> next(foo)
       3
       >>> next(foo)

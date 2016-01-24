@@ -106,7 +106,8 @@ __all__ = [
     'install_default_handler',
     'rootlogger',
     'console',
-    'ConsoleHandler']
+    'ConsoleHandler'
+]
 
 import logging
 import random

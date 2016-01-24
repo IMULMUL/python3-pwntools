@@ -78,7 +78,7 @@ def size(n, abbriv='B', si=False):
     if n < base:
         return '%d%s' % (n, abbriv)
 
-    for suffix in ['K', 'M', 'G', 'T']:
+    for suffix in ('K', 'M', 'G', 'T'):
         n /= base
         if n < base:
             return '%.02f%s%s' % (n, suffix, abbriv)
@@ -181,7 +181,6 @@ def run_in_new_terminal(command, terminal=None, args=None):
       None
 
     """
-
     if not terminal:
         if context.terminal:
             terminal = context.terminal[0]
@@ -218,7 +217,7 @@ def parse_ldd_output(output):
     each library required by the specified binary.
 
     Arguments:
-      output(str): The output to parse
+      output(bytes, str): The output to parse
 
     Example:
         >>> sorted(parse_ldd_output('''
