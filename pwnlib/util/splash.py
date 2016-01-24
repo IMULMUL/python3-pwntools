@@ -30,7 +30,6 @@ def splash():
     your sploit is enterprisey and top notch quality"""
 
     def updater():
-
         colors = [
             text.blue, text.bold_blue,
             text.magenta, text.bold_magenta,

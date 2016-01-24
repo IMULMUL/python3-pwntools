@@ -574,17 +574,17 @@ class ROP:
         Also provides a shorthand for ``.call()``:
             ``rop.function(args)`` is equivalent to ``rop.call(function, args)``
 
-        >>> elf=ELF(which('bash'))
-        >>> rop=ROP([elf])
-        >>> rop.rdi     == rop.search(regs=['rdi'], order = 'regs')
+        >>> elf = ELF(which('bash'))
+        >>> rop = ROP([elf])
+        >>> rop.rdi == rop.search(regs=['rdi'], order='regs')
         True
-        >>> rop.r13_r14_r15_rbp == rop.search(regs=['r13','r14','r15','rbp'], order = 'regs')
+        >>> rop.r13_r14_r15_rbp == rop.search(regs=['r13','r14','r15','rbp'], order='regs')
         True
-        >>> rop.ret     == rop.search(move=rop.align)
+        >>> rop.ret == rop.search(move=rop.align)
         True
-        >>> rop.ret_8   == rop.search(move=8)
+        >>> rop.ret_8 == rop.search(move=8)
         True
-        >>> rop.ret     != None
+        >>> rop.ret is not None
         True
         """
         bad_attrs = [

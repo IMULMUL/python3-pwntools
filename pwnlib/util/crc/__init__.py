@@ -190,7 +190,7 @@ class Module(types.ModuleType):
         The "check" value in the document is the CRC-sum of the string "123456789".
 
         Arguments:
-            data(str):    The data to calculate the CRC-sum of. This should either be a string or a list of bits.
+            data(bytes, str, list): The data to calculate the CRC-sum of. This should either be a string or a list of bits.
             polynom(int): The polynomial to use.
             init(int):    If the CRC-sum was calculated in hardware, then this would b
                         the initial value of the checksum register.

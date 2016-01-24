@@ -173,7 +173,6 @@ class tube(Timeout):
             A string containing bytes received from the socket,
             or ``b''`` if a timeout occurred while waiting.
         """
-
         data = b''
 
         with self.countdown(timeout):
@@ -269,15 +268,15 @@ class tube(Timeout):
                 >>> t.recv_raw = lambda n: b"Hello World!"
                 >>> t.recvuntil(' ')
                 b'Hello '
-                >>> _=t.clean(0)
+                >>> _ = t.clean(0)
                 >>> # Matches on 'o' in 'Hello'
                 >>> t.recvuntil(tuple(' Wor'))
                 b'Hello'
-                >>> _=t.clean(0)
+                >>> _ = t.clean(0)
                 >>> # Matches expressly full string
                 >>> t.recvuntil(b' Wor')
                 b'Hello Wor'
-                >>> _=t.clean(0)
+                >>> _ = t.clean(0)
                 >>> # Matches on full string, drops match
                 >>> t.recvuntil(' Wor', drop=True)
                 b'Hello'
@@ -632,7 +631,6 @@ class tube(Timeout):
         If the request is not satisfied before ``timeout`` seconds pass,
         all data is buffered and an empty bytes (``b''``) is returned.
         """
-
         if isinstance(regex, (bytes, str)):
             regex = re.compile(fiddling.force_bytes(regex))
 
@@ -666,7 +664,6 @@ class tube(Timeout):
             >>> t.recv()
             b'd'
         """
-
         try:
             while self._fillbuffer(timeout=timeout):
                 pass
@@ -680,7 +677,6 @@ class tube(Timeout):
 
         Receives data until EOF is reached.
         """
-
         with log.waitfor('Recieving all data') as h:
             l = len(self.buffer)
             with self.local(timeout):
@@ -753,7 +749,6 @@ class tube(Timeout):
 
         A combination of ``recvuntil(delim, timeout)`` and ``send(data)``.
         """
-
         res = self.recvuntil(delim, timeout)
         self.send(data)
         return res
@@ -761,8 +756,8 @@ class tube(Timeout):
     def sendlineafter(self, delim, data, timeout=default):
         """sendlineafter(delim, data, timeout=default) -> bytes
 
-        A combination of ``recvuntil(delim, timeout)`` and ``sendline(data)``."""
-
+        A combination of ``recvuntil(delim, timeout)`` and ``sendline(data)``.
+        """
         res = self.recvuntil(delim, timeout)
         self.sendline(data)
         return res
@@ -770,15 +765,16 @@ class tube(Timeout):
     def sendthen(self, delim, data, timeout=default):
         """sendthen(delim, data, timeout=default) -> bytes
 
-        A combination of ``send(data)`` and ``recvuntil(delim, timeout)``."""
-
+        A combination of ``send(data)`` and ``recvuntil(delim, timeout)``.
+        """
         self.send(data)
         return self.recvuntil(delim, timeout)
 
     def sendlinethen(self, delim, data, timeout=default):
         """sendlinethen(delim, data, timeout=default) -> bytes
 
-        A combination of ``sendline(data)`` and ``recvuntil(delim, timeout)``."""
+        A combination of ``sendline(data)`` and ``recvuntil(delim, timeout)``.
+        """
         self.send(fiddling.force_bytes(data) + self.newline)
         return self.recvuntil(delim, timeout)
 
@@ -792,7 +788,6 @@ class tube(Timeout):
 
         Thus it only works in while in :data:`pwnlib.term.term_mode`.
         """
-
         log.info('Switching to interactive mode')
 
         go = threading.Event()
@@ -878,9 +873,9 @@ class tube(Timeout):
             >>> def recv(n, data=[b'', b'hooray_data']):
             ...     while data: return data.pop()
             >>> t = tube()
-            >>> t.recv_raw      = recv
+            >>> t.recv_raw = recv
             >>> t.connected_raw = lambda d: True
-            >>> t.fileno        = lambda: 1234
+            >>> t.fileno = lambda: 1234
             >>> with context.local(log_level='info'):
             ...     data = t.clean_and_log() #doctest: +ELLIPSIS
             [DEBUG] Received 0xb bytes:
@@ -910,10 +905,10 @@ class tube(Timeout):
             >>> b.send_raw = p
             >>> a.connected_raw = lambda d: True
             >>> b.connected_raw = lambda d: True
-            >>> a.shutdown      = lambda d: True
-            >>> b.shutdown      = lambda d: True
+            >>> a.shutdown = lambda d: True
+            >>> b.shutdown = lambda d: True
             >>> import time
-            >>> _=(b.connect_input(a), time.sleep(0.1))
+            >>> _ = (b.connect_input(a), time.sleep(0.1))
             b'data'
         """
         def pump():
@@ -966,9 +961,9 @@ class tube(Timeout):
             >>> b.send_raw = p
             >>> a.connected_raw = lambda d: True
             >>> b.connected_raw = lambda d: True
-            >>> a.shutdown      = lambda d: True
-            >>> b.shutdown      = lambda d: True
-            >>> _=(a.connect_output(b), time.sleep(0.1))
+            >>> a.shutdown = lambda d: True
+            >>> b.shutdown = lambda d: True
+            >>> _ = (a.connect_output(b), time.sleep(0.1))
             b'data'
         """
         other.connect_input(self)
@@ -1056,10 +1051,10 @@ class tube(Timeout):
             >>> t.can_recv_raw = lambda n: False
             >>> t.can_recv()
             False
-            >>> _=t.unrecv(b'data')
+            >>> _ = t.unrecv(b'data')
             >>> t.can_recv()
             True
-            >>> _=t.recv()
+            >>> _ = t.recv()
             >>> t.can_recv()
             False
         """
@@ -1112,7 +1107,7 @@ class tube(Timeout):
             >>> def p(x): print(x)
             >>> t = tube()
             >>> t.shutdown_raw = p
-            >>> _=[t.shutdown(x) for x in ('in', 'read', 'recv', 'out', 'write', 'send')]
+            >>> _ = [t.shutdown(x) for x in ('in', 'read', 'recv', 'out', 'write', 'send')]
             recv
             recv
             recv
@@ -1145,7 +1140,7 @@ class tube(Timeout):
             >>> def p(x): print(x)
             >>> t = tube()
             >>> t.connected_raw = p
-            >>> _=[t.connected(x) for x in ('any', 'in', 'read', 'recv', 'out', 'write', 'send')]
+            >>> _ = [t.connected(x) for x in ('any', 'in', 'read', 'recv', 'out', 'write', 'send')]
             any
             recv
             recv

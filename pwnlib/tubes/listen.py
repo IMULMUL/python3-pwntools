@@ -122,6 +122,7 @@ class listen(sock):
         if key == 'sock':
             while self._accepter.is_alive():
                 self._accepter.join(timeout=0.1)
+
             if 'sock' in self.__dict__:
                 return self.sock
             else:
@@ -134,4 +135,5 @@ class listen(sock):
         # a connection or the program will hang in the `join` call above
         if self._accepter.is_alive():
             return
+
         super(listen, self).close()

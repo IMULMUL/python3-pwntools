@@ -469,7 +469,6 @@ class ssh(Timeout):
                                     self.timeout, compress=True)
 
             self.transport = self.client.get_transport()
-
             h.success()
 
         try:
@@ -503,7 +502,7 @@ class ssh(Timeout):
             Return a :class:`pwnlib.tubes.ssh.ssh_channel` object.
 
         Examples:
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
             >>> sh = s.shell('/bin/sh')
@@ -569,7 +568,7 @@ class ssh(Timeout):
             Requires Python on the remote server.
 
         Examples:
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
             >>> sh = s.process('sh', env={'PS1':''})
@@ -586,7 +585,7 @@ class ssh(Timeout):
             b'LOLOLOL\x00/proc/self/cmdline\x00'
             >>> s.process(['pwd'], cwd='/tmp').recvall()
             b'/tmp\n'
-            >>> p = s.process(['python2','-c','import os; print os.read(2, 1024)'], stderr=0)
+            >>> p = s.process(['python2', '-c', 'import os; print os.read(2, 1024)'], stderr=0)
             >>> p.send('hello')
             >>> p.recv()
             b'hello\n'
@@ -667,7 +666,8 @@ class ssh(Timeout):
 
         script = r"""
 #!/usr/bin/env python2
-import os, sys
+import os
+import sys
 exe = %r
 argv = %r
 env = %r
@@ -761,7 +761,7 @@ os.execve(exe, argv, env)
         Return a :class:`pwnlib.tubes.ssh.ssh_channel` object.
 
         Examples:
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
             >>> py = s.run('python2 -i')
@@ -787,7 +787,7 @@ os.execve(exe, argv, env)
         a TTY on the remote server.
 
         Examples:
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
             >>> print(s.run_to_end('echo Hello; exit 17'))
@@ -812,7 +812,7 @@ os.execve(exe, argv, env)
         Examples:
             >>> from pwn import *
             >>> l = listen()
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
             >>> a = s.connect_remote(s.host, l.lport)
@@ -834,7 +834,7 @@ os.execve(exe, argv, env)
         Examples:
 
             >>> from pwn import *
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
             >>> l = s.listen_remote()
@@ -851,7 +851,7 @@ os.execve(exe, argv, env)
 
         Examples:
 
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
             >>> print(s['echo hello'])
@@ -864,7 +864,7 @@ os.execve(exe, argv, env)
 
         Examples:
 
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
             >>> print(repr(s('echo hello')))
@@ -877,18 +877,18 @@ os.execve(exe, argv, env)
 
         Examples:
 
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
             >>> s.echo('hello')
             b'hello'
             >>> s.whoami()
             b'travis'
-            >>> s.echo(['huh','yay','args'])
+            >>> s.echo(['huh', 'yay', 'args'])
             b'huh yay args'
         """
         bad_attrs = [
-            'trait_names',          # ipython tab-complete
+            'trait_names', # ipython tab-complete
         ]
 
         if attr in self.__dict__ or attr in bad_attrs or attr.startswith('_'):
@@ -908,7 +908,7 @@ os.execve(exe, argv, env)
 
         Example:
 
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
             >>> s.connected()
@@ -1046,7 +1046,7 @@ os.execve(exe, argv, env)
             >>> with open('/tmp/bar','w+') as f:
             ...     _ = f.write('Hello, world')
             >>> os.chmod('/tmp/bar', 0o777)
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass',
             ...         cache=False)
@@ -1129,7 +1129,7 @@ os.execve(exe, argv, env)
             remote(str): The filename to upload it to.
 
         Examoles:
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
             >>> s.upload_data(b'Hello, world', '/tmp/upload_foo')
@@ -1279,7 +1279,6 @@ os.execve(exe, argv, env)
         This is a simple wrapper for creating a new
         :class:`pwnlib.tubes.ssh.ssh_channel` object and calling
         :meth:`pwnlib.tubes.ssh.ssh_channel.interactive` on it."""
-
         s = self.shell(shell)
 
         if self.cwd:
@@ -1305,7 +1304,7 @@ os.execve(exe, argv, env)
                 based on the result of running 'mktemp -d' on the remote machine.
 
         Examples:
-            >>> s =  ssh(host='example.pwnme',
+            >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
             >>> cwd = s.set_working_directory()
