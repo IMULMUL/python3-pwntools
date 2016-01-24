@@ -15,13 +15,13 @@ def wget(url, save=None, timeout=5, **kwargs):
 
     Arguments:
       url (str): URL to download
-      save (str or bool): Name to save as.  Any truthy value
+      save (bytes, str, bool): Name to save as.  Any truthy value
             will auto-generate a name based on the URL.
       timeout (int): Timeout, in seconds
 
     Example:
 
-      >>> url    = 'https://httpbin.org/robots.txt'
+      >>> url = 'https://httpbin.org/robots.txt'
       >>> with context.local(log_level='ERROR'):
       ...     result = wget(url)
       >>> result
@@ -67,6 +67,7 @@ def wget(url, save=None, timeout=5, **kwargs):
             if not isinstance(save, (bytes, str)):
                 save = os.path.basename(url)
                 save = save or tempfile.NamedTemporaryFile(dir='.', delete=False).name
+
             with open(save, 'wb+') as f:
                 f.write(total_data)
                 w.success('Saved %r (%s)' % (f.name, size(total_data)))
