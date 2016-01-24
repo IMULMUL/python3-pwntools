@@ -1,9 +1,7 @@
 ![pwntools logo](docs/source/logo.png?raw=true)
 
-[![Docs latest](https://readthedocs.org/projects/pwntools/badge/)](https://pwntools.readthedocs.org/en/latest)
-[![Docs 2.2.0](https://readthedocs.org/projects/pwntools/badge/?version=2.2.0)](https://pwntools.readthedocs.org/en/2.2.0)
+[![Docs latest](https://readthedocs.org/projects/python3-pwntools/badge/)](https://python3-pwntoools.readthedocs.org/en/latest/)
 [![PyPI](https://img.shields.io/pypi/v/pwntools.svg?style=flat)](https://pypi.python.org/pypi/pwntools/)
-[![Gittip](https://img.shields.io/gittip/gallopsled.svg?style=flat)](https://www.gittip.com/gallopsled/)
 [![Travis](https://travis-ci.org/arthaud/python3-pwntools.svg?branch=py3.2-3.3)](https://travis-ci.org/arthaud/python3-pwntools)
 [![Twitter](https://img.shields.io/badge/twitter-Gallopsled-4099FF.svg?style=flat)](https://twitter.com/Gallopsled)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](http://choosealicense.com/licenses/mit/)
