@@ -935,7 +935,7 @@ os.execve(exe, argv, env)
             log.error('Unable to find libraries for %r' % remote)
             return {}
 
-        return misc.parse_ldd_output(data.decode('utf8'))
+        return misc.parse_ldd_output(data)
 
     def _get_fingerprint(self, remote):
         arg = misc.sh_string(remote)

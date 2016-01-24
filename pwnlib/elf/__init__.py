@@ -244,7 +244,7 @@ class ELF(ELFFile):
             arg = misc.sh_string(self.path)
 
             data = subprocess.check_output(cmd % (arg, arg, arg), shell=True)
-            self.libs = misc.parse_ldd_output(data.decode('utf8'))
+            self.libs = misc.parse_ldd_output(data)
         except subprocess.CalledProcessError:
             self.libs = {}
 
