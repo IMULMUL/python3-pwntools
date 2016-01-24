@@ -320,9 +320,9 @@ def dealarm_shell(tube):
     """
     tube.clean()
 
-    tube.sendline('which python')
+    tube.sendline('which python2')
     if tube.recvline().startswith('/'):
-        tube.sendline('''exec python -c "import signal, os; signal.alarm(0); os.execl('$SHELL','')"''')
+        tube.sendline('''exec python2 -c "import signal, os; signal.alarm(0); os.execl('$SHELL','')"''')
         return tube
 
     tube.sendline('which perl')
