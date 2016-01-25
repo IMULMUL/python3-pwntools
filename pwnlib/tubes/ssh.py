@@ -87,7 +87,7 @@ class ssh_channel(sock):
         if isinstance(process, (list, tuple)):
             process = ' '.join(misc.sh_string(s) for s in process)
 
-        assert isinstance(process, str)
+        assert process is None or isinstance(process, str)
 
         if process and wd:
             process = "cd %s >/dev/null 2>&1; %s" % (misc.sh_string(wd), process)
