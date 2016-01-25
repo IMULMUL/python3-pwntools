@@ -793,7 +793,7 @@ class tube(Timeout):
         go = threading.Event()
 
         def recv_thread():
-            while not go.isSet():
+            while not go.is_set():
                 try:
                     cur = self.recv(timeout=0.05)
                     if cur:
@@ -808,7 +808,7 @@ class tube(Timeout):
         t.start()
 
         try:
-            while not go.isSet():
+            while not go.is_set():
                 if term.term_mode:
                     data = term.readline.readline(prompt=prompt, float=True)
                 else:
