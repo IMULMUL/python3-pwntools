@@ -229,7 +229,7 @@ class ssh_channel(sock):
                     elif cur == b'\a':
                         # Ugly hack until term unstands bell characters
                         continue
-                    sys.stdout.write(cur)
+                    sys.stdout.buffer.write(cur)
                     sys.stdout.flush()
                 except EOFError:
                     log.info('Got EOF while reading in interactive')
@@ -250,7 +250,7 @@ class ssh_channel(sock):
                     if not event.is_set():
                         raise
             else:
-                data = sys.stdin.buffer.read(1)
+                data = sys.stdin.read(1)
                 if not data:
                     event.set()
 
