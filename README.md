@@ -6,7 +6,7 @@
 [![Twitter](https://img.shields.io/badge/twitter-Gallopsled-4099FF.svg?style=flat)](https://twitter.com/Gallopsled)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](http://choosealicense.com/licenses/mit/)
 
-This is the CTF framework used by Gallopsled in every CTF.
+Fork for python 3 of pwntools, the CTF framework used by Gallopsled in every CTF.
 
 ```python
 from pwn import *
@@ -35,16 +35,19 @@ To get you started, we've provided some example solutions for past CTF challenge
 
 # Installation
 
-pwntools is best supported on Ubuntu 12.04 and 14.04, but most functionality should work on any Posix-like distribution (Debian, Arch, FreeBSD, OSX, etc.).
+python3-pwntools is best supported on Ubuntu 12.04 and 14.04, but most functionality should work on any Posix-like distribution (Debian, Arch, FreeBSD, OSX, etc.).
 
 Most of the functionality of pwntools is self-contained and Python-only.  You should be able to get running quickly with
 
 ```sh
-pip install pwntools
+git clone https://github.com/arthaud/python3-pwntools.git
+cd python3-pwntools
+python3 setup.py install
 ```
 
-However, some of the features (ROP generation and assembling/disassembling foreign architectures) require non-Python dependencies.  For more information, see the [complete installation instructions here](https://pwntools.readthedocs.org/en/latest/install.html).
+However, some of the features (ROP generation and assembling/disassembling foreign architectures) require non-Python dependencies.  For more information, see the [complete installation instructions here](https://python3-pwntools.readthedocs.org/en/latest/install.html).
 
+Note: if you use python 3.2 or 3.3, consider using the branch [py3.2-3.3](https://github.com/arthaud/python3-pwntools/tree/py3.2-3.3)
 
 # Contribution
 
