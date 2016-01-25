@@ -1,6 +1,6 @@
 ![pwntools logo](docs/source/logo.png?raw=true)
 
-[![Docs latest](https://readthedocs.org/projects/python3-pwntools/badge/)](https://python3-pwntools.readthedocs.org/en/latest/)
+[![Docs latest](https://readthedocs.org/projects/python3-pwntools/badge/?version=latest)](https://python3-pwntools.readthedocs.org/en/latest/)
 [![PyPI](https://img.shields.io/pypi/v/pwntools.svg?style=flat)](https://pypi.python.org/pypi/pwntools/)
 [![Travis](https://travis-ci.org/arthaud/python3-pwntools.svg?branch=master)](https://travis-ci.org/arthaud/python3-pwntools)
 [![Twitter](https://img.shields.io/badge/twitter-Gallopsled-4099FF.svg?style=flat)](https://twitter.com/Gallopsled)
