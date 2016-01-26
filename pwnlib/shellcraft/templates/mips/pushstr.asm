@@ -1,5 +1,5 @@
 <%
-  from pwnlib.util import lists, packing, fiddling
+  from pwnlib.util import lists, packing, misc
   from pwnlib.shellcraft import mips
 %>
 <%page args="string, append_null=True"/>
@@ -12,7 +12,7 @@ Args:
   append_null (bool): Whether to append a single NULL-byte before pushing.
 </%docstring>
 <%
-    string = fiddling.force_bytes(string)
+    string = misc.force_bytes(string)
 
     if append_null:
         string += b'\x00'

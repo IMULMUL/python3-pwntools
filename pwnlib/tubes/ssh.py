@@ -16,7 +16,6 @@ from ..timeout import Timeout
 from ..util import hashes
 from ..util import misc
 from ..util import safeeval
-from ..util import fiddling
 from .process import process
 from .sock import sock
 
@@ -610,7 +609,7 @@ class ssh(Timeout):
         for i, arg in enumerate(argv):
             if not isinstance(arg, (bytes, str)):
                 log.error("argv must only contain bytes or strings: %r" % argv)
-            arg = fiddling.force_bytes(arg)
+            arg = misc.force_bytes(arg)
 
             if b'\x00' in arg[:-1]:
                 log.error('Inappropriate null byte in argv[%i]: %r' % (i, arg))
@@ -620,13 +619,13 @@ class ssh(Timeout):
         executable = executable or argv[0]
         if not isinstance(executable, (bytes, str)):
             log.error("executable / argv[0] must be a bytes or string: %r" % executable)
-        executable = fiddling.force_bytes(executable)
+        executable = misc.force_bytes(executable)
 
         # Validate cwd
         cwd = cwd or self.cwd or '.'
         if not isinstance(cwd, (bytes, str)):
             log.error("cwd must be a bytes or string: %r" % cwd)
-        cwd = fiddling.force_bytes(cwd)
+        cwd = misc.force_bytes(cwd)
 
         # Validate env
         if env is not None and not isinstance(env, dict):
@@ -639,12 +638,12 @@ class ssh(Timeout):
             for k, v in env_vars:
                 if not isinstance(k, (bytes, str)):
                     log.error('Environment keys must be bytes or strings: %r' % k)
-                k = fiddling.force_bytes(k)
+                k = misc.force_bytes(k)
 
                 if not isinstance(v, (bytes, str)):
                     log.error('Environment values must be bytes or strings: %r=%r' %
                               (k, v))
-                v = fiddling.force_bytes(v)
+                v = misc.force_bytes(v)
 
                 if b'\x00' in k[:-1]:
                     log.error('Inappropriate null byte in env key: %r' % k)
@@ -658,11 +657,11 @@ class ssh(Timeout):
         stdout = {sys.stdin: 0, sys.stdout: 1, sys.stderr: 2}.get(stdout, stdout)
         stderr = {sys.stdin: 0, sys.stdout: 1, sys.stderr: 2}.get(stderr, stderr)
         if isinstance(stdin, (bytes, str)):
-            stdin = fiddling.force_bytes(stdin)
+            stdin = misc.force_bytes(stdin)
         if isinstance(stdout, (bytes, str)):
-            stdout = fiddling.force_bytes(stdout)
+            stdout = misc.force_bytes(stdout)
         if isinstance(stderr, (bytes, str)):
-            stderr = fiddling.force_bytes(stderr)
+            stderr = misc.force_bytes(stderr)
 
         script = r"""
 #!/usr/bin/env python2
@@ -1079,7 +1078,7 @@ os.execve(exe, argv, env)
             local = os.path.basename(os.path.normpath(remote))
 
         if self.cwd and os.path.basename(remote) == remote:
-            cwd, remote = fiddling.uniform_strings(self.cwd, remote)
+            cwd, remote = misc.uniform_strings(self.cwd, remote)
             remote = os.path.join(cwd, remote)
 
         with log.progress('Downloading %r to %r' % (remote, local)) as p:
@@ -1142,11 +1141,11 @@ os.execve(exe, argv, env)
             >>> open('/tmp/upload_bar', 'rb').read()
             b'Hello, world'
         """
-        data = fiddling.force_bytes(data)
+        data = misc.force_bytes(data)
 
         # If a relative path was provided, prepend the cwd
         if os.path.normpath(remote) == os.path.basename(remote):
-            cwd, remote = fiddling.uniform_strings(self.cwd or '.', remote)
+            cwd, remote = misc.uniform_strings(self.cwd or '.', remote)
             remote = os.path.join(cwd, remote)
 
         if self.sftp:
@@ -1176,7 +1175,7 @@ os.execve(exe, argv, env)
             remote = os.path.basename(remote)
 
             if self.cwd:
-                cwd, remote = fiddling.uniform_strings(self.cwd, remote)
+                cwd, remote = misc.uniform_strings(self.cwd, remote)
                 remote = os.path.join(cwd, remote)
 
         with open(filename, 'rb') as fd:
@@ -1250,7 +1249,7 @@ os.execve(exe, argv, env)
         to './$HOSTNAME' where $HOSTNAME is the hostname of the remote server."""
         directory = directory or self.host
         directory = os.path.realpath(directory)
-        directory = fiddling.force_bytes(directory)
+        directory = misc.force_bytes(directory)
 
         libs = self._libs_remote(remote)
         remote = self.readlink('-f', remote).decode('utf8', 'surrogateescape')
@@ -1260,7 +1259,7 @@ os.execve(exe, argv, env)
         seen = set()
         for lib, addr in libs.items():
             local = os.path.join(directory,
-                                 fiddling.force_bytes('.' + os.path.sep + lib))
+                                 misc.force_bytes('.' + os.path.sep + lib))
             local = os.path.realpath(local)
 
             if not local.startswith(directory):

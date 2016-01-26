@@ -1,6 +1,6 @@
 <%
   from pwnlib.shellcraft import thumb
-  from pwnlib.util import lists, packing, fiddling
+  from pwnlib.util import lists, packing, misc
 %>
 <%page args="string, append_null=True"/>
 <%docstring>
@@ -27,7 +27,7 @@ Examples:
 
 </%docstring>
 <%
-    string = fiddling.force_bytes(string)
+    string = misc.force_bytes(string)
 
     if append_null:
         string += b'\x00'

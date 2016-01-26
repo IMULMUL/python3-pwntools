@@ -13,6 +13,51 @@ from ..log import getLogger
 log = getLogger(__name__)
 
 
+def force_bytes(s):
+    """force_bytes(s) -> bytes
+
+    Ensures the given argument is of type bytes
+
+    Example:
+
+      >>> force_bytes(b'abc')
+      b'abc'
+      >>> force_bytes('abc')
+      b'abc'
+      >>> force_bytes(1)
+      Traceback (most recent call last):
+          ...
+      TypeError: Expecting a value of type bytes or str, got 1
+"""
+    if isinstance(s, bytes):
+        return s
+    elif isinstance(s, str):
+        return s.encode('utf8')
+    else:
+        raise TypeError('Expecting a value of type bytes or str, got %r' % s)
+
+
+def uniform_strings(*args):
+    """uniform_strings(*args) -> bytes or str list
+
+    Returns all arguments casted into the less exclusive string type (bytes or str)
+
+    Example:
+
+      >>> uniform_strings('a', 'b', 'c')
+      ('a', 'b', 'c')
+      >>> uniform_strings('a', b'b', 'c')
+      (b'a', b'b', b'c')
+      >>> uniform_strings(b'a', b'b', b'c')
+      (b'a', b'b', b'c')
+
+"""
+    if all(isinstance(s, str) for s in args):
+        return args
+    else:
+        return tuple(map(force_bytes, args))
+
+
 def align(alignment, x):
     """align(alignment, x) -> int
 

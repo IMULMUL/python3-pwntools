@@ -9,7 +9,7 @@ import tempfile
 from .elf import ELF
 from .log import getLogger
 from .util import packing
-from .util import fiddling
+from .util import misc
 
 log = getLogger(__name__)
 
@@ -64,7 +64,7 @@ class ROP:
             int containing address of 'resolvable', or None
         """
         if isinstance(resolvable, (bytes, str)):
-            resolvable = fiddling.force_bytes(resolvable)
+            resolvable = misc.force_bytes(resolvable)
 
             for elf in self.elfs:
                 if resolvable in elf.symbols:
@@ -101,7 +101,7 @@ class ROP:
         if isinstance(value, int):
             return value
         elif isinstance(value, (bytes, str)):
-            value = fiddling.force_bytes(value)
+            value = misc.force_bytes(value)
 
             while True:
                 value += b'\x00'

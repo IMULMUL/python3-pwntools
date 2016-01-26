@@ -1,6 +1,6 @@
 <% from pwnlib.shellcraft.arm import mov %>
 <% from pwnlib.util.packing import unpack %>
-<% from pwnlib.util.fiddling import force_bytes %>
+<% from pwnlib.util.misc import force_bytes %>
 <% from pwnlib import constants %>
 <%page args="egg, start_address=0, double_check=True"/>
 <%docstring>

@@ -58,7 +58,8 @@ from .elf import ELF
 from .elf import constants
 from .log import getLogger
 from .memleak import MemLeak
-from .util.fiddling import force_bytes, enhex
+from .util.fiddling import enhex
+from .util.misc import force_bytes
 from .util.packing import unpack
 from .util.web import wget
 

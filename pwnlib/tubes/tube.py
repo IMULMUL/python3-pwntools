@@ -293,7 +293,7 @@ class tube(Timeout):
             delims = (delims,)
 
         # Make sure all items are bytes
-        delims = list(map(fiddling.force_bytes, delims))
+        delims = list(map(misc.force_bytes, delims))
 
         # Longest delimiter for tracking purposes
         longest = max(map(len, delims))
@@ -512,7 +512,7 @@ class tube(Timeout):
             items = (items,)
 
         # Make sure all items are bytes
-        items = list(map(fiddling.force_bytes, items))
+        items = list(map(misc.force_bytes, items))
 
         def pred(line):
             return any(d in line for d in items)
@@ -554,7 +554,7 @@ class tube(Timeout):
             delims = (delims,)
 
         # Make sure all items are bytes
-        delims = list(map(fiddling.force_bytes, delims))
+        delims = list(map(misc.force_bytes, delims))
 
         return self.recvline_pred(lambda line: any(map(line.startswith, delims)),
                                   keepends=keepends,
@@ -589,7 +589,7 @@ class tube(Timeout):
             delims = (delims,)
 
         # Make sure all items are bytes
-        delims = list(map(fiddling.force_bytes, delims))
+        delims = list(map(misc.force_bytes, delims))
 
         delims = [delim + self.newline for delim in delims]
 
@@ -610,7 +610,7 @@ class tube(Timeout):
         all data is buffered and an empty bytes (``b''``) is returned.
         """
         if isinstance(regex, (bytes, str)):
-            regex = re.compile(fiddling.force_bytes(regex))
+            regex = re.compile(misc.force_bytes(regex))
 
         if exact:
             pred = regex.match
@@ -632,7 +632,7 @@ class tube(Timeout):
         all data is buffered and an empty bytes (``b''``) is returned.
         """
         if isinstance(regex, (bytes, str)):
-            regex = re.compile(fiddling.force_bytes(regex))
+            regex = re.compile(misc.force_bytes(regex))
 
         if exact:
             pred = regex.match
@@ -712,7 +712,7 @@ class tube(Timeout):
             >>> t.send('hello')
             b'hello'
         """
-        data = fiddling.force_bytes(data)
+        data = misc.force_bytes(data)
 
         if dumplog.isEnabledFor(logging.DEBUG):
             log.debug('Sent %#x bytes:' % len(data))
@@ -742,7 +742,7 @@ class tube(Timeout):
             >>> t.sendline('hello')
             b'hello\r\n'
         """
-        self.send(fiddling.force_bytes(line) + self.newline)
+        self.send(misc.force_bytes(line) + self.newline)
 
     def sendafter(self, delim, data, timeout=default):
         """sendafter(delim, data, timeout=default) -> bytes
@@ -775,7 +775,7 @@ class tube(Timeout):
 
         A combination of ``sendline(data)`` and ``recvuntil(delim, timeout)``.
         """
-        self.send(fiddling.force_bytes(data) + self.newline)
+        self.send(misc.force_bytes(data) + self.newline)
         return self.recvuntil(delim, timeout)
 
     def interactive(self, prompt=term.text.bold_red('$') + ' '):
