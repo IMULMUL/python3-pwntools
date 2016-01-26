@@ -69,7 +69,7 @@ def unhex(s):
       >>> unhex("74657374")
       b'test'
 """
-    return codecs.decode(force_bytes(s), 'hex')
+    return codecs.decode(force_bytes(s), 'hex_codec')
 
 
 def enhex(x):
@@ -82,7 +82,7 @@ def enhex(x):
       >>> enhex("test")
       '74657374'
 """
-    return codecs.encode(force_bytes(x), 'hex').decode('utf8')
+    return codecs.encode(force_bytes(x), 'hex_codec').decode('utf8')
 
 
 def urlencode(s):

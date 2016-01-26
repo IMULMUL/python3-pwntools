@@ -41,7 +41,7 @@ def main():
         if not set(hexdigits) >= set(dat):
             print("This is not a hex string")
             exit(-1)
-        dat = codecs.decode(dat, 'hex')
+        dat = codecs.decode(dat, 'hex_codec')
     else:
         dat = sys.stdin.buffer.read()
 
