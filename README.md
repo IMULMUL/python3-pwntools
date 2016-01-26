@@ -47,8 +47,6 @@ python3 setup.py install
 
 However, some of the features (ROP generation and assembling/disassembling foreign architectures) require non-Python dependencies.  For more information, see the [complete installation instructions here](https://python3-pwntools.readthedocs.org/en/latest/install.html).
 
-Note: if you use python 3.2 or 3.3, consider using the branch [py3.2-3.3](https://github.com/arthaud/python3-pwntools/tree/py3.2-3.3)
-
 # Contribution
 
 See [CONTRIBUTING.md](CONTRIBUTING.md)
