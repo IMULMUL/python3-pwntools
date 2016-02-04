@@ -10,7 +10,7 @@ Ubuntu
 
 .. code-block:: bash
 
-    $ apt-get install python-dev
+    $ apt-get install python3-dev
 
 Mac OS X
 ^^^^^^^^^^^^^^^^

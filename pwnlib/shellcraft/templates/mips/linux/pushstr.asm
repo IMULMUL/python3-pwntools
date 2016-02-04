@@ -11,26 +11,15 @@ Thin wrapper around :func:`pwnlib.shellcraft.mips.pushstr`, which sets
 Example:
 
     >>> print(pwnlib.shellcraft.mips.linux.pushstr('Hello, World').rstrip())
-        /* push 'Hello, World\x00' */
-        .set noat
-        slti $at, $zero, -1
-        sw $at, -4($sp)
-        add $sp, $sp, -4
-        .set noat
-        lui $at, 25708
-        ori $at, $at, 29295
-        sw $at, -4($sp)
-        add $sp, $sp, -4
-        .set noat
-        lui $at, 22304
-        ori $at, $at, 11375
-        sw $at, -4($sp)
-        add $sp, $sp, -4
-        .set noat
-        lui $at, 27756
-        ori $at, $at, 25928
-        sw $at, -4($sp)
-        add $sp, $sp, -4
+        /* push b'Hello, World\x00' */
+        li $t1, 0x6c6c6548
+        sw $t1, -16($sp)
+        li $t1, 0x57202c6f
+        sw $t1, -12($sp)
+        li $t1, 0x646c726f
+        sw $t1, -8($sp)
+        sw $zero, -4($sp)
+        addiu $sp, $sp, -16
 
 Args:
   string (bytes, str): The string to push.

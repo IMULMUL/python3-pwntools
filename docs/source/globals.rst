@@ -39,7 +39,7 @@ This is a quick list of most of the objects and routines imported, in rough orde
     - :mod:`pwnlib.asm`
     - Quickly turn assembly into some bytes, or vice-versa, without mucking about
     - Supports any architecture for which you have a binutils installed
-    - Over 20 different architectures have pre-built binaries at `ppa:pwntools/binutils <https://launchpad.net/~pwntools/+archive/ubuntu/binutils>`_.
+    - Over 20 different architectures have pre-built binaries at `ppa:binjitsu/binutils <https://launchpad.net/~binjitsu/+archive/ubuntu/binutils>`_.
 - ``shellcraft``
     - :mod:`pwnlib.shellcraft`
     - Library of shellcode ready to go

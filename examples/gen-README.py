@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
 """
 Script to generate README.md
 """
 
 from pwn import *
+
 
 out = '''# Examples
 While these examples should all work, they are not very representative of
@@ -10,19 +12,18 @@ the pwntools project.
 
 We have a plan to create a separate repository with examples, primarily
 exploits. Until we do so, we recommend new users to look at
-https://pwntools.readthedocs.org, as this is a better overview of our features.
+https://python3-pwntools.readthedocs.org, as this is a better overview of our
+features.
 
 In no particular order the docstrings for each example:
 
 '''
 
-
-def append_example(_arg, top, names):
-    global out
-    for name in names:
-        if not (name.endswith('.py') and name != __file__):
+for dirpath, dirnames, filenames in os.walk('.'):
+    for filename in sorted(filenames):
+        if not (filename.endswith('.py') and filename != __file__):
             continue
-        path = os.path.join(top, name)[2:]  # strip './'
+        path = os.path.join(dirpath, filename)[2:]  # strip './'
         log.info('-> %s' % path)
         data = read(path).strip()
         if data[0:3] not in ('"""', "'''"):
@@ -36,7 +37,5 @@ def append_example(_arg, top, names):
         doc = util.safeeval.const(data[0:i + 3])
         out += '* `%s`\n' % path
         out += '```%s```\n' % doc
-
-os.path.walk('.', append_example, None)
 
 write('README.md', out)

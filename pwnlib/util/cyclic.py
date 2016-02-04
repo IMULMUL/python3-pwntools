@@ -13,9 +13,9 @@ def de_bruijn(alphabet=string.ascii_lowercase, n=4):
     The returned generator will yield up to ``len(alphabet)**n`` elements.
 
     Arguments:
-      alphabet: List or string to generate the sequence over.
-      n(int): The length of subsequences that should be unique.
-"""
+        alphabet: List or string to generate the sequence over.
+        n(int): The length of subsequences that should be unique.
+    """
     k = len(alphabet)
     a = [0] * k * n
 
@@ -47,20 +47,19 @@ def cyclic(length=None, alphabet=string.ascii_lowercase, n=4):
     a list is returned.
 
     Arguments:
-      length: The desired length of the list or None if the entire sequence is desired.
-      alphabet: List or string to generate the sequence over.
-      n(int): The length of subsequences that should be unique.
+        length: The desired length of the list or None if the entire sequence is desired.
+        alphabet: List or string to generate the sequence over.
+        n(int): The length of subsequences that should be unique.
 
     Example:
-      >>> cyclic(alphabet = "ABC", n=3)
-      'AAABAACABBABCACBACCBBBCBCCC'
-      >>> cyclic(20)
-      'aaaabaaacaaadaaaeaaa'
-      >>> alphabet, n = range(30), 3
-      >>> len(alphabet)**n, len(cyclic(alphabet=alphabet, n=n))
-      (27000, 27000)
-"""
-
+        >>> cyclic(alphabet="ABC", n=3)
+        'AAABAACABBABCACBACCBBBCBCCC'
+        >>> cyclic(20)
+        'aaaabaaacaaadaaaeaaa'
+        >>> alphabet, n = range(30), 3
+        >>> len(alphabet)**n, len(cyclic(alphabet=alphabet, n=n))
+        (27000, 27000)
+    """
     out = []
     for ndx, c in enumerate(de_bruijn(alphabet, n)):
         if length is not None and ndx >= length:
@@ -89,24 +88,29 @@ def cyclic_find(subseq, alphabet=string.ascii_lowercase, n=None):
        https://www.sciencedirect.com/science/article/pii/S0012365X00001175
 
     Arguments:
-      subseq: The subsequence to look for. This can either be a string, a list
-              or an integer. If an integer is provided it will be packed as a
-              little endian integer.
-      alphabet: List or string to generate the sequence over.
-      n(int): The length of subsequences that should be unique.
-
+        subseq(int, bytes, str): The subsequence to look for. This can either
+                                 be a bytes, a string, a list or an integer.
+                                 If an integer is provided it will be packed as
+                                 a little endian integer.
+        alphabet(bytes, str): List or string to generate the sequence over.
+        n(int): The length of subsequences that should be unique.
 
     Examples:
 
-      >>> cyclic_find(cyclic(1000)[514:518])
-      514
+        >>> cyclic_find(cyclic(1000)[514:518])
+        514
+        >>> cyclic_find(0x61616162)
+        4
     """
+    if isinstance(subseq, int):
+        width = 'all' if n is None else n * 8
+        subseq = packing.pack(subseq, width, 'little', False)
+
+        if isinstance(alphabet, str): # subseq and alphabet should have the same type
+            subseq = subseq.decode('utf8')
+
     if any(c not in alphabet for c in subseq):
         return -1
-
-    if isinstance(subseq, int):
-        width = n * 8 or 'all'
-        subseq = packing.pack(subseq, width, 'little', False)
 
     n = n or len(subseq)
 

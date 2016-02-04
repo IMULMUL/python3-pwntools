@@ -2,11 +2,7 @@
 import argparse
 import sys
 
-import pwnlib.log
-from pwnlib.elf import ELF
-from pwnlib.util.fiddling import unhex
-
-pwnlib.log.install_default_handler()
+from pwn import *
 
 p = argparse.ArgumentParser()
 p.add_argument('elf', help="File to patch")

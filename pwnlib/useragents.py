@@ -53,7 +53,9 @@ def random():
     Returns:
         A random user agent string selected from :func:`getall`.
 
-    >>> random() in getall()
-    True
+    Example:
+
+        >>> random() #doctest: +SKIP
+        'Mozilla/5.0 (X11; Linux i686; rv:5.0) Gecko/20100101 Firefox/5.0 Iceweasel/5.0'
     """
     return randommod.choice(list(_load()))

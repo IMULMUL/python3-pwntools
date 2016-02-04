@@ -1,8 +1,10 @@
 *.o
 *.hi
 *.pyc
+__pycache__
 *~
 *.swp
+.ropeproject
 *.pdf
 */auto/*
 */bin/*
@@ -11,3 +13,4 @@ build
 MANIFEST
 dist
 pwntools.egg-info
+*.core

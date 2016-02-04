@@ -58,7 +58,6 @@ def group(n, lst, underfull_action='ignore', fill_value=None):
       >>> group(3, list('ABCDEFG'), 'fill')
       [['A', 'B', 'C'], ['D', 'E', 'F'], ['G', None, None]]
     """
-
     if underfull_action not in ('ignore', 'drop', 'fill'):
         raise ValueError("group(): underfull_action must be either 'ignore', 'drop' or 'fill'")
 
@@ -99,7 +98,6 @@ def concat(l):
       [1, 2, 3]
 
     """
-
     res = []
     for k in l:
         res.extend(k)
@@ -116,7 +114,6 @@ def concat_all(*args):
        >>> concat_all(0, [1, (2, 3)], [([[4, 5, 6]])])
        [0, 1, 2, 3, 4, 5, 6]
     """
-
     if len(args) != 1:
         return concat_all(list(args))
 

@@ -1,7 +1,7 @@
 <% from pwnlib.shellcraft import common %>
 <% from pwnlib.shellcraft import i386 %>
 <%docstring>
-Recives 4 bytes size field
+Receives 4 bytes size field
 Useful in conjuncion with findpeer and stager
 Args:
     sock, the socket to read the payload from.

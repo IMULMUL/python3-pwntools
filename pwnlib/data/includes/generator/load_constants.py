@@ -29,7 +29,7 @@ for l in data:
     elif val.endswith('L'):
         val = val[:-1]
 
-    print("{key} = Constant({key!r},{val})".format(**locals()), file=python)
+    print("{key} = Constant({key!r}, {val})".format(**locals()), file=python)
     if re.match(r'^0[0-9]', val) or re.match(r'[^0-9a-fA-Fx]0[0-9]', val):
         print("#define %s %s" % (key, hex(safeeval.expr(val))), file=header)
     else:

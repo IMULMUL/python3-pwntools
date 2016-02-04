@@ -128,7 +128,7 @@ def make_function(funcname, filename, directory):
         args.append('*' + varargs)
         args_used.append('*' + varargs)
 
-    if keywords not in ['pageargs', None]:
+    if keywords not in ('pageargs', None):
         args.append('**' + keywords)
         args_used.append('**' + keywords)
 
@@ -178,5 +178,19 @@ def wrap(template, render_global):
     # Setting _relpath is a slight hack only used to get better documentation
     res = wrap(template, render_global)
     res._relpath = path
+    res.__module__ = 'pwnlib.shellcraft.' + os.path.dirname(path).replace('/', '.')
+
+    import sys, inspect, functools
+
+    @functools.wraps(res)
+    def function(*args):
+        return sys.modules[res.__module__].function(res.__name__, res, *args)
+
+    @functools.wraps(res)
+    def call(*args):
+        return sys.modules[res.__module__].call(res.__name__, *args)
+
+    res.function = function
+    res.call = call
 
     return res

@@ -1,4 +1,5 @@
 import errno
+import socket
 import time
 
 from .. import tubes
@@ -33,18 +34,27 @@ def pidof(target):
     Returns:
         A list of found PIDs.
     """
-    if isinstance(target, tubes.sock.sock):
+    if isinstance(target, tubes.ssh.ssh_channel):
+        return [target.pid]
+    elif isinstance(target, tubes.sock.sock):
         local = target.sock.getsockname()
         remote = target.sock.getpeername()
 
-        def match(p):
-            return (p.raddr, p.laddr, p.status) == (local, remote, 'ESTABLISHED')
+        def match(c):
+            return (c.raddr, c.laddr, c.status) == (local, remote, 'ESTABLISHED')
 
         return [c.pid for c in psutil.net_connections() if match(c)]
+    elif isinstance(target, tuple):
+        host, port = target
 
+        host = socket.gethostbyname(host)
+
+        def match(c):
+            return c.raddr == (host, port)
+
+        return [c.pid for c in psutil.net_connections() if match(c)]
     elif isinstance(target, tubes.process.process):
         return [target.proc.pid]
-
     else:
         return pid_by_name(target)
 
@@ -68,7 +78,7 @@ def pid_by_name(name):
         try:
             if p.exe() == name:
                 return True
-        except:
+        except Exception:
             pass
         return False
 
@@ -103,7 +113,7 @@ def parent(pid):
     """
     try:
         return psutil.Process(pid).parent().pid
-    except:
+    except Exception:
         return 0
 
 
