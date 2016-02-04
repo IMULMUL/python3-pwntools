@@ -270,7 +270,8 @@ class process(tube):
                                                  close_fds=close_fds,
                                                  preexec_fn=self._preexec_fn)
                     break
-                except OSError as exception:
+                except OSError as e:
+                    exception = e
                     if exception.errno != errno.ENOEXEC:
                         raise
             else:
