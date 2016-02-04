@@ -53,6 +53,9 @@ class listen(sock):
         else:
             self.error("remote(): type %r is not supported" % typ)
 
+        if bindaddr == '0.0.0.0' and fam == socket.AF_INET6:
+            bindaddr = '::'
+
         h = self.waitfor('Trying to bind to %s on port %d' % (bindaddr, port))
 
         for res in socket.getaddrinfo(bindaddr, port, fam, typ, 0, socket.AI_PASSIVE):
