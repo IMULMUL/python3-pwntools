@@ -1,4 +1,7 @@
-<% from pwnlib.util import lists, packing, fiddling, misc %>\
+<%
+    from pwnlib.util import lists, packing, fiddling, misc
+    from pwnlib.shellcraft import pretty, okay
+%>
 <%page args="string, append_null=True"/>
 <%docstring>
 Pushes a string onto the stack without using
@@ -8,7 +11,7 @@ Example:
 
     >>> print(shellcraft.i386.pushstr('').rstrip())
         /* push b'\x00' */
-        push 0x1
+        push 1
         dec byte ptr [esp]
     >>> print(shellcraft.i386.pushstr('a').rstrip())
         /* push b'a\x00' */
@@ -23,7 +26,7 @@ Example:
         xor dword ptr [esp], 0x1606060
     >>> print(shellcraft.i386.pushstr('aaaa').rstrip())
         /* push b'aaaa\x00' */
-        push 0x1
+        push 1
         dec byte ptr [esp]
         push 0x61616161
     >>> print(shellcraft.i386.pushstr('aaaaa').rstrip())
@@ -39,7 +42,7 @@ Example:
         xor dword ptr [esp], 0x10101c2
     >>> print(shellcraft.i386.pushstr(b'\xc3', append_null=False).rstrip())
         /* push b'\xc3' */
-        push 0x...c3
+        push -0x3d
     >>> with context.local():
     ...    context.arch = 'i386'
     ...    print(enhex(asm(shellcraft.pushstr("/bin/sh"))))
@@ -58,30 +61,25 @@ Args:
   append_null (bool): Whether to append a single NULL-byte before pushing.
 </%docstring>
 <%
-    string = misc.force_bytes(string)
+string = misc.force_bytes(string)
 
-    if append_null:
-        string += b'\x00'
-    if not string:
-        return
+if append_null and not string.endswith(b'\x00'):
+    string += b'\x00'
 
-    def okay(s):
-        return b'\n' not in s and b'\x00' not in s
+if not string:
+    return
 
-    if string[-1] >= 128:
-        extend = b'\xff'
-    else:
-        extend = b'\x00'
-
-    def pretty(n):
-        return hex(n & (2 ** 32 - 1))
+if string[-1] >= 128:
+    extend = b'\xff'
+else:
+    extend = b'\x00'
 %>\
-    /* push ${repr(string)} */
+    /* push ${pretty(string)} */
 % for word in lists.group(4, string, 'fill', extend)[::-1]:
 <%
-    sign = packing.u32(word, 'little', 'signed')
+    sign = packing.u32(word, endian='little', sign='signed')
 %>\
-% if sign in [0, 0xa]:
+% if sign in (0, 0xa):
     push ${pretty(sign + 1)}
     dec byte ptr [esp]
 % elif -0x80 <= sign <= 0x7f and okay(word[0:1]):
@@ -91,8 +89,8 @@ Args:
 % else:
 <%
     a, b = fiddling.xor_pair(word, avoid=b'\x00\n')
-    a = packing.u32(a, 'little', 'unsigned')
-    b = packing.u32(b, 'little', 'unsigned')
+    a = packing.u32(a, endian='little', sign='unsigned')
+    b = packing.u32(b, endian='little', sign='unsigned')
 %>\
     push ${pretty(a)}
     xor dword ptr [esp], ${pretty(b)}

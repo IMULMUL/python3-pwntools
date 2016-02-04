@@ -1,8 +1,8 @@
 pwntools
-====================================
+========
 
-``pwntools`` is a CTF framework and exploit development library.
-Written in Python, it is designed for rapid prototyping and development,
+``python3-pwntools`` is a CTF framework and exploit development library.
+Written in Python 3, it is designed for rapid prototyping and development,
 and intended to make exploit writing as simple as possible.
 
 Getting Started
@@ -34,13 +34,17 @@ Each of the ``pwntools`` modules is documented here.
    constants
    context
    dynelf
+   encoders
    elf
    exception
+   fmtstr
    gdb
    log
    memleak
    replacements
    rop
+   rop/*
+   runner
    shellcraft
    shellcraft/*
    term
@@ -50,6 +54,11 @@ Each of the ``pwntools`` modules is documented here.
    ui
    useragents
    util/*
+
+.. toctree::
+   :hidden:
+
+   testexample
 
 Indices and tables
 ==================

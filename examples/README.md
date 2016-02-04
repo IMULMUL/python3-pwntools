@@ -4,7 +4,8 @@ the pwntools project.
 
 We have a plan to create a separate repository with examples, primarily
 exploits. Until we do so, we recommend new users to look at
-https://pwntools.readthedocs.org, as this is a better overview of our features.
+https://python3-pwntools.readthedocs.org, as this is a better overview of our
+features.
 
 In no particular order the docstrings for each example:
 
@@ -74,6 +75,10 @@ Example showing pwnlib's readline implementation and a few completers.  This
 part of pwnlib will probably see some major changes soon, but we wanted to show
 off some proof-of-concepts.
 ```
+* `remote.py`
+```
+Example showing how to use the remote class.
+```
 * `remote_gdb_debugging.py`
 ```
 Simple example showing how to use the remote
@@ -103,7 +108,7 @@ and::
 
   $ TERM=xterm-256color python text.py
 ```
-* `remote.py`
+* `yesno.py`
 ```
-Example showing how to use the remote class.
+Example showing `pwnlib.ui.yesno()`
 ```

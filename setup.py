@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-from setuptools import setup, find_packages
-from distutils.util import convert_path
-from distutils.command.install import INSTALL_SCHEMES
-import os
 import glob
+import os
 import platform
+import sys
+from distutils.command.install import INSTALL_SCHEMES
+from distutils.sysconfig import get_python_inc
+from distutils.util import convert_path
+
+from setuptools import find_packages
+from setuptools import setup
 
 # Get all template files
 templates = []
@@ -41,11 +45,22 @@ install_requires = ['paramiko>=1.15.2',
                     'capstone',
                     'ropgadget>=5.3',
                     'pyserial>=2.7',
-                    'requests>=2.0']
+                    'requests>=2.5.1',
+                    'pip>=6.0.8',
+                    'tox>=1.8.1',
+                    'pygments>=2.0',
+                    'pysocks']
 
 # This is a hack until somebody ports psutil to OpenBSD
 if platform.system() != 'OpenBSD':
     install_requires.append('psutil>=2.1.3')
+
+# Check that the user has installed the Python development headers
+PythonH = os.path.join(get_python_inc(), 'Python.h')
+if not os.path.exists(PythonH):
+    print("You must install the Python development headers!", file=sys.stderr)
+    print("$ apt-get install python3-dev", file=sys.stderr)
+    sys.exit(-1)
 
 setup(
     name                 = 'pwntools',
@@ -55,6 +70,7 @@ setup(
     package_data         = {
         'pwnlib': [
             'data/crcsums.txt',
+            'data/useragents/useragents.txt',
             'data/binutils/*',
             'data/includes/*.h',
             'data/includes/*/*.h',
@@ -62,19 +78,22 @@ setup(
     },
     entry_points         = {'console_scripts': console_scripts},
     scripts              = glob.glob("bin/*"),
-    description          = "This is the CTF framework used by Gallopsled in every CTF.",
-    author               = "Gallopsled et al.",
-    author_email         = "#gallopsled @ freenode.net",
-    url                  = 'https://github.com/Gallopsled/pwntools/',
-    download_url         = "https://github.com/Gallopsled/pwntools/tarball/%s" % version,
+    description          = "CTF framework and exploit development library.",
+    author               = "Maxime Arthaud",
+    author_email         = "maxime@arthaud.me",
+    url                  = 'https://github.com/arthaud/python3-pwntools',
+    download_url         = 'https://github.com/arthaud/python3-pwntools/tarball/%s' % version,
     install_requires     = install_requires,
-    license              = "Mostly MIT, some GPL/BSD, see LICENSE-pwntools.txt",
+    license              = "Mostly MIT, some GPL/BSD, see LICENSE.txt",
     classifiers          = [
         'Topic :: Security',
         'Environment :: Console',
         'Operating System :: OS Independent',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Intended Audience :: Developers'
     ]
 )

@@ -11,7 +11,7 @@ Building `binutils` from source takes about 60 seconds on a modern 8-core machin
 
 Ubuntu
 ^^^^^^^^^^^^^^^^
-First, add our `Personal Package Archive repository <http://binutils.pwntools.com>`__.
+First, add our `Personal Package Archive repository <http://binutils.binjitsu.com>`__.
 
 .. code-block:: bash
 
@@ -32,11 +32,11 @@ Mac OS X is just as easy, but requires building binutils from source.
 However, we've made ``homebrew`` recipes to make this a single command.
 After installing `brew <http://brew.sh>`__, grab the appropriate
 recipe from our `binutils
-repo <https://github.com/Gallopsled/pwntools-binutils/>`__.
+repo <https://github.com/binjitsu/binjitsu-binutils/>`__.
 
 .. code-block:: bash
 
-    $ brew install https://raw.githubusercontent.com/Gallopsled/pwntools-binutils/master/osx/binutils-$ARCH.rb
+    $ brew install https://raw.githubusercontent.com/binjitsu/binjitsu-binutils/master/osx/binutils-$ARCH.rb
 
 Alternate OSes
 ^^^^^^^^^^^^^^^^
@@ -58,8 +58,6 @@ OSes, ``binutils`` is simple to build by hand.
     gpg --keyserver keys.gnupg.net --recv-keys 4AE55E93
     gpg --verify binutils-$V.tar.gz.sig
 
-    rm -rf binutils-*
-
     tar xf binutils-$V.tar.gz
 
     mkdir binutils-build
@@ -79,6 +77,6 @@ OSes, ``binutils`` is simple to build by hand.
     MAKE=gmake
     hash gmake || MAKE=make
 
-    $MAKE -j
+    $MAKE -j clean all
     sudo $MAKE install
 

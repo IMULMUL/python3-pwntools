@@ -18,8 +18,9 @@ class serialtube(tube.tube):
             convert_newlines=True,
             bytesize=8, parity='N', stopbits=1, xonxoff=False,
             rtscts=False, dsrdtr=False,
-            timeout='default'):
-        super(serialtube, self).__init__(timeout)
+            timeout='default',
+            level=None):
+        super(serialtube, self).__init__(timeout, level=level)
 
         self.convert_newlines = convert_newlines
         self.conn = serial.Serial(
@@ -91,7 +92,7 @@ class serialtube(tube.tube):
 
     def fileno(self):
         if not self.connected():
-            log.error("A stopped program does not have a file number")
+            self.error("A stopped program does not have a file number")
 
         return self.conn.fileno()
 
@@ -99,7 +100,7 @@ class serialtube(tube.tube):
         self.close()
 
     def interactive(self, prompt=term.text.bold_red('$') + ' '):
-        log.info('Switching to interactive mode')
+        self.info('Switching to interactive mode')
 
         # We would like a cursor, please!
         term.term.show_cursor()
@@ -115,10 +116,11 @@ class serialtube(tube.tube):
                     elif cur == b'\a':
                         # Ugly hack until term unstands bell characters
                         continue
-                    sys.stderr.buffer.write(cur)
-                    sys.stderr.flush()
+
+                    sys.stdout.buffer.write(cur)
+                    sys.stdout.flush()
                 except EOFError:
-                    log.info('Got EOF while reading in interactive')
+                    self.info('Got EOF while reading in interactive')
                     go[0] = False
                     break
 
@@ -143,7 +145,7 @@ class serialtube(tube.tube):
                     self.send(data)
                 except EOFError:
                     go[0] = False
-                    log.info('Got EOF while sending in interactive')
+                    self.info('Got EOF while sending in interactive')
 
         while t.is_alive():
             t.join(timeout=0.1)

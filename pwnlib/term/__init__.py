@@ -20,12 +20,12 @@ term_mode = False
 
 
 def can_init():
-    """This function returns True iff stderr is a TTY and we are not inside a
+    """This function returns True iff stdout is a TTY and we are not inside a
     REPL.  Iff this function returns `True`, a call to :meth:`init` will let
     ``pwnlib`` manage the terminal.
     """
 
-    if not sys.stderr.isatty():
+    if not sys.stdout.isatty():
         return False
 
     # Check for python -i
@@ -61,7 +61,6 @@ def init():
     It is on our TODO, to create a function to "give back" the terminal without
     closing the interpreter.
     """
-
     global term_mode
 
     if term_mode:

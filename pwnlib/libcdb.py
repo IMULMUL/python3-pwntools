@@ -10,12 +10,10 @@ import urllib.parse as urlparse
 from .context import context
 from .elf import ELF
 from .log import getLogger
-from .util.fiddling import b64d
-from .util.fiddling import hexdump
-from .util.misc import read
-from .util.misc import write
 from .util.safeeval import const
 from .util.web import wget
+from .util.fiddling import b64d, hexdump
+from .util.misc import read, write
 
 log = getLogger(__name__)
 
@@ -58,7 +56,7 @@ def search_by_build_id(hex_encoded_id):
             url = os.path.dirname(url) + '/'
             url = urlparse.urljoin(url, data.decode('utf8'))
 
-    write(cache, data)
+    write(cache, data, mode='wb')
     return cache
 
 

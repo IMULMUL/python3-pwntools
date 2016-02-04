@@ -569,10 +569,8 @@ S_IFSOCK = Constant('S_IFSOCK', 0o140000)
 S_ISVTX = Constant('S_ISVTX', 0o001000)
 S_IFWHT = Constant('S_IFWHT', 0o160000)
 ACCESSPERMS = Constant('ACCESSPERMS', (0o000700 | 0o000070 | 0o000007))
-ALLPERMS = Constant('ALLPERMS', (0o004000 | 0o002000 |
-                                 0o001000 | 0o000700 | 0o000070 | 0o000007))
-DEFFILEMODE = Constant('DEFFILEMODE', (0o000400 | 0o000200 |
-                                       0o000040 | 0o000020 | 0o000004 | 0o000002))
+ALLPERMS = Constant('ALLPERMS', (0o004000 | 0o002000 | 0o001000 | 0o000700 | 0o000070 | 0o000007))
+DEFFILEMODE = Constant('DEFFILEMODE', (0o000400 | 0o000200 | 0o000040 | 0o000020 | 0o000004 | 0o000002))
 S_BLKSIZE = Constant('S_BLKSIZE', 512)
 UF_SETTABLE = Constant('UF_SETTABLE', 0x0000ffff)
 UF_NODUMP = Constant('UF_NODUMP', 0x00000001)
@@ -1069,19 +1067,5 @@ RFTSIGSHIFT = Constant('RFTSIGSHIFT', 20)
 RFTSIGMASK = Constant('RFTSIGMASK', 0xFF)
 RFPROCDESC = Constant('RFPROCDESC', (1 << 28))
 RFPPWAIT = Constant('RFPPWAIT', (1 << 31))
-RFFLAGS = Constant(
-    'RFFLAGS',
-    ((1 << 2) | (
-        1 << 4) | (
-            1 << 5) | (
-                1 << 6) | (
-                    1 << 12) | (
-                        1 << 13) | (
-                            1 << 14) | (
-                                1 << 16) | (
-                                    1 << 17) | (
-                                        1 << 18) | (
-                                            1 << 19) | (
-                                                1 << 28) | (
-                                                    1 << 31)))
+RFFLAGS = Constant('RFFLAGS', ((1 << 2) | (1 << 4) | (1 << 5) | (1 << 6) | (1 << 12) | (1 << 13) | (1 << 14) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 19) | (1 << 28) | (1 << 31)))
 RFKERNELONLY = Constant('RFKERNELONLY', ((1 << 17) | (1 << 18) | (1 << 31) | (1 << 28)))

@@ -1,16 +1,20 @@
+import ctypes
 import errno
 import fcntl
 import logging
 import os
 import pty
+import resource
 import select
 import subprocess
 import tty
 
 from ..context import context
 from ..log import getLogger
+from ..qemu import get_qemu_user
 from ..timeout import Timeout
 from ..util.misc import which
+from ..util.misc import parse_ldd_output
 from .tube import tube
 
 log = getLogger(__name__)
@@ -31,7 +35,7 @@ class process(tube):
             Set to `True` to interpret `argv` as a string
             to pass to the shell for interpretation instead of as argv.
         executable(str):
-            Path to the binary to execute.  If ``None``, uses ``argv[0]``.
+            Path t`o the binary to execute.  If ``None``, uses ``argv[0]``.
             Cannot be used with ``shell``.
         cwd(str):
             Working directory.  Uses the current working directory by default.
@@ -41,24 +45,48 @@ class process(tube):
             Timeout to use on ``tube`` ``recv`` operations.
         stdin(int):
             File object or file descriptor number to use for ``stdin``.
-            By default, a pipe is used.
+            By default, a pipe is used.  A pty can be used instead by setting
+            this to ``process.PTY``.  This will cause programs to behave in an
+            interactive manner (e.g.., ``python`` will show a ``>>>`` prompt).
+            If the application reads from ``/dev/tty`` directly, use a pty.
         stdout(int):
             File object or file descriptor number to use for ``stdout``.
-            By default, a pty is used.
+            By default, a pty is used so that any stdout buffering by libc
+            routines is disabled.
             May also be ``subprocess.PIPE`` to use a normal pipe.
         stderr(int):
             File object or file descriptor number to use for ``stderr``.
             By default, ``stdout`` is used.
             May also be ``subprocess.PIPE`` to use a separate pipe,
             although the ``tube`` wrapper will not be able to read this data.
+        close_fds(bool):
+            Close all open file descriptors except stdin, stdout, stderr.
+            By default, ``True`` is used.
         preexec_fn(callable):
             Callable to invoke immediately before calling ``execve``.
+        raw(bool):
+            Set the created pty to raw mode (i.e. disable echo and control
+            characters).  ``True`` by default.  If no pty is created, this
+            has no effect.
+        aslr(bool):
+            If set to ``False``, disable ASLR via ``personality`` (``setarch -R``)
+            and ``setrlimit`` (``ulimit -s unlimited``).
+            This disables ASLR for the target process.  However, the ``setarch``
+            changes are lost if a ``setuid`` binary is executed.
+            The default value is inherited from ``context.aslr``.
+        nosetuid(bool):
+            If set to ``True``, prevent the binary from running as another user,
+            even if the setuid bit is set.  This is only supported on Linux,
+            with kernels v3.5 or greater.
+
+    Attributes:
+        proc(subprocess)
 
     Examples:
 
         >>> p = process(which('python3'))
         >>> p.sendline("print('Hello world')")
-        >>> p.sendline("print('Wow, such data')");
+        >>> p.sendline("print('Wow, such data')")
         >>> b'' == p.recv(timeout=0.01)
         True
         >>> p.shutdown('send')
@@ -98,33 +126,47 @@ class process(tube):
         b'\x00\x00\x00\x00\x00\x00\x00\x00'
 
         >>> p = process(['python2', '-c', 'import os; print os.read(2, 1024)'],
-        ...             preexec_fn = lambda: os.dup2(0, 2))
+        ...             preexec_fn=lambda: os.dup2(0, 2))
         >>> p.sendline('hello')
         >>> p.recvline()
         b'hello\n'
 
-        >>> p = process(['python2', '-c', 'open("/dev/tty", "wb").write("stack smashing detected")'])
-        >>> p.recv()
+        >>> stack_smashing = ['python2', '-c', 'open("/dev/tty", "wb").write("stack smashing detected")']
+        >>> process(stack_smashing).recvall()
         b'stack smashing detected'
+        >>> process(stack_smashing, stdout=process.PIPE).recvall()
+        b''
+
+        >>> getpass = ['python2', '-c', 'import getpass; print(getpass.getpass("XXX"))']
+        >>> p = process(getpass, stdin=process.PTY)
+        >>> p.recv()
+        b'XXX'
+        >>> p.sendline('hunter2')
+        >>> p.recvall()
+        b'\nhunter2\n'
+
+        >>> process('echo hello 1>&2', shell=True).recvall()
+        b'hello\n'
+
+        >>> process('echo hello 1>&2', shell=True, stderr=process.PIPE).recvall()
+        b''
+
+        >>> a = process(['cat', '/proc/self/maps']).recvall()
+        >>> b = process(['cat', '/proc/self/maps'], aslr=False).recvall()
+        >>> with context.local(aslr=False):
+        ...    c = process(['cat', '/proc/self/maps']).recvall()
+        >>> a == b
+        False
+        >>> b == c
+        True
+
+        >>> process(['sh', '-c', 'ulimit -s'], aslr=0).recvline()
+        b'unlimited\n'
     """
 
-    #: `subprocess.Popen` object
-    proc = None
-
-    #: Full path to the executable
-    executable = None
-
-    #: Full path to the executable
-    program = None
-
-    #: Arguments passed on argv
-    argv = None
-
-    #: Environment passed on envp
-    env = None
-
-    #: Directory the process was created in
-    cwd = None
+    PIPE = PIPE
+    STDOUT = STDOUT
+    PTY = PTY
 
     #: Have we seen the process stop?
     _stop_noticed = False
@@ -138,44 +180,115 @@ class process(tube):
                  stdin=PIPE,
                  stdout=PTY,
                  stderr=STDOUT,
+                 level=None,
                  close_fds=True,
-                 preexec_fn=lambda: None):
-        super(process, self).__init__(timeout)
+                 preexec_fn=lambda: None,
+                 raw=True,
+                 aslr=None,
+                 nosetuid=False):
+        super(process, self).__init__(timeout, level=level)
+
+        #: `subprocess.Popen` object
+        self.proc = None
 
         if not shell:
             executable, argv, env = self._validate(cwd, executable, argv, env)
 
-        stdin, stdout, stderr, master = self._handles(stdin, stdout, stderr)
+        # Permit invocation as process('sh') and process(['sh'])
+        if isinstance(argv, (bytes, str)):
+            argv = [argv]
 
-        self.executable = self.program = executable
+        # Avoid the need to have to deal with the STDOUT magic value.
+        if stderr is STDOUT:
+            stderr = stdout
+
+        # Determine which descriptors will be attached to a new PTY
+        handles = (stdin, stdout, stderr)
+
+        #: Which file descriptor is the controlling TTY
+        self.pty = handles.index(PTY) if PTY in handles else None
+
+        #: Whether the controlling TTY is set to raw mode
+        self.raw = raw
+
+        #: Whether ASLR should be left on
+        self.aslr = aslr if aslr is not None else context.aslr
+
+        #: Whether setuid is permitted
+        self._setuid = not nosetuid
+
+        # Create the PTY if necessary
+        stdin, stdout, stderr, master, slave = self._handles(*handles)
+
+        #: Full path to the executable
+        self.executable = executable
+
+        #: Arguments passed on argv
         self.argv = argv
-        self.env = env
+
+        #: Environment passed on envp
+        self.env = env or os.environ
+
+        #: Directory the process was created in
         self.cwd = cwd or os.path.curdir
-        self.preexec_user = preexec_fn
+
+        self.preexec_fn = preexec_fn
 
         message = "Starting program %r" % self.program
 
-        if log.isEnabledFor(logging.DEBUG):
+        if self.isEnabledFor(logging.DEBUG):
             if self.argv != [self.executable]:
                 message += ' argv=%r ' % self.argv
             if self.env != os.environ:
                 message += ' env=%r ' % self.env
 
-        with log.progress(message):
-            self.proc = subprocess.Popen(args=argv,
-                                         shell=shell,
-                                         executable=executable,
-                                         cwd=cwd,
-                                         env=env,
-                                         stdin=stdin,
-                                         stdout=stdout,
-                                         stderr=stderr,
-                                         close_fds=close_fds,
-                                         preexec_fn=self.preexec_fn)
+        with self.progress(message) as p:
+            # In the event the binary is a foreign architecture,
+            # and binfmt is not installed (e.g. when running on
+            # Travis CI), re-try with qemu-XXX if we get an
+            # 'Exec format error'.
+            prefixes = [([], executable)]
+            executables = [executable]
+            exception = None
 
-        if master:
-            self.proc.stdout = os.fdopen(master, 'rb', 0)
-            os.close(stdout)
+            try:
+                qemu = get_qemu_user()
+                prefixes.append(([qemu], qemu))
+            except:
+                pass
+
+            for prefix, executable in prefixes:
+                try:
+                    self.proc = subprocess.Popen(args=prefix + argv,
+                                                 shell=shell,
+                                                 executable=executable,
+                                                 cwd=cwd,
+                                                 env=env,
+                                                 stdin=stdin,
+                                                 stdout=stdout,
+                                                 stderr=stderr,
+                                                 close_fds=close_fds,
+                                                 preexec_fn=self._preexec_fn)
+                    break
+                except OSError as exception:
+                    if exception.errno != errno.ENOEXEC:
+                        raise
+            else:
+                try:
+                    raise exception
+                except:
+                    self.exception(str(prefixes))
+
+        if self.pty is not None:
+            if stdin is slave:
+                self.proc.stdin = os.fdopen(os.dup(master), 'r+b', 0)
+            if stdout is slave:
+                self.proc.stdout = os.fdopen(os.dup(master), 'r+b', 0)
+            if stderr is slave:
+                self.proc.stderr = os.fdopen(os.dup(master), 'r+b', 0)
+
+            os.close(master)
+            os.close(slave)
 
         # Set in non-blocking mode so that a call to call recv(1000) will
         # return as soon as a the first byte is available
@@ -183,9 +296,49 @@ class process(tube):
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
         fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
-    def preexec_fn(self):
-        self._pty_make_controlling_tty(1)
-        self.preexec_user()
+    def _preexec_fn(self):
+        """
+        Routine executed in the child process before invoking execve().
+
+        Handles setting the controlling TTY as well as invoking the user-
+        supplied preexec_fn.
+        """
+        if self.pty is not None:
+            self._pty_make_controlling_tty(self.pty)
+
+        if not self.aslr:
+            try:
+                if context.os == 'linux':
+                    ADDR_NO_RANDOMIZE = 0x0040000
+                    ctypes.CDLL('libc.so.6').personality(ADDR_NO_RANDOMIZE)
+
+                resource.setrlimit(resource.RLIMIT_STACK, (-1, -1))
+            except:
+                log.exception("Could not disable ASLR")
+
+        # Assume that the user would prefer to have core dumps.
+        resource.setrlimit(resource.RLIMIT_CORE, (-1, -1))
+
+        # Given that we want a core file, assume that we want the whole thing.
+        try:
+            with open('/proc/self/coredump_filter', 'w') as f:
+                f.write('0xff')
+        except Exception:
+            pass
+
+        if not self._setuid:
+            try:
+                PR_SET_NO_NEW_PRIVS = 38
+                ctypes.CDLL('libc.so.6').prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)
+            except:
+                pass
+
+        self.preexec_fn()
+
+    @property
+    def program(self):
+        """Alias for ``executable``, for backward compatibility"""
+        return self.executable
 
     @staticmethod
     def _validate(cwd, executable, argv, env):
@@ -261,7 +414,6 @@ class process(tube):
 
         # Create a duplicate so we can modify it safely
         env = dict(env or os.environ)
-
         env_vars = env.items()
         env = {}
         for k, v in env_vars:
@@ -272,6 +424,7 @@ class process(tube):
 
             k_null_byte = b'\x00' if isinstance(k, bytes) else '\x00'
             v_null_byte = b'\x00' if isinstance(v, bytes) else '\x00'
+
             if k_null_byte in k[:-1]:
                 log.error('Inappropriate null byte in env key: %r' % k)
             if v_null_byte in v[:-1]:
@@ -281,11 +434,10 @@ class process(tube):
 
         return executable, argv, env
 
-    @staticmethod
-    def _handles(stdin, stdout, stderr):
-        master = None
+    def _handles(self, stdin, stdout, stderr):
+        master = slave = None
 
-        if stdout is PTY:
+        if self.pty is not None:
             # Normally we could just use subprocess.PIPE and be happy.
             # Unfortunately, this results in undesired behavior when
             # printf() and similar functions buffer data instead of
@@ -295,37 +447,58 @@ class process(tube):
             # buffer any data on STDOUT.
             master, slave = pty.openpty()
 
-            # By making STDOUT a PTY, the OS will attempt to interpret
-            # terminal control codes.  We don't want this, we want all
-            # input passed exactly and perfectly to the process.
-            tty.setraw(master)
-            tty.setraw(slave)
+            if self.raw:
+                # By giving the child process a controlling TTY,
+                # the OS will attempt to interpret terminal control codes
+                # like backspace and Ctrl+C.
+                #
+                # If we don't want this, we set it to raw mode.
+                tty.setraw(master)
+                tty.setraw(slave)
 
-            # Pick one side of the pty to pass to the child
-            stdout = slave
+            if stdin is PTY:
+                stdin = slave
+            if stdout is PTY:
+                stdout = slave
+            if stderr is PTY:
+                stderr = slave
 
-        return stdin, stdout, stderr, master
+        return stdin, stdout, stderr, master, slave
+
+    def __getattr__(self, attr):
+        """Permit pass-through access to the underlying process object for
+        fields like ``pid`` and ``stdin``.
+        """
+        if hasattr(self.proc, attr):
+            return getattr(self.proc, attr)
+
+        raise AttributeError("'process' object has no attribute '%s'" % attr)
 
     def kill(self):
         """kill()
 
         Kills the process.
         """
-
         self.close()
 
-    def poll(self):
-        """poll() -> int
+    def poll(self, block=False):
+        """poll(block=False) -> int
+
+        Arguments:
+            block(bool): Wait for the process to exit
 
         Poll the exit code of the process. Will return None, if the
         process has not yet finished and the exit code otherwise.
         """
+        if block:
+            self.wait_for_close()
+
         self.proc.poll()
 
         if self.proc.returncode is not None and not self._stop_noticed:
             self._stop_noticed = True
-            log.info("Program %r stopped with exit code %d" %
-                     (self.program, self.proc.returncode))
+            self.info("Program %r stopped with exit code %d" %
+                      (self.program, self.proc.returncode))
 
         return self.proc.returncode
 
@@ -399,6 +572,9 @@ class process(tube):
             #     return select.select([self.proc.stdout], [], [], timeout) == ([self.proc.stdout], [], [])
             # ValueError: I/O operation on closed file
             raise EOFError
+        except select.error as v:
+            if v[0] == errno.EINTR:
+                return False
 
     def connected_raw(self, direction):
         if direction == 'any':
@@ -416,25 +592,22 @@ class process(tube):
         self.poll()
 
         # close file descriptors
-        if self.proc.stdin is not None:
-            self.proc.stdin.close()
-        if self.proc.stderr is not None:
-            self.proc.stderr.close()
-        if self.proc.stdout is not None:
-            self.proc.stdout.close()
+        for fd in (self.proc.stdin, self.proc.stdout, self.proc.stderr):
+            if fd is not None:
+                fd.close()
 
         if not self._stop_noticed:
             try:
                 self.proc.kill()
-                self.proc.wait()  # avoid leaving zombies around
+                self.proc.wait()
                 self._stop_noticed = True
-                log.info('Stopped program %r' % self.program)
+                self.info('Stopped program %r' % self.program)
             except OSError:
                 pass
 
     def fileno(self):
         if not self.connected():
-            log.error("A stopped program does not have a file number")
+            self.error("A stopped program does not have a file number")
 
         return self.proc.stdout.fileno()
 
@@ -489,3 +662,50 @@ class process(tube):
             raise Exception("Could not open controlling tty, /dev/tty")
         else:
             os.close(fd)
+
+    def libs(self):
+        """libs() -> dict
+
+        Return a dictionary mapping the path of each shared library loaded
+        by the process to the address it is loaded at in the process' address
+        space.
+
+        If ``/proc/$PID/maps`` for the process cannot be accessed, the output
+        of ``ldd`` alone is used.  This may give inaccurate results if ASLR
+        is enabled.
+        """
+        with context.local(log_level='error'):
+            ldd = process(['ldd', self.executable]).recvall()
+
+        maps = parse_ldd_output(ldd)
+
+        try:
+            maps_raw = open('/proc/%d/maps' % self.pid).read()
+        except IOError:
+            return maps
+
+        for lib in maps:
+            path = os.path.realpath(lib)
+            for line in maps_raw.splitlines():
+                if line.endswith(path):
+                    address = line.split('-')[0]
+                    maps[lib] = int(address, 16)
+                    break
+
+        return maps
+
+    @property
+    def libc(self):
+        """libc() -> ELF
+
+        Returns an ELF for the libc for the current process.
+        If possible, it is adjusted to the correct address
+        automatically.
+        """
+        from ..elf import ELF
+
+        for lib, address in self.libs().items():
+            if 'libc.so' in lib:
+                e = ELF(lib)
+                e.address = address
+                return e

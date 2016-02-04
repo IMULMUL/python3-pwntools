@@ -1,5 +1,5 @@
-About pwntools
-========================
+About python3-pwntools
+======================
 
 Whether you're using it to write exploits, or as part
 of another software project will dictate how you use it.

@@ -5,12 +5,27 @@ Implements context management so that nested/scoped contexts and threaded
 contexts work properly and as expected.
 """
 import collections
+import functools
 import logging
+import os
+import platform
+import socks
+import socket
 import string
+import sys
 import threading
+import time
 
 from ..timeout import Timeout
 
+_original_socket = socket.socket
+
+class _devnull:
+    name = None
+    def write(self, *a, **kw): pass
+    def read(self, *a, **kw): return ''
+    def flush(self, *a, **kw): pass
+    def close(self, *a, **kw): pass
 
 class _defaultdict(dict):
     """
@@ -188,7 +203,7 @@ class Thread(threading.Thread):
         >>> # Note that a normal Thread starts with a clean context
         >>> # (i386 is the default architecture)
         >>> t = threading.Thread(target=p)
-        >>> _=(t.start(), t.join())
+        >>> _ = (t.start(), t.join())
         i386
         mips
         >>> # Note that the main Thread's context is unchanged
@@ -196,7 +211,7 @@ class Thread(threading.Thread):
         arm
         >>> # Note that a context-aware Thread receives a copy of the context
         >>> t = pwnlib.context.Thread(target=p)
-        >>> _=(t.start(), t.join())
+        >>> _ = (t.start(), t.join())
         arm
         mips
         >>> # Again, the main thread is unchanged
@@ -297,15 +312,15 @@ class ContextType:
         ...   nop()
         90
         >>> from pwnlib.context import Thread as PwnThread
-        >>> from threading      import Thread as NormalThread
+        >>> from threading import Thread as NormalThread
         >>> with context.local(arch = 'mips'):
         ...     pwnthread = PwnThread(target=nop)
-        ...     thread    = NormalThread(target=nop)
+        ...     thread = NormalThread(target=nop)
         >>> # Normal thread uses the default value for arch, 'i386'
-        >>> _=(thread.start(), thread.join())
+        >>> _ = (thread.start(), thread.join())
         90
         >>> # Pwnthread uses the correct context from creation-time
-        >>> _=(pwnthread.start(), pwnthread.join())
+        >>> _ = (pwnthread.start(), pwnthread.join())
         00000000
         >>> nop()
         00f020e3
@@ -323,19 +338,26 @@ class ContextType:
     #: Default values for :class:`pwnlib.context.ContextType`
     defaults = {
         'arch': 'i386',
+        'aslr': True,
         'binary': None,
         'bits': 32,
+        'device': os.environ.get('ANDROID_SERIAL', None),
         'endian': 'little',
+        'kernel': None,
         'log_level': logging.INFO,
+        'log_file': _devnull(),
+        'randomize': False,
         'newline': '\n',
+        'noptrace': False,
         'os': 'linux',
+        'proxy': None,
         'signed': False,
-        'timeout': Timeout.maximum,
         'terminal': None,
+        'timeout': Timeout.maximum,
     }
 
     #: Valid values for :meth:`pwnlib.context.ContextType.os`
-    oses = sorted(('linux', 'freebsd', 'windows'))
+    oses = sorted(('linux', 'freebsd', 'windows', 'cgc', 'android'))
 
     big_32 = {'endian': 'big', 'bits': 32}
     big_64 = {'endian': 'big', 'bits': 64}
@@ -497,10 +519,21 @@ class ContextType:
 
         return LocalContext()
 
-    def clear(self):
+    @property
+    def silent(self):
+        """Disable all non-error logging within the enclosed scope.
+        """
+        return self.local(log_level='error')
+
+    def clear(self, *args, **kwargs):
         """
         Clears the contents of the context.
         All values are set to their defaults.
+
+        Arguments:
+
+            a: Arguments passed to ``update``
+            kw: Arguments passed to ``update``
 
         Examples:
 
@@ -516,10 +549,24 @@ class ContextType:
         """
         self._tls._current.clear()
 
+        if args or kwargs:
+            self.update(*args, **kwargs)
+
+    @property
+    def native(self):
+        arch = context.arch
+        with context.local(arch=platform.machine()):
+            platform_arch = context.arch
+
+            if arch in ('i386', 'amd64') and platform_arch in ('i386', 'amd64'):
+                return True
+
+            return arch == platform_arch
+
     @_validator
     def arch(self, arch):
         """
-        Target machine architecture.
+        Target binary architecture.
 
         Allowed values are listed in :attr:`pwnlib.context.ContextType.architectures`.
 
@@ -588,7 +635,7 @@ class ContextType:
 
         # Attempt to perform convenience and legacy compatibility
         # transformations.
-        transform = (('x86_64', 'amd64'), ('x86', 'i386'), ('ppc', 'powerpc'))
+        transform = (('x86_64', 'amd64'), ('x86', 'i386'), ('i686', 'i386'), ('ppc', 'powerpc'))
         for k, v in transform:
             if arch.startswith(k):
                 arch = arch.replace(k, v, 1)
@@ -604,6 +651,33 @@ class ContextType:
                 self._tls[k] = v
 
         return arch
+
+    @_validator
+    def aslr(self, aslr):
+        """
+        ASLR settings for new processes.
+
+        If ``False``, attempt to disable ASLR in all processes which are
+        created via ``personality`` (``setarch -R``) and ``setrlimit``
+        (``ulimit -s unlimited``).
+
+        The ``setarch`` changes are lost if a ``setuid`` binary is executed.
+        """
+        return bool(aslr)
+
+    @_validator
+    def kernel(self, arch):
+        """
+        Target machine's kernel architecture.
+
+        Usually, this is the same as ``arch``, except when
+        running a 32-bit binary on a 64-bit kernel (e.g. i386-on-amd64).
+
+        Even then, this doesn't matter much -- only when the the segment
+        registers need to be known
+        """
+        with context.local(arch=arch):
+            return context.arch
 
     @_validator
     def bits(self, bits):
@@ -652,13 +726,14 @@ class ContextType:
         # Cyclic imports... sorry Idolf.
         from ..elf import ELF
 
-        e = ELF(binary)
+        if not isinstance(binary, ELF):
+            binary = ELF(binary)
 
-        self.arch = e.arch
-        self.bits = e.bits
-        self.endian = e.endian
+        self.arch = binary.arch
+        self.bits = binary.bits
+        self.endian = binary.endian
 
-        return e
+        return binary
 
     @property
     def bytes(self):
@@ -672,7 +747,6 @@ class ContextType:
             >>> context.bytes = 1
             >>> context.bits == 8
             True
-
             >>> context.bytes = 0 #doctest: +ELLIPSIS
             Traceback (most recent call last):
             ...
@@ -762,6 +836,59 @@ class ContextType:
         raise AttributeError('log_level must be an integer or one of %r' % permitted)
 
     @_validator
+    def log_file(self, value):
+        r"""
+        Sets the target file for all logging output.
+
+        Works in a similar fashion to :attr:`log_level`.
+
+        Examples:
+
+            >>> context.log_file = 'foo.txt' #doctest: +ELLIPSIS
+            >>> log.debug('Hello!') #doctest: +ELLIPSIS
+            >>> with context.local(log_level='ERROR'): #doctest: +ELLIPSIS
+            ...     log.info('Hello again!')
+            >>> with context.local(log_file='bar.txt'):
+            ...     log.debug('Hello from bar!')
+            >>> log.info('Hello from foo!')
+            >>> open('foo.txt').readlines()[-3] #doctest: +ELLIPSIS
+            '...:DEBUG:...:Hello!\n'
+            >>> open('foo.txt').readlines()[-2] #doctest: +ELLIPSIS
+            '...:INFO:...:Hello again!\n'
+            >>> open('foo.txt').readlines()[-1] #doctest: +ELLIPSIS
+            '...:INFO:...:Hello from foo!\n'
+            >>> open('bar.txt').readlines()[-1] #doctest: +ELLIPSIS
+            '...:DEBUG:...:Hello from bar!\n'
+        """
+        if isinstance(value, str):
+            # check if mode was specified as "[value],[mode]"
+            if ',' not in value:
+                value += ',a'
+            filename, mode = value.rsplit(',', 1)
+            value = open(filename, mode)
+        elif not hasattr(value, 'write'):
+            raise AttributeError('log_file must be a file')
+
+        iso_8601 = '%Y-%m-%dT%H:%M:%S'
+        lines = [
+            '=' * 78,
+            ' Started at %s ' % time.strftime(iso_8601),
+            ' sys.argv = [',
+        ]
+        for arg in sys.argv:
+            lines.append('   %r,' % arg)
+        lines.append(' ]')
+        lines.append('=' * 78)
+        for line in lines:
+            value.write('=%-78s=\n' % line)
+        value.flush()
+        return value
+
+    @property
+    def mask(self):
+        return (1 << self.bits) - 1
+
+    @_validator
     def os(self, os):
         """
         Operating system of the target machine.
@@ -776,14 +903,21 @@ class ContextType:
             >>> context.os = 'foobar' #doctest: +ELLIPSIS
             Traceback (most recent call last):
             ...
-            AttributeError: os must be one of ['freebsd', 'linux', 'windows']
+            AttributeError: os must be one of ['android', 'cgc', 'freebsd', 'linux', 'windows']
         """
         os = os.lower()
 
         if os not in ContextType.oses:
-            raise AttributeError("os must be one of %r" % sorted(ContextType.oses))
+            raise AttributeError("os must be one of %r" % ContextType.oses)
 
         return os
+
+    @_validator
+    def randomize(self, r):
+        """
+        Global flag that lots of things should be randomized.
+        """
+        return bool(r)
 
     @_validator
     def signed(self, signed):
@@ -846,6 +980,59 @@ class ContextType:
         if isinstance(value, (bytes, str)):
             return [value]
         return value
+
+    @property
+    def abi(self):
+        return self._abi
+
+    @_validator
+    def proxy(self, proxy):
+        """
+        Default proxy for all socket connections.
+
+        >>> context.proxy = 'localhost' #doctest: +ELLIPSIS
+        >>> r = remote('google.com', 80)
+        Traceback (most recent call last):
+        ...
+        pwnlib.exception.PwnlibException: Could not connect to google.com on port 80
+        >>> context.proxy = None
+        >>> r = remote('google.com', 80, level='error')
+        """
+        if not proxy:
+            socket.socket = _original_socket
+            return None
+
+        if isinstance(proxy, str):
+            proxy = (socks.SOCKS5, proxy)
+
+        if not isinstance(proxy, collections.Iterable):
+            raise AttributeError('proxy must be a string hostname, or tuple of arguments for socks.set_default_proxy')
+
+        socks.set_default_proxy(*proxy)
+        socket.socket = socks.socksocket
+        return proxy
+
+    @_validator
+    def noptrace(self, value):
+        """Disable all actions which rely on ptrace.
+
+        This is useful for switching between local exploitation with a debugger,
+        and remote exploitation (without a debugger).
+
+        This option can be set with the ``NOPTRACE`` command-line argument.
+        """
+        return bool(value)
+
+    @_validator
+    def device(self, value):
+        """Sets a target device for local, attached-device debugging.
+
+        This is useful for local Android exploitation.
+
+        This option automatically inherits the ANDROID_SERIAL environment
+        value.
+        """
+        return str(value)
 
     #*************************************************************************
     #                               ALIASES
@@ -928,3 +1115,34 @@ class ContextType:
 #: Consider it a shorthand to passing ``os=`` and ``arch=`` to every single
 #: function call.
 context = ContextType()
+
+
+def LocalContext(function):
+    """
+    Wraps the specied function on a context.local() block, using kwargs.
+
+    Example:
+
+        >>> @LocalContext
+        ... def printArch():
+        ...     print(context.arch)
+        >>> printArch()
+        i386
+        >>> printArch(arch='arm')
+        arm
+    """
+    @functools.wraps(function)
+    def setter(*args, **kwargs):
+        # Fast path to skip adding a Context frame
+        if not kwargs:
+            return function(*args)
+
+        context_args = {k: v for k, v in kwargs.items()
+                        if isinstance(getattr(ContextType, k, None), property)}
+
+        for k in context_args.keys():
+            del kwargs[k]
+
+        with context.local(**context_args):
+            return function(*args, **kwargs)
+    return setter

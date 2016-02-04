@@ -11,7 +11,7 @@ from . import termcap
 
 try:
     _fd = sys.stdin.fileno()
-except:
+except Exception:
     _fd = open('/dev/null', 'r').fileno()
 
 

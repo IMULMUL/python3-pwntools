@@ -46,8 +46,8 @@ class remote(sock):
 
     def __init__(self, host, port,
                  fam="any", typ="tcp",
-                 timeout=Timeout.default, ssl=False, sock=None):
-        super(remote, self).__init__(timeout)
+                 timeout=Timeout.default, ssl=False, sock=None, level=None):
+        super(remote, self).__init__(timeout, level=level)
 
         self.rport = int(port)
         self.rhost = host
@@ -60,7 +60,12 @@ class remote(sock):
         else:
             typ = self._get_type(typ)
             fam = self._get_family(fam)
-            self.sock = self._connect(fam, typ)
+            try:
+                self.sock = self._connect(fam, typ)
+            except socket.gaierror as e:
+                if e.errno != socket.EAI_NONAME:
+                    raise
+                self.error('Could not resolve hostname: %r' % host)
 
         if self.sock:
             self.settimeout(self.timeout)
@@ -101,7 +106,7 @@ class remote(sock):
         sock = None
         timeout = self.timeout
 
-        h = log.waitfor('Opening connection to %s on port %d' % (self.rhost, self.rport))
+        h = self.waitfor('Opening connection to %s on port %d' % (self.rhost, self.rport))
 
         for res in socket.getaddrinfo(self.rhost, self.rport, fam, typ, 0, socket.AI_PASSIVE):
             self.family, self.type, self.proto, _canonname, sockaddr = res
@@ -125,7 +130,7 @@ class remote(sock):
                 pass
         else:
             h.failure()
-            log.error("Could not connect to %s on port %d" % (self.rhost, self.rport))
+            self.error("Could not connect to %s on port %d" % (self.rhost, self.rport))
 
         h.success()
         return sock
@@ -145,3 +150,17 @@ class remote(sock):
         s = socket
         host, port = s.getpeername()
         return remote(host, port, fam=s.family, typ=s.type, sock=s)
+
+
+class tcp(remote):
+    def __init__(self, host, port,
+                 fam="any", typ="tcp",
+                 timeout=Timeout.default, ssl=False, sock=None, level=None):
+        return super(tcp, self).__init__(host, port, fam, typ, timeout, ssl, sock, level)
+
+
+class udp(remote):
+    def __init__(self, host, port,
+                 fam="any", typ="udp",
+                 timeout=Timeout.default, ssl=False, sock=None, level=None):
+        return super(udp, self).__init__(host, port, fam, typ, timeout, ssl, sock, level)

@@ -2,8 +2,10 @@
 """
 Topographical sort
 """
-from collections import OrderedDict
+from random import shuffle, randint
+from collections import OrderedDict, defaultdict
 
+from .context import context
 from .log import getLogger
 
 log = getLogger(__name__)
@@ -108,7 +110,7 @@ def depends_on_cycle(reg, assignments, in_cycles):
     return False
 
 
-def regsort(in_out, all_regs, tmp=None, xchg=True):
+def regsort(in_out, all_regs, tmp=None, xchg=True, randomize=None):
     """
     Sorts register dependencies.
 
@@ -155,6 +157,8 @@ def regsort(in_out, all_regs, tmp=None, xchg=True):
             Indicates the existence of an instruction which can swap the
             contents of two registers without use of a third register.
             If ``bool(xchg)==False``, this mode is disabled.
+        random(bool):
+            Randomize as much as possible about the order or registers.
 
     Returns:
 
@@ -224,12 +228,35 @@ def regsort(in_out, all_regs, tmp=None, xchg=True):
          ('mov', 'c', 'x'),
          ('mov', 'x', '1')]
     """
+    if randomize is None:
+        randomize = context.randomize
+
     sentinel = object()
 
     # Drop all registers which will be set to themselves.
     #
     # For example, {'eax': 'eax'}
     in_out = {k: v for k, v in in_out.items() if k != v}
+
+    # Collapse constant values
+    #
+    # For eaxmple, {'eax': 0, 'ebx': 0} => {'eax': 0, 'ebx': 'eax'}
+    v_k = defaultdict(lambda: [])
+    for k, v in sorted(in_out.items()):
+        if v not in all_regs and v != 0:
+            v_k[v].append(k)
+
+    post_mov = {}
+
+    # This is a hack so that we can sort values of different types
+    def make_orderable(item):
+        return (type(item[0]).__name__, item[0],
+                type(item[1]).__name__, item[1])
+
+    for v, ks in sorted(v_k.items(), key=make_orderable):
+        for k in ks[1:]:
+            post_mov[k] = ks[0]
+            in_out.pop(k)
 
     # Check input
     if not all(k in all_regs for k in in_out):
@@ -240,7 +267,15 @@ def regsort(in_out, all_regs, tmp=None, xchg=True):
     #
     # For example, {'eax': 1, 'ebx': 2, 'ecx': 'edx'}
     if not any(v in in_out for k, v in in_out.items()):
-        return [('mov', k, in_out[k]) for k in sorted(in_out)]
+        result = [('mov', k, in_out[k]) for k in sorted(in_out)]
+
+        if randomize:
+            shuffle(result)
+
+        for dreg, sreg in sorted(post_mov.items()):
+            result.append(('mov', dreg, sreg))
+
+        return result
 
     # Invert so we have a dependency graph.
     #
@@ -249,9 +284,6 @@ def regsort(in_out, all_regs, tmp=None, xchg=True):
     #
     # In this case, both A and C must be set before B.
     deps = {r: extract_dependencies(r, in_out) for r in in_out}
-
-    # Order alphabetically for repeatability
-    not_done = OrderedDict(in_out)
 
     # Final result which will be returned
     result = []
@@ -265,11 +297,18 @@ def regsort(in_out, all_regs, tmp=None, xchg=True):
     in_cycle = []
     not_in_cycle = []
 
+    if randomize:
+        shuffle(cycle_candidates)
+
     while cycle_candidates:
         reg = cycle_candidates[0]
         cycle = check_cycle(reg, in_out)
 
         if cycle:
+            if randomize:
+                x = randint(0, len(cycle))
+                cycle = cycle[x:] + cycle[:x]
+
             cycles.append(cycle)
             in_cycle.extend(cycle)
             for reg in cycle:
@@ -315,6 +354,9 @@ def regsort(in_out, all_regs, tmp=None, xchg=True):
         not_in_cycle.remove(tmp)
 
     # Resolve everything *not* in a cycle.
+    if randomize:
+        shuffle(not_in_cycle)
+
     while not_in_cycle:
         reg = not_in_cycle[0]
         order = resolve_order(reg, deps)
@@ -346,8 +388,12 @@ def regsort(in_out, all_regs, tmp=None, xchg=True):
     #
     #  ╭─ (A) → (B) → (C) ─╮
     #  ╰──────── ← ────────╯
+    if randomize:
+        shuffle(cycles)
+
     if tmp:
         for cycle in cycles:
+
             first = cycle[0]
             last = cycle[-1]
 
@@ -369,5 +415,8 @@ def regsort(in_out, all_regs, tmp=None, xchg=True):
     # Finally, set the temp register's final value
     if tmp and tmp in in_out:
         result.append(('mov', tmp, in_out[tmp]))
+
+    for dreg, sreg in sorted(post_mov.items()):
+        result.append(('mov', dreg, sreg))
 
     return result

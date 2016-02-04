@@ -20,15 +20,15 @@ def force_bytes(s):
 
     Example:
 
-      >>> force_bytes(b'abc')
-      b'abc'
-      >>> force_bytes('abc')
-      b'abc'
-      >>> force_bytes(1)
-      Traceback (most recent call last):
-          ...
-      TypeError: Expecting a value of type bytes or str, got 1
-"""
+        >>> force_bytes(b'abc')
+        b'abc'
+        >>> force_bytes('abc')
+        b'abc'
+        >>> force_bytes(1)
+        Traceback (most recent call last):
+            ...
+        TypeError: Expecting a value of type bytes or str, got 1
+    """
     if isinstance(s, bytes):
         return s
     elif isinstance(s, str):
@@ -44,14 +44,13 @@ def uniform_strings(*args):
 
     Example:
 
-      >>> uniform_strings('a', 'b', 'c')
-      ('a', 'b', 'c')
-      >>> uniform_strings('a', b'b', 'c')
-      (b'a', b'b', b'c')
-      >>> uniform_strings(b'a', b'b', b'c')
-      (b'a', b'b', b'c')
-
-"""
+        >>> uniform_strings('a', 'b', 'c')
+        ('a', 'b', 'c')
+        >>> uniform_strings('a', b'b', 'c')
+        (b'a', b'b', b'c')
+        >>> uniform_strings(b'a', b'b', b'c')
+        (b'a', b'b', b'c')
+    """
     if all(isinstance(s, str) for s in args):
         return args
     else:
@@ -64,8 +63,8 @@ def align(alignment, x):
     Rounds `x` up to nearest multiple of the `alignment`.
 
     Example:
-      >>> [align(5, n) for n in range(15)]
-      [0, 5, 5, 5, 5, 5, 10, 10, 10, 10, 10, 15, 15, 15, 15]
+        >>> [align(5, n) for n in range(15)]
+        [0, 5, 5, 5, 5, 5, 10, 10, 10, 10, 10, 15, 15, 15, 15]
     """
     return ((x + alignment - 1) // alignment) * alignment
 
@@ -101,8 +100,8 @@ def size(n, abbriv='B', si=False):
     Convert the length of a bytestream to human readable form.
 
     Arguments:
-      n(int,str): The length to convert to human readable form
-      abbriv(str):
+        n(int,str): The length to convert to human readable form
+        abbriv(str):
 
     Example:
         >>> size(451)
@@ -129,6 +128,14 @@ def size(n, abbriv='B', si=False):
             return '%.02f%s%s' % (n, suffix, abbriv)
 
     return '%.02fP%s' % (n / base, abbriv)
+
+KB = 1024
+MB = 1024 * KB
+GB = 1024 * MB
+
+KiB = 1000
+MiB = 1000 * KB
+GiB = 1000 * MB
 
 
 def read(path, count=-1, skip=0, mode='r'):
@@ -167,17 +174,17 @@ def which(name, all=False):
     the first occurence or :const:`None` is returned.
 
     Arguments:
-      `name` (str): The file to search for.
-      `all` (bool):  Whether to return all locations where `name` was found.
+        name (str): The file to search for.
+        all (bool):  Whether to return all locations where `name` was found.
 
     Returns:
-      If `all` is :const:`True` the set of all locations where `name` was found,
-      else the first location or :const:`None` if not found.
+        If `all` is :const:`True` the set of all locations where `name` was found,
+        else the first location or :const:`None` if not found.
 
     Example:
-      >>> which('sh')
-      '/bin/sh'
-"""
+        >>> which('sh')
+        '/bin/sh'
+    """
     isroot = os.getuid() == 0
     out = set()
     try:
@@ -218,12 +225,12 @@ def run_in_new_terminal(command, terminal=None, args=None):
         variable), a new pane will be opened.
 
     Arguments:
-      command (str): The command to run.
-      terminal (str): Which terminal to use.
-      args (list): Arguments to pass to the terminal
+        command (str): The command to run.
+        terminal (str): Which terminal to use.
+        args (list): Arguments to pass to the terminal
 
     Returns:
-      None
+        None
 
     """
     if not terminal:
@@ -262,7 +269,7 @@ def parse_ldd_output(output):
     each library required by the specified binary.
 
     Arguments:
-      output(bytes, str): The output to parse
+        output(bytes, str): The output to parse
 
     Example:
         >>> sorted(parse_ldd_output('''
@@ -293,7 +300,6 @@ def parse_ldd_output(output):
 
 def mkdir_p(path):
     """Emulates the behavior of ``mkdir -p``."""
-
     try:
         os.makedirs(path)
     except OSError as exc:
@@ -327,9 +333,7 @@ def sh_string(s):
         >>> print(subprocess.check_output("echo -n " + sh_string("foo\\\\'bar"), shell=True))
         b"foo\\\\'bar"
     """
-    if isinstance(s, str):
-        s = s.encode('utf8')
-
+    s = force_bytes(s)
     very_good = set(string.ascii_letters + string.digits)
     good = (very_good | set(string.punctuation + ' ')) - set("'")
     alt_good = (very_good | set(string.punctuation + ' ')) - set('!')
@@ -365,14 +369,14 @@ def dealarm_shell(tube):
     """
     tube.clean()
 
-    tube.sendline('which python2')
+    tube.sendline('which python2 || echo')
     if tube.recvline().startswith('/'):
         tube.sendline('''exec python2 -c "import signal, os; signal.alarm(0); os.execl('$SHELL','')"''')
         return tube
 
-    tube.sendline('which perl')
+    tube.sendline('which perl || echo')
     if tube.recvline().startswith('/'):
-        tube.sendline('''exec perl -e "alarm 0; exec '$SHELL'"''')
+        tube.sendline('''exec perl -e "alarm 0; exec '${SHELL:-/bin/sh}'"''')
         return tube
 
     return None

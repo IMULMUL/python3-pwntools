@@ -12,8 +12,8 @@ Example:
 
     >>> print(pwnlib.shellcraft.thumb.linux.push('SYS_execve').rstrip())
         /* push 'SYS_execve' */
-        mov r1, #11
-        push {r1}
+        mov r7, #0xb
+        push {r7}
 
 </%docstring>
 

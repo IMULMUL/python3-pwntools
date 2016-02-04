@@ -2,7 +2,6 @@
 """
 Script for downloading lists of user agent strings
 """
-
 import os
 import re
 from urllib import request
@@ -25,7 +24,7 @@ def getxml(url):
     f.close()
     return xml
 
-with log.waitfor('Fetching from from http://www.useragentstring.com') as l:
+with log.waitfor('Fetching from http://www.useragentstring.com') as l:
     html = getxml('http://www.useragentstring.com/pages/All/')
     soup = BeautifulSoup(html)
     l.success()
@@ -55,7 +54,7 @@ with log.waitfor('Parsing list') as l:
             uas.add(a.string.strip())
     l.success()
 
-with log.waitfor('Fetching from from http://techpatterns.com') as l:
+with log.waitfor('Fetching from http://techpatterns.com') as l:
     xml = getxml('http://techpatterns.com/downloads/firefox/useragentswitcher.xml')
     soup = BeautifulSoup(xml)
     l.success()
@@ -73,7 +72,7 @@ with log.waitfor('Parsing list') as l:
     loop(soup.useragentswitcher)
     l.success()
 
-with log.waitfor('Fetching from from http://www.user-agents.org') as l:
+with log.waitfor('Fetching from http://www.user-agents.org') as l:
     xml = getxml('http://www.user-agents.org/allagents.xml')
     soup = BeautifulSoup(xml)
     l.success()

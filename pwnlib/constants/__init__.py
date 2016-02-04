@@ -46,6 +46,7 @@ from types import ModuleType
 
 from ..context import context
 from ..util import safeeval
+from .constant import Constant
 
 
 class ConstantsModule(ModuleType):
@@ -67,6 +68,8 @@ class ConstantsModule(ModuleType):
         True
 
     """
+    Constant = Constant
+
     possible_submodules = set(context.oses) | set(context.architectures)
 
     def __init__(self, name, module):
@@ -139,7 +142,7 @@ class ConstantsModule(ModuleType):
             self._env_store[key] = {key: getattr(self, key)
                                     for key in dir(self) if not key.endswith('__')}
 
-        return safeeval.values(string, self._env_store[key])
+        return Constant('(%s)' % string, safeeval.values(string, self._env_store[key]))
 
 
 # To prevent garbage collection

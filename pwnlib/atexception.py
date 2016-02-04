@@ -82,7 +82,7 @@ def _run_handlers():
                 func(*args, **kwargs)
         except SystemExit:
             pass
-        except:
+        except Exception:
             # extract the current exception and rewind the traceback to where it
             # originated
             typ, val, tb = sys.exc_info()
@@ -103,6 +103,7 @@ def _newhook(typ, val, tb):
     """
     if _oldhook:
         _oldhook(typ, val, tb)
-    _run_handlers()
+    if _run_handlers:
+        _run_handlers()
 
 sys.excepthook = _newhook

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# pwntools documentation build configuration file, created by
+# python3-pwntools documentation build configuration file, created by
 # sphinx-quickstart on Wed May 28 15:00:52 2014.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -11,9 +11,9 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
 import os
 import subprocess
+import sys
 
 # Disable terminal handling in pwnlib
 os.environ['PWNLIB_NOTERM'] = '1'
@@ -22,6 +22,8 @@ os.environ['PWNLIB_NOTERM'] = '1'
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../..'))
+
+import pwnlib
 
 # -- General configuration -----------------------------------------------------
 
@@ -44,12 +46,16 @@ extensions = [
 ]
 
 doctest_global_setup = '''
-import pwnlib, sys
+import sys, os, logging
+os.environ['PWNLIB_NOTERM'] = '1'
+os.environ['PWNLIB_RANDOMIZE'] = '0'
+import pwnlib
 pwnlib.context.context.reset_local()
-pwnlib.context.ContextType.defaults['log_level'] = 'ERROR'
+pwnlib.context.ContextType.defaults['log_level'] = logging.ERROR
+pwnlib.context.ContextType.defaults['randomize'] = False
 pwnlib.term.text.when = 'never'
 pwnlib.log.install_default_handler()
-pwnlib.log.console.stream = sys.stdout
+pwnlib.log.rootlogger.setLevel(1)
 '''
 
 autodoc_member_order = 'alphabetical'
@@ -70,14 +76,13 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pwntools'
-copyright = '2014, Gallopsled et al'
+copyright = '2016, Maxime Arthaud'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-import pwnlib
 release = pwnlib.__version__
 version = release.rsplit('.', 1)[0]
 
@@ -213,12 +218,12 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
     ('index', 'pwntools.tex', 'pwntools Documentation',
-     'Gallopsled et al', 'manual'),
+     '2016, Maxime Arthaud', 'manual'),
 ]
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/2.7', None),
-    'paramiko': ('https://paramiko-docs.readthedocs.org/en/1.15/', None)
+    'python': ('https://docs.python.org/3', None),
+    'paramiko': ('https://paramiko-docs.readthedocs.org/en/1.16/', None)
 }
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -248,7 +253,7 @@ intersphinx_mapping = {
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'pwntools', 'pwntools Documentation',
-     ['Gallopsled et al'], 1)
+     ['2016, Maxime Arthaud'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -262,7 +267,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'pwntools', 'pwntools Documentation',
-     'Gallopsled et al', 'pwntools', 'One line description of project.',
+     '', 'pwntools', 'CTF exploit writing toolkit.',
      'Miscellaneous'),
 ]
 
@@ -330,4 +335,4 @@ def linkcode_resolve(domain, info):
             except (IOError, TypeError):
                 pass
 
-    return "https://github.com/Gallopsled/pwntools/blob/%s/%s" % (branch, filename)
+    return "https://github.com/arthaud/python3-pwntools/blob/%s/%s" % (branch, filename)

@@ -7,16 +7,33 @@ import tempfile
 from . import atexit
 from . import elf
 from . import tubes
-from .asm import make_elf
-from .context import context
+from .asm import make_elf, make_elf_from_assembly, _bfdname
+from .context import context, LocalContext
 from .log import getLogger
 from .util import misc
 from .util import proc
+from .qemu import get_qemu_user
 
 log = getLogger(__name__)
 
 
-def debug_shellcode(data, execute=None, **kwargs):
+@LocalContext
+def debug_assembly(asm, execute=None, vma=None):
+    """
+    Creates an ELF file, and launches it with GDB.
+
+    This is identical to debug_shellcode, except that
+    any defined symbols are available in GDB, and it
+    saves you the explicit call to asm().
+    """
+    tmp_elf = make_elf_from_assembly(asm, vma=vma, extract=False)
+    os.chmod(tmp_elf, 0o777)
+    atexit.register(lambda: os.unlink(tmp_elf))
+    return debug(tmp_elf, execute=execute, arch=context.arch)
+
+
+@LocalContext
+def debug_shellcode(data, execute=None, vma=None):
     """
     Creates an ELF file, and launches it with GDB.
 
@@ -27,30 +44,17 @@ def debug_shellcode(data, execute=None, **kwargs):
     Returns:
         A ``process`` tube connected to the shellcode on stdin/stdout/stderr.
     """
-    with context.local(**kwargs):
-        tmp_elf = tempfile.mktemp(prefix='pwn', suffix='.elf')
-        elf_data = make_elf(data)
-        with open(tmp_elf, 'wb+') as f:
-            f.write(elf_data)
-            f.flush()
-        os.chmod(tmp_elf, 0o777)
-        atexit.register(lambda: os.unlink(tmp_elf))
-        return debug(tmp_elf, execute=None, arch=context.arch)
+    if isinstance(data, str):
+        log.error("Shellcode cannot be str.  Did you mean debug_assembly?")
+
+    tmp_elf = make_elf(data, extract=False, vma=vma)
+    os.chmod(tmp_elf, 0o777)
+    atexit.register(lambda: os.unlink(tmp_elf))
+    return debug(tmp_elf, execute=execute, arch=context.arch)
 
 
-def get_qemu_arch(arch):
-    if arch == 'mips' and context.endian == 'little':
-        return 'mipsel'
-    if arch == 'arm' and context.endian == 'big':
-        return 'armeb'
-    if arch == 'amd64':
-        return 'x86_64'
-
-    arch = arch.replace('powerpc', 'ppc')
-    return arch
-
-
-def debug(args, exe=None, execute=None, ssh=None, arch=None):
+@LocalContext
+def debug(args, execute=None, exe=None, ssh=None, env=None):
     """debug(args) -> tube
 
     Launch a GDB server with the specified command line,
@@ -64,36 +68,57 @@ def debug(args, exe=None, execute=None, ssh=None, arch=None):
     Returns:
         A tube connected to the target process
     """
+    if context.noptrace:
+        log.warn_once("Skipping debugger since context.noptrace == True")
+        return tubes.process.process(args, executable=exe, env=env)
+
+    if isinstance(args, (int, tubes.process.process, tubes.ssh.ssh_channel)):
+        log.error("Use gdb.attach() to debug a running process")
+
+    if env is None:
+        env = os.environ
+
     if isinstance(args, (bytes, str)):
         args = [args]
 
     orig_args = args
 
-    if not arch:
-        args = ['gdbserver', 'localhost:0'] + args
+    if ssh:
+        runner = ssh.process
+        which = ssh.which
     else:
-        qemu_port = random.randint(1024, 65535)
-        qemu_arch = get_qemu_arch(arch)
-        args = ['qemu-%s-static' % qemu_arch, '-g', str(qemu_port)] + args
-
-    if not ssh:
         runner = tubes.process.process
         which = misc.which
+
+    if ssh or context.native:
+        gdbserver = which('gdbserver')
+
+        if not gdbserver:
+            log.error("gdbserver is not installed")
+
+        orig_args = args
+
+        args = [gdbserver]
+        if context.aslr:
+            args += ['--no-disable-randomization']
+        args += ['localhost:0']
+        args += orig_args
     else:
-        runner = ssh.run
-        which = ssh.which
+        qemu_port = random.randint(1024, 65535)
+        args = [get_qemu_user(), '-g', str(qemu_port)] + args
 
     # Make sure gdbserver is installed
     if not which(args[0]):
         log.error("%s is not installed" % args[0])
 
-    with context.local(log_level='debug'):
-        gdbserver = runner(args)
+    gdbserver = runner(args, executable=exe, env=env)
 
-    if not arch:
+    if context.native:
         # Process /bin/bash created; pid = 14366
         # Listening on port 34816
         process_created = gdbserver.recvline()
+        gdbserver.pid = int(process_created.split()[-1], 0)
+        gdbserver.executable = which(orig_args[0])
         listening_on = gdbserver.recvline()
 
         port = int(listening_on.split()[-1])
@@ -109,23 +134,36 @@ def debug(args, exe=None, execute=None, ssh=None, arch=None):
     elif not exe:
         exe = misc.which(orig_args[0])
 
-    attach(('127.0.0.1', port), exe=orig_args[0], execute=execute, arch=context.arch)
+    attach(('127.0.0.1', port), exe=orig_args[0], execute=execute, need_ptrace_scope=False)
 
     if ssh:
         remote | listener.wait_for_connection()
 
+        # Disable showing GDB traffic when debugging verbosity is increased
+        remote.level = 'error'
+        listener.level = 'error'
+
+    # gdbserver outputs a message when a client connects
+    garbage = gdbserver.recvline(timeout=1)
+
+    if b"Remote debugging from host" not in garbage:
+        gdbserver.unrecv(garbage)
+
     return gdbserver
 
 
-def get_gdb_arch(arch):
+def get_gdb_arch():
     return {
         'amd64': 'i386:x86-64',
-        'powerpc': 'powerpc:403',
-        'powerpc64': 'powerpc:e5500'
-    }.get(arch, arch)
+        'powerpc': 'powerpc:common',
+        'powerpc64': 'powerpc:common64',
+        'mips64': 'mips:isa64',
+        'thumb': 'arm'
+    }.get(context.arch, context.arch)
 
 
-def attach(target, execute=None, exe=None, arch=None):
+@LocalContext
+def attach(target, execute=None, exe=None, need_ptrace_scope=True):
     """attach(target, execute=None, exe=None, arch=None) -> None
 
     Start GDB in a new terminal and attach to `target`.
@@ -150,25 +188,17 @@ def attach(target, execute=None, exe=None, arch=None):
 
     Returns:
       :const:`None`
-"""
-    # if ptrace_scope is set and we're not root, we cannot attach to a running process
-    try:
-        ptrace_scope = open('/proc/sys/kernel/yama/ptrace_scope').read().strip()
-        if ptrace_scope != '0' and os.geteuid() != 0:
-            msg = 'Disable ptrace_scope to attach to running processes.\n'
-            msg += 'More info: https://askubuntu.com/q/41629'
-            log.warning(msg)
-            return
-    except IOError:
-        pass
+    """
+    if context.noptrace:
+        log.warn_once("Skipping debug attach since context.noptrace == True")
+        return
 
     # if execute is a file object, then read it; we probably need to run some
     # more gdb script anyway
-    if execute:
-        if hasattr(execute, 'read') and hasattr(execute, 'close'):
-            fd = execute
-            execute = fd.read()
-            fd.close()
+    if execute and hasattr(execute, 'read'):
+        fd = execute
+        execute = fd.read()
+        fd.close()
 
     # enable gdb.attach(p, 'continue')
     if execute and not execute.endswith('\n'):
@@ -176,12 +206,27 @@ def attach(target, execute=None, exe=None, arch=None):
 
     # gdb script to run before `execute`
     pre = ''
-    if arch:
+    if not context.native:
         if not misc.which('gdb-multiarch'):
             log.warn_once('Cross-architecture debugging usually requires gdb-multiarch\n'
                           '$ apt-get install gdb-multiarch')
         pre += 'set endian %s\n' % context.endian
-        pre += 'set architecture %s\n' % get_gdb_arch(arch)
+        pre += 'set architecture %s\n' % get_gdb_arch()
+        # pre += 'set gnutarget ' + _bfdname() + '\n'
+    else:
+        # If ptrace_scope is set and we're not root, we cannot attach to a
+        # running process.
+        # We assume that we do not need this to be set if we are debugging on
+        # a different architecture (e.g. under qemu-user).
+        try:
+            ptrace_scope = open('/proc/sys/kernel/yama/ptrace_scope').read().strip()
+            if need_ptrace_scope and ptrace_scope != '0' and os.geteuid() != 0:
+                msg = 'Disable ptrace_scope to attach to running processes.\n'
+                msg += 'More info: https://askubuntu.com/q/41629'
+                log.warning(msg)
+                return
+        except IOError:
+            pass
 
     # let's see if we can find a pid to attach to
     pid = None
@@ -242,7 +287,7 @@ def attach(target, execute=None, exe=None, arch=None):
                             '::1', 'ip6-localhost', '::'):
                 return
 
-            for f in ['tcp', 'tcp6']:
+            for f in ('tcp', 'tcp6'):
                 with open('/proc/net/%s' % f) as fd:
                     # skip the first line with the column names
                     fd.readline()
@@ -318,6 +363,7 @@ def attach(target, execute=None, exe=None, arch=None):
     misc.run_in_new_terminal(cmd)
     if pid:
         proc.wait_for_debugger(pid)
+    return pid
 
 
 def ssh_gdb(ssh, process, execute=None, arch=None, **kwargs):
@@ -423,7 +469,7 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
     # Get the addresses from GDB
     #
     libs = {}
-    cmd = "gdb --args %s" % (binary)
+    cmd = "gdb --args %s" % binary
     expr = re.compile(r'(0x\S+)[^/]+(.*)'.encode('utf8'))
 
     if ulimit:
@@ -432,9 +478,10 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
     cmd = shlex.split(cmd)
 
     with runner(cmd) as gdb:
+        if context.aslr:
+            gdb.sendline('set disable-randomization off')
         gdb.send("""
         set prompt
-        set disable-randomization off
         break *%#x
         run
         """ % entry)
@@ -445,7 +492,7 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
         for line in lines.splitlines():
             m = expr.match(line)
             if m:
-                libs[m.group(2).decode('utf8')] = int(m.group(1), 16)
+                libs[m.group(2).decode('utf8', 'surrogateescape')] = int(m.group(1), 16)
         gdb.sendline('kill')
         gdb.sendline('y')
         gdb.sendline('quit')

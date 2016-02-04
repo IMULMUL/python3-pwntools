@@ -9,7 +9,6 @@ __all__ = [
     'consume',
     'cyclen',
     'dotproduct',
-    'exp',
     'flatten',
     'group',
     'iter_except',
@@ -56,10 +55,8 @@ import copy
 import multiprocessing
 import operator
 import random
-import time
 from itertools import *
 
-from ..context import *
 from ..log import getLogger
 
 log = getLogger(__name__)
@@ -72,23 +69,23 @@ def take(n, iterable):
     will be advanced.
 
     Arguments:
-      n(int):  Number of elements to take.
-      iterable:  An iterable.
+        n(int):  Number of elements to take.
+        iterable:  An iterable.
 
     Returns:
-      A list of the first `n` elements of `iterable`.  If there are fewer than
-      `n` elements in `iterable` they will all be returned.
+        A list of the first `n` elements of `iterable`.  If there are fewer than
+        `n` elements in `iterable` they will all be returned.
 
     Examples:
-      >>> take(2, range(10))
-      [0, 1]
-      >>> i = count()
-      >>> take(2, i)
-      [0, 1]
-      >>> take(2, i)
-      [2, 3]
-      >>> take(9001, [1, 2, 3])
-      [1, 2, 3]
+        >>> take(2, range(10))
+        [0, 1]
+        >>> i = count()
+        >>> take(2, i)
+        [0, 1]
+        >>> take(2, i)
+        [2, 3]
+        >>> take(9001, [1, 2, 3])
+        [1, 2, 3]
     """
     return list(islice(iterable, n))
 
@@ -97,17 +94,17 @@ def tabulate(func, start=0):
     """tabulate(func, start=0) -> iterator
 
     Arguments:
-      func(function):  The function to tabulate over.
-      start(int):  Number to start on.
+        func(function):  The function to tabulate over.
+        start(int):  Number to start on.
 
     Returns:
-      An iterator with the elements ``func(start), func(start + 1), ...``.
+        An iterator with the elements ``func(start), func(start + 1), ...``.
 
     Examples:
-      >>> take(2, tabulate(str))
-      ['0', '1']
-      >>> take(5, tabulate(lambda x: x**2, start=1))
-      [1, 4, 9, 16, 25]
+        >>> take(2, tabulate(str))
+        ['0', '1']
+        >>> take(5, tabulate(lambda x: x**2, start=1))
+        [1, 4, 9, 16, 25]
     """
     return map(func, count(start))
 
@@ -119,21 +116,21 @@ def consume(n, iterator):
     everything.
 
     Arguments:
-      n(int):  Number of elements to consume.
-      iterator(iterator):  An iterator.
+        n(int):  Number of elements to consume.
+        iterator(iterator):  An iterator.
 
     Returns:
-      :const:`None`.
+        :const:`None`.
 
     Examples:
-      >>> i = count()
-      >>> consume(5, i)
-      >>> next(i)
-      5
-      >>> i = iter([1, 2, 3, 4, 5])
-      >>> consume(2, i)
-      >>> list(i)
-      [3, 4, 5]
+        >>> i = count()
+        >>> consume(5, i)
+        >>> next(i)
+        5
+        >>> i = iter([1, 2, 3, 4, 5])
+        >>> consume(2, i)
+        >>> list(i)
+        [3, 4, 5]
     """
     # Use functions that consume iterators at C speed.
     if n is None:
@@ -151,24 +148,24 @@ def nth(n, iterable, default=None):
     iterator it will be advanced.
 
     Arguments:
-      n(int):  Index of the element to return.
-      iterable:  An iterable.
-      default(objext):  A default value.
+        n(int):  Index of the element to return.
+        iterable:  An iterable.
+        default(objext):  A default value.
 
     Returns:
-      The element at index `n` in `iterable` or `default` if `iterable` has too
-      few elements.
+        The element at index `n` in `iterable` or `default` if `iterable` has too
+        few elements.
 
     Examples:
-      >>> nth(2, [0, 1, 2, 3])
-      2
-      >>> nth(2, [0, 1], 42)
-      42
-      >>> i = count()
-      >>> nth(42, i)
-      42
-      >>> nth(42, i)
-      85
+        >>> nth(2, [0, 1, 2, 3])
+        2
+        >>> nth(2, [0, 1], 42)
+        42
+        >>> i = count()
+        >>> nth(42, i)
+        42
+        >>> nth(42, i)
+        85
     """
     return next(islice(iterable, n, None), default)
 
@@ -184,14 +181,14 @@ def quantify(iterable, pred=bool):
                ``True`` or ``False``.
 
     Returns:
-      The number of elements in `iterable` for which `pred` returns
-      ``True``.
+        The number of elements in `iterable` for which `pred` returns
+        ``True``.
 
     Examples:
-      >>> quantify([1, 2, 3, 4], lambda x: x % 2 == 0)
-      2
-      >>> quantify(['1', 'two', '3', '42'], str.isdigit)
-      3
+        >>> quantify([1, 2, 3, 4], lambda x: x % 2 == 0)
+        2
+        >>> quantify(['1', 'two', '3', '42'], str.isdigit)
+        3
     """
     return sum(map(pred, iterable))
 
@@ -203,23 +200,23 @@ def pad(iterable, value=None):
     first the elements of `iterable` then `value` indefinitely.
 
     Arguments:
-      iterable:  An iterable.
-      value:  The value to pad with.
+        iterable:  An iterable.
+        value:  The value to pad with.
 
     Returns:
-      An iterator whoose elements are first the elements of `iterable` then
-      `value` indefinitely.
+        An iterator whoose elements are first the elements of `iterable` then
+        `value` indefinitely.
 
     Examples:
-      >>> take(3, pad([1, 2]))
-      [1, 2, None]
-      >>> i = pad(iter([1, 2, 3]), 42)
-      >>> take(2, i)
-      [1, 2]
-      >>> take(2, i)
-      [3, 42]
-      >>> take(2, i)
-      [42, 42]
+        >>> take(3, pad([1, 2]))
+        [1, 2, None]
+        >>> i = pad(iter([1, 2, 3]), 42)
+        >>> take(2, i)
+        [1, 2]
+        >>> take(2, i)
+        [3, 42]
+        >>> take(2, i)
+        [42, 42]
     """
     return chain(iterable, repeat(value))
 
@@ -230,18 +227,18 @@ def cyclen(n, iterable):
     Repeats the elements of `iterable` `n` times.
 
     Arguments:
-      n(int):  The number of times to repeat `iterable`.
-      iterable:  An iterable.
+        n(int):  The number of times to repeat `iterable`.
+        iterable:  An iterable.
 
     Returns:
-      An iterator whoose elements are the elements of `iterator` repeated `n`
-      times.
+        An iterator whoose elements are the elements of `iterator` repeated `n`
+        times.
 
     Examples:
-      >>> take(4, cyclen(2, [1, 2]))
-      [1, 2, 1, 2]
-      >>> list(cyclen(10, []))
-      []
+        >>> take(4, cyclen(2, [1, 2]))
+        [1, 2, 1, 2]
+        >>> list(cyclen(10, []))
+        []
     """
     return chain.from_iterable(repeat(tuple(iterable), n))
 
@@ -252,16 +249,16 @@ def dotproduct(x, y):
     Computes the dot product of `x` and `y`.
 
     Arguments:
-      x(iterable):  An iterable.
-      x(iterable):  An iterable.
+        x(iterable):  An iterable.
+        x(iterable):  An iterable.
 
     Returns:
-      The dot product of `x` and `y`, i.e.: ``x[0] * y[0] + x[1] * y[1] + ...``.
+        The dot product of `x` and `y`, i.e.: ``x[0] * y[0] + x[1] * y[1] + ...``.
 
     Example:
-      >>> dotproduct([1, 2, 3], [4, 5, 6])
-      ... # 1 * 4 + 2 * 5 + 3 * 6 == 32
-      32
+        >>> dotproduct([1, 2, 3], [4, 5, 6])
+        ... # 1 * 4 + 2 * 5 + 3 * 6 == 32
+        32
     """
     return sum(map(operator.mul, x, y))
 
@@ -274,17 +271,17 @@ def flatten(xss):
     `xss`.
 
     Arguments:
-      xss:  An iterable of iterables.
+        xss:  An iterable of iterables.
 
     Returns:
-      An iterator whoose elements are the concatenation of the iterables in
-      `xss`.
+        An iterator whoose elements are the concatenation of the iterables in
+        `xss`.
 
     Examples:
-      >>> list(flatten([[1, 2], [3, 4]]))
-      [1, 2, 3, 4]
-      >>> take(6, flatten([[43, 42], [41, 40], count()]))
-      [43, 42, 41, 40, 0, 1]
+        >>> list(flatten([[1, 2], [3, 4]]))
+        [1, 2, 3, 4]
+        >>> take(6, flatten([[43, 42], [41, 40], count()]))
+        [43, 42, 41, 40, 0, 1]
     """
     return chain.from_iterable(xss)
 
@@ -298,33 +295,33 @@ def repeat_func(func, *args, **kwargs):
     fast.
 
     Arguments:
-      func(function):  The function to call.
-      args:  Positional arguments.
-      kwargs:  Keyword arguments.
+        func(function):  The function to call.
+        args:  Positional arguments.
+        kwargs:  Keyword arguments.
 
     Returns:
-      An iterator whoose elements are the results of calling ``func(*args,
-      **kwargs)`` repeatedly.
+        An iterator whoose elements are the results of calling ``func(*args,
+        **kwargs)`` repeatedly.
 
     Examples:
-      >>> def f(x):
-      ...     x[0] += 1
-      ...     return x[0]
-      >>> i = repeat_func(f, [0])
-      >>> take(2, i)
-      [1, 2]
-      >>> take(2, i)
-      [3, 4]
-      >>> def f(**kwargs):
-      ...     return kwargs.get('x', 43)
-      >>> i = repeat_func(f, x=42)
-      >>> take(2, i)
-      [42, 42]
-      >>> i = repeat_func(f, 42)
-      >>> take(2, i)
-      Traceback (most recent call last):
-          ...
-      TypeError: f() takes exactly 0 arguments (1 given)
+        >>> def f(x):
+        ...     x[0] += 1
+        ...     return x[0]
+        >>> i = repeat_func(f, [0])
+        >>> take(2, i)
+        [1, 2]
+        >>> take(2, i)
+        [3, 4]
+        >>> def f(**kwargs):
+        ...     return kwargs.get('x', 43)
+        >>> i = repeat_func(f, x=42)
+        >>> take(2, i)
+        [42, 42]
+        >>> i = repeat_func(f, 42)
+        >>> take(2, i)
+        Traceback (most recent call last):
+            ...
+        TypeError: f() takes exactly 0 arguments (1 given)
     """
     if kwargs:
         return starmap(lambda args, kwargs: func(*args, **kwargs),
@@ -338,18 +335,18 @@ def pairwise(iterable):
     """pairwise(iterable) -> iterator
 
     Arguments:
-      iterable:  An iterable.
+        iterable:  An iterable.
 
     Returns:
-      An iterator whoose elements are pairs of neighbouring elements of
-      `iterable`.
+        An iterator whoose elements are pairs of neighbouring elements of
+        `iterable`.
 
     Examples:
-      >>> list(pairwise([1, 2, 3, 4]))
-      [(1, 2), (2, 3), (3, 4)]
-      >>> i = starmap(operator.add, pairwise(count()))
-      >>> take(5, i)
-      [1, 3, 5, 7, 9]
+        >>> list(pairwise([1, 2, 3, 4]))
+        [(1, 2), (2, 3), (3, 4)]
+        >>> i = starmap(operator.add, pairwise(count()))
+        >>> take(5, i)
+        [1, 3, 5, 7, 9]
     """
     a, b = tee(iterable)
     next(b, None)
@@ -363,21 +360,21 @@ def group(n, iterable, fill_value=None):
     :mod:`itertools` fast build-in functions.
 
     Arguments:
-      n(int):  The group size.
-      iterable:  An iterable.
-      fill_value:  The value to fill into the remaining slots of the last group
-        if the `n` does not divide the number of elements in `iterable`.
+        n(int):  The group size.
+        iterable:  An iterable.
+        fill_value:  The value to fill into the remaining slots of the last group
+                     if the `n` does not divide the number of elements in `iterable`.
 
     Returns:
-      An iterator whoose elements are `n`-tuples of the elements of `iterable`.
+        An iterator whoose elements are `n`-tuples of the elements of `iterable`.
 
     Examples:
-      >>> list(group(2, range(5)))
-      [(0, 1), (2, 3), (4, None)]
-      >>> take(3, group(2, count()))
-      [(0, 1), (2, 3), (4, 5)]
-      >>> [''.join(x) for x in group(3, 'ABCDEFG', 'x')]
-      ['ABC', 'DEF', 'Gxx']
+        >>> list(group(2, range(5)))
+        [(0, 1), (2, 3), (4, None)]
+        >>> take(3, group(2, count()))
+        [(0, 1), (2, 3), (4, 5)]
+        >>> [''.join(x) for x in group(3, 'ABCDEFG', 'x')]
+        ['ABC', 'DEF', 'Gxx']
     """
     args = [iter(iterable)] * n
     return zip_longest(fillvalue=fill_value, *args)
@@ -389,17 +386,17 @@ def roundrobin(*iterables):
     Take elements from `iterables` in a round-robin fashion.
 
     Arguments:
-      *iterables:  One or more iterables.
+        *iterables:  One or more iterables.
 
     Returns:
-      An iterator whoose elements are taken from `iterables` in a round-robin
-      fashion.
+        An iterator whoose elements are taken from `iterables` in a round-robin
+        fashion.
 
     Examples:
-      >>> ''.join(roundrobin('ABC', 'D', 'EF'))
-      'ADEBFC'
-      >>> ''.join(take(10, roundrobin('ABC', 'DE', repeat('x'))))
-      'ADxBExCxxx'
+        >>> ''.join(roundrobin('ABC', 'D', 'EF'))
+        'ADEBFC'
+        >>> ''.join(take(10, roundrobin('ABC', 'DE', repeat('x'))))
+        'ADxBExCxxx'
     """
     # Recipe credited to George Sakkis
     pending = len(iterables)
@@ -419,17 +416,17 @@ def powerset(iterable, include_empty=True):
     The powerset of an iterable.
 
     Arguments:
-      iterable:  An iterable.
-      include_empty(bool):  Whether to include the empty set.
+        iterable:  An iterable.
+        include_empty(bool):  Whether to include the empty set.
 
     Returns:
-      The powerset of `iterable` as an interator of tuples.
+        The powerset of `iterable` as an interator of tuples.
 
     Examples:
-      >>> list(powerset(range(3)))
-      [(), (0,), (1,), (2,), (0, 1), (0, 2), (1, 2), (0, 1, 2)]
-      >>> list(powerset(range(2), include_empty=False))
-      [(0,), (1,), (0, 1)]
+        >>> list(powerset(range(3)))
+        [(), (0,), (1,), (2,), (0, 1), (0, 2), (1, 2), (0, 1, 2)]
+        >>> list(powerset(range(2), include_empty=False))
+        [(0,), (1,), (0, 1)]
     """
     s = list(iterable)
     i = chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
@@ -447,18 +444,18 @@ def unique_everseen(iterable, key=None):
     remembered.
 
     Arguments:
-      iterable:  An iterable.
-      key:  A function to map over each element in `iterable` before remembering
-        it.  Setting to :const:`None` is equivalent to the identity function.
+        iterable:  An iterable.
+        key:  A function to map over each element in `iterable` before remembering
+              it. Setting to :const:`None` is equivalent to the identity function.
 
     Returns:
-      An iterator of the unique elements in `iterable`.
+        An iterator of the unique elements in `iterable`.
 
     Examples:
-      >>> ''.join(unique_everseen('AAAABBBCCDAABBB'))
-      'ABCD'
-      >>> ''.join(unique_everseen('ABBCcAD', str.lower))
-      'ABCD'
+        >>> ''.join(unique_everseen('AAAABBBCCDAABBB'))
+        'ABCD'
+        >>> ''.join(unique_everseen('ABBCcAD', str.lower))
+        'ABCD'
     """
     seen = set()
     seen_add = seen.add
@@ -483,18 +480,18 @@ def unique_justseen(iterable, key=None):
     remembered.
 
     Arguments:
-      iterable:  An iterable.
-      key:  A function to map over each element in `iterable` before remembering
-        it.  Setting to :const:`None` is equivalent to the identity function.
+        iterable:  An iterable.
+        key:  A function to map over each element in `iterable` before remembering
+              it. Setting to :const:`None` is equivalent to the identity function.
 
     Returns:
-      An iterator of the unique elements in `iterable`.
+        An iterator of the unique elements in `iterable`.
 
     Examples:
-      >>> ''.join(unique_justseen('AAAABBBCCDAABBB'))
-      'ABCDAB'
-      >>> ''.join(unique_justseen('ABBCcAD', str.lower))
-      'ABCAD'
+        >>> ''.join(unique_justseen('AAAABBBCCDAABBB'))
+        'ABCDAB'
+        >>> ''.join(unique_justseen('ABBCcAD', str.lower))
+        'ABCAD'
     """
     return map(next, map(operator.itemgetter(1), groupby(iterable, key)))
 
@@ -508,21 +505,21 @@ def unique_window(iterable, window, key=None):
     Otherwise ``elm`` is remembered.
 
     Arguments:
-      iterable:  An iterable.
-      window(int):  The number of elements to remember.
-      key:  A function to map over each element in `iterable` before remembering
-        it.  Setting to :const:`None` is equivalent to the identity function.
+        iterable:  An iterable.
+        window(int):  The number of elements to remember.
+        key:  A function to map over each element in `iterable` before remembering
+              it. Setting to :const:`None` is equivalent to the identity function.
 
     Returns:
-      An iterator of the unique elements in `iterable`.
+        An iterator of the unique elements in `iterable`.
 
     Examples:
-      >>> ''.join(unique_window('AAAABBBCCDAABBB', 6))
-      'ABCDA'
-      >>> ''.join(unique_window('ABBCcAD', 5, str.lower))
-      'ABCD'
-      >>> ''.join(unique_window('ABBCcAD', 4, str.lower))
-      'ABCAD'
+        >>> ''.join(unique_window('AAAABBBCCDAABBB', 6))
+        'ABCDA'
+        >>> ''.join(unique_window('ABBCcAD', 5, str.lower))
+        'ABCD'
+        >>> ''.join(unique_window('ABBCcAD', 4, str.lower))
+        'ABCAD'
     """
     seen = collections.deque(maxlen=window)
     seen_add = seen.append
@@ -547,27 +544,27 @@ def iter_except(func, exception):
     the end.
 
     Arguments:
-      func:  The function to call.
-      exception(exception):  The exception that signals the end.  Other
-        exceptions will not be caught.
+        func:  The function to call.
+        exception(exception):  The exception that signals the end.  Other
+                               exceptions will not be caught.
 
     Returns:
-      An iterator whoose elements are the results of calling ``func()`` until an
-      exception matching `exception` is raised.
+        An iterator whoose elements are the results of calling ``func()`` until an
+        exception matching `exception` is raised.
 
     Examples:
-      >>> s = {1, 2, 3}
-      >>> i = iter_except(s.pop, KeyError)
-      >>> next(i)
-      1
-      >>> next(i)
-      2
-      >>> next(i)
-      3
-      >>> next(i)
-      Traceback (most recent call last):
-          ...
-      StopIteration
+        >>> s = {1, 2, 3}
+        >>> i = iter_except(s.pop, KeyError)
+        >>> next(i)
+        1
+        >>> next(i)
+        2
+        >>> next(i)
+        3
+        >>> next(i)
+        Traceback (most recent call last):
+            ...
+        StopIteration
     """
     try:
         while True:
@@ -580,19 +577,19 @@ def random_product(*args, **kwargs):
     """random_product(*args, repeat=1) -> tuple
 
     Arguments:
-      args:  One or more iterables
-      repeat(int):  Number of times to repeat `args`.
+        args:  One or more iterables
+        repeat(int):  Number of times to repeat `args`.
 
     Returns:
-      A random element from ``itertools.product(*args, repeat=repeat)``.
+        A random element from ``itertools.product(*args, repeat=repeat)``.
 
     Examples:
-      >>> args = (range(2), range(2))
-      >>> random_product(*args) in {(0, 0), (0, 1), (1, 0), (1, 1)}
-      True
-      >>> args = (range(3), range(3), range(3))
-      >>> random_product(*args, repeat=2) in product(*args, repeat=2)
-      True
+        >>> args = (range(2), range(2))
+        >>> random_product(*args) in {(0, 0), (0, 1), (1, 0), (1, 1)}
+        True
+        >>> args = (range(3), range(3), range(3))
+        >>> random_product(*args, repeat=2) in product(*args, repeat=2)
+        True
     """
     repeat = kwargs.pop('repeat', 1)
 
@@ -608,18 +605,18 @@ def random_permutation(iterable, r=None):
     """random_product(iterable, r=None) -> tuple
 
     Arguments:
-      iterable:  An iterable.
-      r(int):  Size of the permutation.  If :const:`None` select all elements in
-        `iterable`.
+        iterable:  An iterable.
+        r(int):  Size of the permutation.  If :const:`None` select all elements in
+                 `iterable`.
 
     Returns:
-      A random element from ``itertools.permutations(iterable, r=r)``.
+        A random element from ``itertools.permutations(iterable, r=r)``.
 
     Examples:
-      >>> random_permutation(range(2)) in {(0, 1), (1, 0)}
-      True
-      >>> random_permutation(range(10), r=2) in permutations(range(10), r=2)
-      True
+        >>> random_permutation(range(2)) in {(0, 1), (1, 0)}
+        True
+        >>> random_permutation(range(10), r=2) in permutations(range(10), r=2)
+        True
     """
     pool = tuple(iterable)
     r = len(pool) if r is None else r
@@ -630,17 +627,17 @@ def random_combination(iterable, r):
     """random_combination(iterable, r) -> tuple
 
     Arguments:
-      iterable:  An iterable.
-      r(int):  Size of the combination.
+        iterable:  An iterable.
+        r(int):  Size of the combination.
 
     Returns:
-      A random element from ``itertools.combinations(iterable, r=r)``.
+        A random element from ``itertools.combinations(iterable, r=r)``.
 
     Examples:
-      >>> random_combination(range(2), 2)
-      (0, 1)
-      >>> random_combination(range(10), r=2) in combinations(range(10), r=2)
-      True
+        >>> random_combination(range(2), 2)
+        (0, 1)
+        >>> random_combination(range(10), r=2) in combinations(range(10), r=2)
+        True
     """
     pool = tuple(iterable)
     n = len(pool)
@@ -652,20 +649,20 @@ def random_combination_with_replacement(iterable, r):
     """random_combination(iterable, r) -> tuple
 
     Arguments:
-      iterable:  An iterable.
-      r(int):  Size of the combination.
+        iterable:  An iterable.
+        r(int):  Size of the combination.
 
     Returns:
-      A random element from ``itertools.combinations_with_replacement(iterable,
-      r=r)``.
+        A random element from ``itertools.combinations_with_replacement(iterable,
+        r=r)``.
 
     Examples:
-      >>> cs = {(0, 0), (0, 1), (1, 1)}
-      >>> random_combination_with_replacement(range(2), 2) in cs
-      True
-      >>> i = combinations_with_replacement(range(10), r=2)
-      >>> random_combination_with_replacement(range(10), r=2) in i
-      True
+        >>> cs = {(0, 0), (0, 1), (1, 1)}
+        >>> random_combination_with_replacement(range(2), 2) in cs
+        True
+        >>> i = combinations_with_replacement(range(10), r=2)
+        >>> random_combination_with_replacement(range(10), r=2) in i
+        True
     """
     pool = tuple(iterable)
     n = len(pool)
@@ -680,25 +677,25 @@ def lookahead(n, iterable):
     Raises ``IndexError`` if `iterable` has too few elements.
 
     Arguments:
-      n(int):  Index of the element to return.
-      iterable:  An iterable.
+        n(int):  Index of the element to return.
+        iterable:  An iterable.
 
     Returns:
-      The element in `iterable` at index `n`.
+        The element in `iterable` at index `n`.
 
     Examples:
-      >>> i = count()
-      >>> lookahead(4, i)
-      4
-      >>> next(i)
-      0
-      >>> i = count()
-      >>> nth(4, i)
-      4
-      >>> next(i)
-      5
-      >>> lookahead(4, i)
-      10
+        >>> i = count()
+        >>> lookahead(4, i)
+        4
+        >>> next(i)
+        0
+        >>> i = count()
+        >>> nth(4, i)
+        4
+        >>> next(i)
+        5
+        >>> lookahead(4, i)
+        10
     """
     for value in islice(copy.copy(iterable), n, None):
         return value
@@ -712,15 +709,15 @@ def lexicographic(alphabet):
     the order of `alphabet`).
 
     Arguments:
-      alphabet:  The alphabet to draw symbols from.
+        alphabet:  The alphabet to draw symbols from.
 
     Returns:
-      An iterator of the words with symbols in `alphabet`, in lexicographic
-      order.
+        An iterator of the words with symbols in `alphabet`, in lexicographic
+        order.
 
     Example:
-      >>> take(8, map(lambda x: ''.join(x), lexicographic('01')))
-      ['', '0', '1', '00', '01', '10', '11', '000']
+        >>> take(8, map(lambda x: ''.join(x), lexicographic('01')))
+        ['', '0', '1', '00', '01', '10', '11', '000']
     """
     for n in count():
         for e in product(alphabet, repeat=n):
@@ -733,19 +730,19 @@ def chained(func):
     A decorator chaining the results of `func`.  Useful for generators.
 
     Arguments:
-      func(function):  The function being decorated.
+        func(function):  The function being decorated.
 
     Returns:
-      A generator function whoose elements are the concatenation of the return
-      values from ``func(*args, **kwargs)``.
+        A generator function whoose elements are the concatenation of the return
+        values from ``func(*args, **kwargs)``.
 
     Example:
-      >>> @chained
-      ... def g():
-      ...     for x in count():
-      ...         yield (x, -x)
-      >>> take(6, g())
-      [0, 0, 1, -1, 2, -2]
+        >>> @chained
+        ... def g():
+        ...     for x in count():
+        ...         yield (x, -x)
+        >>> take(6, g())
+        [0, 0, 1, -1, 2, -2]
     """
     def wrapper(*args, **kwargs):
         for xs in func(*args, **kwargs):
@@ -761,15 +758,15 @@ def exp(s, n):
     is simply a shorthand notation for ``product(*[s]*n)``.
 
     Arguments:
-      s(iterable): The iterable to exponentiate.
-      n(int): The exponent.
+        s(iterable): The iterable to exponentiate.
+        n(int): The exponent.
 
     Returns:
-      A generator of ``n``-tuples of elements in ``s``.
+        A generator of ``n``-tuples of elements in ``s``.
 
     Example:
-      >>> list(exp((0, 1), 3))
-      [(0, 0, 0), (0, 0, 1), (0, 1, 0), (0, 1, 1), (1, 0, 0), (1, 0, 1), (1, 1, 0), (1, 1, 1)]
+        >>> list(exp((0, 1), 3))
+        [(0, 0, 0), (0, 0, 1), (0, 1, 0), (0, 1, 1), (1, 0, 0), (1, 0, 1), (1, 1, 0), (1, 1, 1)]
     """
     return product(*[s] * n)
 
@@ -786,26 +783,25 @@ def bruteforce(func, alphabet, length, method='upto', start=None, databag=None):
     if multiple CPU cores are available.
 
     Arguments:
-      func(function):  The function to bruteforce.
-      alphabet:  The alphabet to draw symbols from.
-      length:  Longest string to try.
-      method:  If 'upto' try strings of length ``1 .. length``, if 'fixed' only
-        try strings of length ``length`` and if 'downfrom' try strings of length
-        ``length .. 1``.
-      start: a tuple ``(i, N)`` which splits the search space up into `N` pieces
-        and starts at piece `i` (1..N). :const:`None` is equivalent to ``(1, 1)``.
+        func(function):  The function to bruteforce.
+        alphabet:  The alphabet to draw symbols from.
+        length:  Longest string to try.
+        method:  If 'upto' try strings of length ``1 .. length``, if 'fixed' only
+                 try strings of length ``length`` and if 'downfrom' try strings
+                 of length ``length .. 1``.
+        start: a tuple ``(i, N)`` which splits the search space up into `N` pieces
+               and starts at piece `i` (1..N). :const:`None` is equivalent to ``(1, 1)``.
 
     Returns:
-      A string `s` such that ``func(s)`` returns :const:`True` or :const:`None`
-      if the search space was exhausted.
+        A string `s` such that ``func(s)`` returns :const:`True` or :const:`None`
+        if the search space was exhausted.
 
     Example:
-      >>> bruteforce(lambda x: x == 'hello', string.ascii_lowercase, length=10)
-      'hello'
-      >>> bruteforce(lambda x: x == 'hello', 'hllo', 5) is None
-      True
+        >>> bruteforce(lambda x: x == 'hello', string.ascii_lowercase, length=10)
+        'hello'
+        >>> bruteforce(lambda x: x == 'hello', 'hllo', 5) is None
+        True
     """
-
     if method == 'upto' and length > 1:
         iterator = product(alphabet, repeat=1)
         for i in range(2, length + 1):
@@ -880,8 +876,8 @@ def mbruteforce(func, alphabet, length, method='upto', start=None, threads=None)
     Same functionality as bruteforce(), but multithreaded.
 
     Arguments:
-      func, alphabet, length, method, start: same as for bruteforce()
-      threads: Amount of threads to spawn, default is the amount of cores.
+        func, alphabet, length, method, start: same as for bruteforce()
+        threads: Amount of threads to spawn, default is the amount of cores.
     """
 
     def bruteforcewrap(func, alphabet, length, method, start, databag):

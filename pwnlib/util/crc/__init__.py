@@ -217,7 +217,7 @@ class Module(types.ModuleType):
             inlen = len(data) * 8
             if refin:
                 data = fiddling.bitswap(data)
-            p = BitPolynom(packing.unpack(data, 'all', 'big', False))
+            p = BitPolynom(packing.unpack(data, 'all', endian='big', sign=False))
 
         p = p << width
         p ^= init << inlen
@@ -278,7 +278,7 @@ class Module(types.ModuleType):
             data = data.encode('utf8')
 
         l = len(data)
-        data += packing.pack(l, 'all', 'little', False)
+        data += packing.pack(l, 'all', endian='little', sign=False)
         return crc.crc_32_posix(data)
 
     @staticmethod
