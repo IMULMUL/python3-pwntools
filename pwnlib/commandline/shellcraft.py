@@ -78,8 +78,6 @@ p.add_argument(
     help='The shellcode you want',
 )
 
-p.epilog = 'Available shellcodes are:\n' + '\n'.join(shellcraft.templates)
-
 p.add_argument(
     'args',
     nargs='*',
@@ -153,6 +151,12 @@ p.add_argument(
 )
 
 p.add_argument(
+    '-l', '--list',
+    help="List all available shellcodes",
+    action='store_true'
+)
+
+p.add_argument(
     '--syscalls',
     help="List syscalls",
     action='store_true'
@@ -172,9 +176,9 @@ def get_template(name):
     return func
 
 
-def is_not_a_syscall_template(name):
+def is_syscall_template(name):
     template_src = shellcraft._get_source(name)
-    return 'man 2' not in read(template_src)
+    return 'man 2' in read(template_src)
 
 
 def main():
@@ -183,13 +187,18 @@ def main():
     p.description = banner + p.description
     args = p.parse_args()
 
+    if args.list or args.syscalls:
+        syscalls, shellcodes = partition(shellcraft.templates, is_syscall_template)
+
+        if args.syscalls:
+            more('\n'.join(syscalls))
+        else:
+            more('\n'.join(shellcodes))
+
+        exit()
+
     if not args.shellcode:
-        templates = shellcraft.templates
-
-        if not args.syscalls:
-            templates = filter(is_not_a_syscall_template, templates)
-
-        print('\n'.join(templates))
+        p.print_help()
         exit()
 
     func = get_template(args.shellcode)
