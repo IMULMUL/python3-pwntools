@@ -1,11 +1,11 @@
-from .context import context, LocalContext
+from .context import context, local_context
 from .log import getLogger
 from .util import misc
 
 log = getLogger(__name__)
 
 
-@LocalContext
+@local_context
 def get_qemu_arch():
     """
     Returns the name which QEMU uses for the currently selected
@@ -31,7 +31,7 @@ def get_qemu_arch():
     }.get((context.arch, context.endian), context.arch)
 
 
-@LocalContext
+@local_context
 def get_qemu_user():
     """
     Returns the path to the QEMU-user binary for the currently

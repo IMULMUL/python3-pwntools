@@ -34,7 +34,7 @@ import struct
 import sys
 
 from . import iters
-from ..context import context, LocalContext
+from ..context import context, local_context
 
 mod = sys.modules[__name__]
 
@@ -150,7 +150,7 @@ def pack(number, word_size=None, endianness=None, sign=None, **kwargs):
             return bytes(reversed(out))
 
 
-@LocalContext
+@local_context
 def unpack(data, word_size=None):
     """unpack(data, word_size=None, endianness=None, sign=None, **kwargs) -> int
 
@@ -222,7 +222,7 @@ def unpack(data, word_size=None):
     return number - 2 * signbit
 
 
-@LocalContext
+@local_context
 def unpack_many(data, word_size=None):
     """unpack(data, word_size=None, endianness=None, sign=None) -> int list
 
@@ -321,7 +321,7 @@ def make_multi(op, size):
     bs = getattr(mod, "_%sbs" % name)
     bu = getattr(mod, "_%sbu" % name)
 
-    @LocalContext
+    @local_context
     def routine(number):
         endian = context.endian
         signed = context.signed
@@ -420,7 +420,7 @@ def make_packer(word_size=None, sign=None, **kwargs):
         return lambda number: pack(number, word_size, endianness, sign)
 
 
-@LocalContext
+@local_context
 def make_unpacker(word_size=None, endianness=None, sign=None, **kwargs):
     """make_unpacker(word_size=None, endianness=None, sign=None, **kwargs) -> bytes → number
 
@@ -556,7 +556,7 @@ def _to_byte(s):
         raise TypeError("_to_byte() does not support type %s" % type(s))
 
 
-@LocalContext
+@local_context
 def fit(pieces, **kwargs):
     """fit(pieces, filler=de_bruijn(), length=None, preprocessor=None) -> bytes
 

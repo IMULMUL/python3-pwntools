@@ -203,7 +203,7 @@ import tempfile
 from .. import abi
 from .. import constants
 
-from ..context import context, LocalContext
+from ..context import context, local_context
 from ..elf import ELF
 from ..log import getLogger
 from ..util import cyclic
@@ -400,7 +400,7 @@ class ROP:
         self.__load()
 
     @staticmethod
-    @LocalContext
+    @local_context
     def from_blob(blob, *args, **kwargs):
         return ROP(ELF.from_bytes(blob, *args, **kwargs))
 

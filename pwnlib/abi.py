@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .context import context, LocalContext
+from .context import context, local_context
 
 
 class ABI:
@@ -29,7 +29,7 @@ class ABI:
         self.stack_minimum = minimum
 
     @staticmethod
-    @LocalContext
+    @local_context
     def default():
         return {
             (32, 'i386', 'linux'): linux_i386,
@@ -42,7 +42,7 @@ class ABI:
         }[(context.bits, context.arch, context.os)]
 
     @staticmethod
-    @LocalContext
+    @local_context
     def syscall():
         return {
             (32, 'i386', 'linux'): linux_i386_syscall,
@@ -53,7 +53,7 @@ class ABI:
         }[(context.bits, context.arch, context.os)]
 
     @staticmethod
-    @LocalContext
+    @local_context
     def sigreturn():
         return {
             (32, 'i386', 'linux'): linux_i386_sigreturn,

@@ -3,7 +3,7 @@ import collections
 import random
 import re
 
-from ..context import context, LocalContext
+from ..context import context, local_context
 from ..log import getLogger
 from ..util.fiddling import hexdump
 from ..util.misc import force_bytes
@@ -42,7 +42,7 @@ class Encoder:
         raise NotImplementedError()
 
 
-@LocalContext
+@local_context
 def encode(raw_bytes, avoid=None, expr=None, force=0, pcreg=''):
     """encode(raw_bytes, avoid, expr, force) -> bytes
 
@@ -106,7 +106,7 @@ re_null = r'\x00'
 re_line = r'[\s\x00]'
 
 
-@LocalContext
+@local_context
 def null(raw_bytes, *args, **kwargs):
     """null(raw_bytes) -> bytes
 
@@ -118,7 +118,7 @@ def null(raw_bytes, *args, **kwargs):
     return encode(raw_bytes, expr=null, *args, **kwargs)
 
 
-@LocalContext
+@local_context
 def line(raw_bytes, *args, **kwargs):
     """line(raw_bytes) -> bytes
 
@@ -130,7 +130,7 @@ def line(raw_bytes, *args, **kwargs):
     return encode(raw_bytes, expr=re_whitespace, *args, **kwargs)
 
 
-@LocalContext
+@local_context
 def alphanumeric(raw_bytes, *args, **kwargs):
     """alphanumeric(raw_bytes) -> bytes
 
@@ -142,7 +142,7 @@ def alphanumeric(raw_bytes, *args, **kwargs):
     return encode(raw_bytes, expr=re_alphanumeric, *args, **kwargs)
 
 
-@LocalContext
+@local_context
 def printable(raw_bytes, *args, **kwargs):
     """printable(raw_bytes) -> bytes
 
@@ -154,7 +154,7 @@ def printable(raw_bytes, *args, **kwargs):
     return encode(raw_bytes, expr=re_printable, *args, **kwargs)
 
 
-@LocalContext
+@local_context
 def scramble(raw_bytes, *args, **kwargs):
     """scramble(raw_bytes) -> bytes
 

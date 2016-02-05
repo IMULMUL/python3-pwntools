@@ -160,7 +160,7 @@ Mipsel Example:
 """
 
 from ..abi import ABI
-from ..context import context, LocalContext
+from ..context import context, local_context
 from ..log import getLogger
 from ..util.packing import pack
 
@@ -348,7 +348,7 @@ class SigreturnFrame(dict):
     _regs = []
     endian = None
 
-    @LocalContext
+    @local_context
     def __init__(self):
         if context.kernel is None and context.arch == 'i386':
             log.error("kernel architecture must be specified")

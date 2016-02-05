@@ -1,10 +1,10 @@
 from .elf import ELF
-from .context import LocalContext
+from .context import local_context
 
 __all__ = ['run_assembly', 'run_shellcode', 'run_assembly_exitcode', 'run_shellcode_exitcode']
 
 
-@LocalContext
+@local_context
 def run_assembly(assembly):
     """
     Given an assembly listing, assemble and execute it.
@@ -27,7 +27,7 @@ def run_assembly(assembly):
     return ELF.from_assembly(assembly).process()
 
 
-@LocalContext
+@local_context
 def run_shellcode(bytes, **kw):
     """Given assembled machine code bytes, execute them.
 
@@ -48,7 +48,7 @@ def run_shellcode(bytes, **kw):
     return ELF.from_bytes(bytes, **kw).process()
 
 
-@LocalContext
+@local_context
 def run_assembly_exitcode(assembly):
     """
     Given an assembly listing, assemble and execute it, and wait for
@@ -67,7 +67,7 @@ def run_assembly_exitcode(assembly):
     return p.poll()
 
 
-@LocalContext
+@local_context
 def run_shellcode_exitcode(bytes):
     """
     Given assembled machine code bytes, execute them, and wait for

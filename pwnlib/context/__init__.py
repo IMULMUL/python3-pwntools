@@ -1123,13 +1123,13 @@ class ContextType:
 context = ContextType()
 
 
-def LocalContext(function):
+def local_context(function):
     """
     Wraps the specied function on a context.local() block, using kwargs.
 
     Example:
 
-        >>> @LocalContext
+        >>> @local_context
         ... def printArch():
         ...     print(context.arch)
         >>> printArch()

@@ -8,7 +8,7 @@ from . import atexit
 from . import elf
 from . import tubes
 from .asm import make_elf, make_elf_from_assembly
-from .context import context, LocalContext
+from .context import context, local_context
 from .log import getLogger
 from .util import misc
 from .util import proc
@@ -17,7 +17,7 @@ from .qemu import get_qemu_user
 log = getLogger(__name__)
 
 
-@LocalContext
+@local_context
 def debug_assembly(asm, execute=None, vma=None):
     """
     Creates an ELF file, and launches it with GDB.
@@ -32,7 +32,7 @@ def debug_assembly(asm, execute=None, vma=None):
     return debug(tmp_elf, execute=execute, arch=context.arch)
 
 
-@LocalContext
+@local_context
 def debug_shellcode(data, execute=None, vma=None):
     """
     Creates an ELF file, and launches it with GDB.
@@ -53,7 +53,7 @@ def debug_shellcode(data, execute=None, vma=None):
     return debug(tmp_elf, execute=execute, arch=context.arch)
 
 
-@LocalContext
+@local_context
 def debug(args, execute=None, exe=None, ssh=None, env=None):
     """debug(args) -> tube
 
@@ -162,7 +162,7 @@ def get_gdb_arch():
     }.get(context.arch, context.arch)
 
 
-@LocalContext
+@local_context
 def attach(target, execute=None, exe=None, need_ptrace_scope=True):
     """attach(target, execute=None, exe=None, arch=None) -> None
 

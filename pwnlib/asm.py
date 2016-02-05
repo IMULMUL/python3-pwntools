@@ -53,7 +53,7 @@ from os import path
 
 from . import atexit
 from . import shellcraft
-from .context import context, LocalContext
+from .context import context, local_context
 from .log import getLogger
 
 log = getLogger(__name__)
@@ -64,7 +64,7 @@ _basedir = path.split(__file__)[0]
 _incdir = path.join(_basedir, 'data', 'includes')
 
 
-@LocalContext
+@local_context
 def which_binutils(util):
     """
     Finds a binutils in the PATH somewhere.
@@ -321,7 +321,7 @@ def _run(cmd, stdin=None):
     return stdout
 
 
-@LocalContext
+@local_context
 def cpp(shellcode):
     r"""cpp(shellcode, ...) -> str
 
@@ -361,7 +361,7 @@ def cpp(shellcode):
     return _run(cmd, code).decode('utf8').strip('\n').rstrip() + '\n'
 
 
-@LocalContext
+@local_context
 def make_elf_from_assembly(assembly, vma=0x10000000, extract=False):
     r"""
     Builds an ELF file with the specified assembly as its
@@ -388,7 +388,7 @@ def make_elf_from_assembly(assembly, vma=0x10000000, extract=False):
     return path
 
 
-@LocalContext
+@local_context
 def make_elf(data, vma=None, strip=True, extract=True):
     r"""
     Builds an ELF file with the specified binary data as its
@@ -471,7 +471,7 @@ def make_elf(data, vma=None, strip=True, extract=True):
     return retval
 
 
-@LocalContext
+@local_context
 def asm(shellcode, vma=0, extract=True):
     r"""asm(code, vma=0, extract=True, ...) -> bytes
 
@@ -565,7 +565,7 @@ def asm(shellcode, vma=0, extract=True):
     return result
 
 
-@LocalContext
+@local_context
 def disasm(data, vma=0, byte=True, offset=True, instructions=True):
     """disasm(data, ...) -> str
 
