@@ -1,7 +1,5 @@
 from ...asm import asm
 from ... import shellcraft
-from ...context import context
-from ...util.lists import group
 from ...util.fiddling import xor_key
 from ...util.packing import u8
 from ..encoder import Encoder

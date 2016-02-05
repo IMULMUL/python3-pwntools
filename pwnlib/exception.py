@@ -1,6 +1,7 @@
-__all__ = ['PwnlibException']
 import sys
 import traceback
+
+__all__ = ['PwnlibException']
 
 
 class PwnlibException(Exception):

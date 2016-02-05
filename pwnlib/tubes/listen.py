@@ -2,11 +2,8 @@ import errno
 import socket
 
 from ..context import context
-from ..log import getLogger
 from ..timeout import Timeout
 from .sock import sock
-
-log = getLogger(__name__)
 
 
 class listen(sock):

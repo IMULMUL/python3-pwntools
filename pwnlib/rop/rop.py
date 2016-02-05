@@ -193,7 +193,6 @@ Let's try it out!
     b'hello\n'
 """
 import collections
-import copy
 import hashlib
 import os
 import re
@@ -213,11 +212,12 @@ from ..util import packing
 from ..util import misc
 from ..util.packing import *
 from . import srop
-from .call import Call, StackAdjustment, AppendedArgument, CurrentStackPointer, NextGadgetAddress
+from .call import Call, AppendedArgument, CurrentStackPointer, NextGadgetAddress
 from .gadgets import Gadget
 
-log = getLogger(__name__)
 __all__ = ['ROP']
+
+log = getLogger(__name__)
 
 
 class Padding:

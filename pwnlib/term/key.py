@@ -1,5 +1,3 @@
-__all__ = ['getch', 'getraw', 'get', 'unget']
-
 import errno
 import os
 import select
@@ -8,6 +6,8 @@ import sys
 
 from . import keyconsts as kc
 from . import termcap
+
+__all__ = ['getch', 'getraw', 'get', 'unget']
 
 try:
     _fd = sys.stdin.fileno()

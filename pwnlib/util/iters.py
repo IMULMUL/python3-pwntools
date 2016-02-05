@@ -2,6 +2,17 @@
 This module includes and extends the standard module :mod:`itertools`.
 """
 
+import collections
+import copy
+import multiprocessing
+import operator
+import random
+from itertools import *
+
+from ..log import getLogger
+
+log = getLogger(__name__)
+
 __all__ = [
     'bruteforce',
     'mbruteforce',
@@ -49,17 +60,6 @@ __all__ = [
     'takewhile',
     'tee'
 ]
-
-import collections
-import copy
-import multiprocessing
-import operator
-import random
-from itertools import *
-
-from ..log import getLogger
-
-log = getLogger(__name__)
 
 
 def take(n, iterable):

@@ -3,7 +3,7 @@
 Topographical sort
 """
 from random import shuffle, randint
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 
 from .context import context
 from .log import getLogger

@@ -1,10 +1,11 @@
 """
 Database of >22,000 user agent strings
 """
-__all__ = ['getall', 'random']
 
 import os
 import random as randommod
+
+__all__ = ['getall', 'random']
 
 _cache = None
 

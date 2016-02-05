@@ -89,7 +89,6 @@ Example - Automated exploitation
     format_string.execute_writes()
 
 """
-import logging
 import re
 
 from pwnlib.log import getLogger

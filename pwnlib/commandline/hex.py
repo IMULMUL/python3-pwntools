@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import sys
+
 from pwnlib.util.fiddling import enhex
 
 parser = argparse.ArgumentParser(description='''

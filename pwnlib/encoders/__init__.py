@@ -2,6 +2,7 @@
 """
 Encode shellcode to avoid input filtering and impress your friends!
 """
+
 from . import amd64
 from . import arm
 from . import i386

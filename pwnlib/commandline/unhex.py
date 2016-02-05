@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import argparse
-import sys
-from pwnlib.util.fiddling import unhex
 import re
+import sys
+
+from pwnlib.util.fiddling import unhex
 
 parser = argparse.ArgumentParser(description='''
 Decodes hex-encoded data provided on the command line or via stdin.

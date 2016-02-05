@@ -1,4 +1,5 @@
-"""Improved replacements for standard functions
+"""
+Improved replacements for standard functions
 """
 
 import time as __time

@@ -1,3 +1,5 @@
+import ctypes
+
 from .log import getLogger
 from .util.packing import pack
 from .util.packing import unpack
@@ -65,7 +67,7 @@ class MemLeak:
         Return Value:
             An instance of the provided struct class, with the leaked data decoded
         """
-        size = sizeof(struct)
+        size = ctypes.sizeof(struct)
         data = self.n(address, size)
         obj = struct.from_buffer_copy(data)
         return obj

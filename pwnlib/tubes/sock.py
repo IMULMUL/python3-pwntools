@@ -2,10 +2,7 @@ import errno
 import select
 import socket
 
-from ..log import getLogger
 from .tube import tube
-
-log = getLogger(__name__)
 
 
 class sock(tube):

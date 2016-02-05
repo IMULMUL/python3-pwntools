@@ -1,6 +1,4 @@
-import binascii
 import random
-import sys
 import string
 
 from . import builder

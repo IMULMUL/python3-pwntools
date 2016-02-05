@@ -20,12 +20,14 @@ from ..timeout import Timeout
 
 _original_socket = socket.socket
 
+
 class _devnull:
     name = None
     def write(self, *a, **kw): pass
     def read(self, *a, **kw): return ''
     def flush(self, *a, **kw): pass
     def close(self, *a, **kw): pass
+
 
 class _defaultdict(dict):
     """

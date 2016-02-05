@@ -7,7 +7,7 @@ import tempfile
 from . import atexit
 from . import elf
 from . import tubes
-from .asm import make_elf, make_elf_from_assembly, _bfdname
+from .asm import make_elf, make_elf_from_assembly
 from .context import context, LocalContext
 from .log import getLogger
 from .util import misc

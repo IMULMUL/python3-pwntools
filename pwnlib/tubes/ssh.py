@@ -14,12 +14,10 @@ import types
 from .. import term
 from ..context import context
 from ..log import Logger
-from ..log import getLogger
 from ..timeout import Timeout
 from ..util import hashes
 from ..util import misc
 from ..util import safeeval
-from .process import process
 from .sock import sock
 
 # Kill the warning line:

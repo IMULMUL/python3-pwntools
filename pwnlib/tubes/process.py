@@ -262,7 +262,6 @@ class process(tube):
             # Travis CI), re-try with qemu-XXX if we get an
             # 'Exec format error'.
             prefixes = [([], executable)]
-            executables = [executable]
             exception = None
 
             try:

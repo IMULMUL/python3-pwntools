@@ -1,6 +1,6 @@
-__all__ = ['Keymap']
-
 from . import key
+
+__all__ = ['Keymap']
 
 
 class Keymap:

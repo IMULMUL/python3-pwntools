@@ -1,18 +1,14 @@
 """
 Fetch a LIBC binary based on some heuristics.
 """
-import codecs
-import json
+
 import os
 import tempfile
 import urllib.parse as urlparse
 
 from .context import context
-from .elf import ELF
 from .log import getLogger
-from .util.safeeval import const
 from .util.web import wget
-from .util.fiddling import b64d, hexdump
 from .util.misc import read, write
 
 log = getLogger(__name__)

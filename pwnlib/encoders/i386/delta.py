@@ -1,9 +1,5 @@
 import collections
 from random import randint, choice
-from ...asm import asm
-from ...asm import disasm
-from ...context import context
-from ...util.fiddling import hexdump
 from ..encoder import Encoder
 
 '''

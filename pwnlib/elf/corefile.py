@@ -1,4 +1,3 @@
-import collections
 import ctypes
 import elftools
 from elftools.common.utils import roundup, struct_parse

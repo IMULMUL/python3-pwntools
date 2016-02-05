@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
 import codecs
-import io
 import random
 import re
 import string
@@ -13,7 +12,6 @@ from ..context import context
 from ..log import getLogger
 from ..term import text
 from .cyclic import cyclic
-from .cyclic import cyclic_find
 from .misc import force_bytes
 
 log = getLogger(__name__)
@@ -649,7 +647,6 @@ def hexdump_iter(s, width=16, skip=True, hexii=False, begin=0,
     style.update(_style)
 
     skipping = False
-    lines = []
     last_unique = ''
     byte_width = len('00 ')
     column_sep = '  '

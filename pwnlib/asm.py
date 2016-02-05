@@ -44,9 +44,7 @@ import os
 import platform
 import re
 import shutil
-import string
 import subprocess
-import sys
 import tempfile
 from collections import defaultdict
 from glob import glob
