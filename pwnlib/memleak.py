@@ -29,25 +29,23 @@ class MemLeak:
 
     Example:
 
-        .. doctest:: leaker
-
-            >>> import pwnlib
-            >>> binsh = pwnlib.util.misc.read('/bin/sh', mode='rb')
-            >>> @pwnlib.memleak.MemLeak
-            ... def leaker(addr):
-            ...     print("leaking 0x%x" % addr)
-            ...     return binsh[addr:addr+4]
-            >>> leaker.s(0)[:4]
-            leaking 0x0
-            leaking 0x4
-            b'\\x7fELF'
-            >>> hex(leaker.d(0))
-            '0x464c457f'
-            >>> hex(leaker.clearb(1))
-            '0x45'
-            >>> hex(leaker.d(0))
-            leaking 0x1
-            '0x464c457f'
+        >>> import pwnlib
+        >>> binsh = pwnlib.util.misc.read('/bin/sh', mode='rb')
+        >>> @pwnlib.memleak.MemLeak
+        ... def leaker(addr):
+        ...     print("leaking 0x%x" % addr)
+        ...     return binsh[addr:addr+4]
+        >>> leaker.s(0)[:4]
+        leaking 0x0
+        leaking 0x4
+        b'\\x7fELF'
+        >>> hex(leaker.d(0))
+        '0x464c457f'
+        >>> hex(leaker.clearb(1))
+        '0x45'
+        >>> hex(leaker.d(0))
+        leaking 0x1
+        '0x464c457f'
     """
 
     def __init__(self, f, search_range=20, reraise=True):
@@ -60,10 +58,13 @@ class MemLeak:
 
     def struct(self, address, struct):
         """struct(address, struct) => structure object
+
         Leak an entire structure.
+
         Arguments:
             address(int):  Address of structure in memory
             struct(class): A ctypes structure to be instantiated with leaked data
+
         Return Value:
             An instance of the provided struct class, with the leaked data decoded
         """

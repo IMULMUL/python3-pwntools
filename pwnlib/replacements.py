@@ -11,7 +11,7 @@ def sleep(n):
     Replacement for :func:`time.sleep()`, which does not return if a signal is recieved.
 
     Arguments:
-      n (int):  Number of seconds to sleep.
+        n (int):  Number of seconds to sleep.
     """
     end = __time.time() + n
     while True:

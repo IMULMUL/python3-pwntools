@@ -198,7 +198,6 @@ class Module(types.ModuleType):
             refout(bool): Should the checksum be reflected?
             xorout(int):  The value to xor the checksum with before outputting
         """
-
         polynom = BitPolynom(int(polynom)) | (1 << width)
         if polynom.degree() != width:
             raise ValueError("Polynomial is too large for that width")
@@ -257,7 +256,7 @@ class Module(types.ModuleType):
         Example:
             >>> print(%s('123456789'))
             %d
-    """ % (name, name, polynom, width, init, refin, refout, xorout, extra_doc, name, check)
+        """ % (name, name, polynom, width, init, refin, refout, xorout, extra_doc, name, check)
 
         return inner
 

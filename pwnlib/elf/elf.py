@@ -116,7 +116,6 @@ class ELF(ELFFile):
         which contains that assembly at its entry point.
 
         Arguments:
-
             assembly(str): Assembly language listing
             vma(int): Address of the entry point and the module's base address.
 
@@ -138,7 +137,6 @@ class ELF(ELFFile):
         which contains those bytes at its entry point.
 
         Arguments:
-
             bytes(bytes): Shellcode byte string
             vma(int): Desired base address for the ELF.
 
@@ -226,11 +224,13 @@ class ELF(ELFFile):
         """Address of the lowest segment loaded in the ELF.
         When updated, cascades updates to segment vaddrs, section addrs, symbols, plt, and got.
 
-        >>> bash = ELF(which('bash'))
-        >>> old = bash.symbols[b'read']
-        >>> bash.address += 0x1000
-        >>> bash.symbols[b'read'] == old + 0x1000
-        True
+        Examples:
+
+            >>> bash = ELF(which('bash'))
+            >>> old = bash.symbols[b'read']
+            >>> bash.address += 0x1000
+            >>> bash.symbols[b'read'] == old + 0x1000
+            True
         """
         return self._address
 
@@ -297,12 +297,14 @@ class ELF(ELFFile):
 
     def _populate_libraries(self):
         """
-        >>> from os.path import exists
-        >>> bash = ELF(which('bash'))
-        >>> all(map(exists, bash.libs.keys()))
-        True
-        >>> any(map(lambda x: 'libc' in x, bash.libs.keys()))
-        True
+        Examples:
+
+            >>> from os.path import exists
+            >>> bash = ELF(which('bash'))
+            >>> all(map(exists, bash.libs.keys()))
+            True
+            >>> any(map(lambda x: 'libc' in x, bash.libs.keys()))
+            True
         """
         if not self.get_section_by_name(b'.dynamic'):
             self.libs = {}
@@ -354,9 +356,11 @@ class ELF(ELFFile):
 
     def _populate_symbols(self):
         """
-        >>> bash = ELF(which('bash'))
-        >>> bash.symbols[b'_start'] == bash.header.e_entry
-        True
+        Examples:
+
+            >>> bash = ELF(which('bash'))
+            >>> bash.symbols[b'_start'] == bash.header.e_entry
+            True
         """
         # By default, have 'symbols' include everything in the PLT.
         #
@@ -391,16 +395,18 @@ class ELF(ELFFile):
         This assumes that each GOT entry points to its PLT entry,
         usually +6 bytes but could be anywhere within 0-16 bytes.
 
-        >>> from pwnlib.util.packing import unpack
-        >>> bash = ELF(which('bash'))
-        >>> def validate_got_plt(sym):
-        ...     got = bash.got[sym]
-        ...     plt = bash.plt[sym]
-        ...     got_addr = unpack(bash.read(got, bash.elfclass // 8), bash.elfclass)
-        ...     return got_addr in range(plt, plt + 0x10)
-        ...
-        >>> all(map(validate_got_plt, bash.got.keys()))
-        True
+        Examples:
+
+            >>> from pwnlib.util.packing import unpack
+            >>> bash = ELF(which('bash'))
+            >>> def validate_got_plt(sym):
+            ...     got = bash.got[sym]
+            ...     plt = bash.plt[sym]
+            ...     got_addr = unpack(bash.read(got, bash.elfclass // 8), bash.elfclass)
+            ...     return got_addr in range(plt, plt + 0x10)
+            ...
+            >>> all(map(validate_got_plt, bash.got.keys()))
+            True
         """
         plt = self.get_section_by_name(b'.plt')
         got = self.get_section_by_name(b'.got')
@@ -467,6 +473,7 @@ class ELF(ELFFile):
             An iterator for each virtual address that matches.
 
         Examples:
+
             >>> bash = ELF(which('bash'))
             >>> bash.address + 1 == next(bash.search('ELF'))
             True
@@ -508,6 +515,7 @@ class ELF(ELFFile):
             Virtual address which corresponds to the file offset, or None
 
         Examples:
+
             >>> bash = ELF(which('bash'))
             >>> bash.address == bash.offset_to_vaddr(0)
             True
@@ -537,6 +545,7 @@ class ELF(ELFFile):
             or None.
 
         Examples:
+
             >>> bash = ELF(which('bash'))
             >>> 0 == bash.vaddr_to_offset(bash.address)
             True
@@ -568,9 +577,10 @@ class ELF(ELFFile):
             A string of bytes, or None
 
         Examples:
-          >>> bash = ELF(which('bash'))
-          >>> bash.read(bash.address + 1, 3)
-          b'ELF'
+
+            >>> bash = ELF(which('bash'))
+            >>> bash.read(bash.address + 1, 3)
+            b'ELF'
         """
         offset = self.vaddr_to_offset(address)
 
@@ -595,12 +605,13 @@ class ELF(ELFFile):
             that it stays in the same segment.
 
         Examples:
-          >>> bash = ELF(which('bash'))
-          >>> bash.read(bash.address + 1, 3)
-          b'ELF'
-          >>> bash.write(bash.address, b"HELO")
-          >>> bash.read(bash.address, 4)
-          b'HELO'
+
+            >>> bash = ELF(which('bash'))
+            >>> bash.read(bash.address + 1, 3)
+            b'ELF'
+            >>> bash.write(bash.address, b"HELO")
+            >>> bash.read(bash.address, 4)
+            b'HELO'
         """
         offset = self.vaddr_to_offset(address)
 
@@ -615,12 +626,14 @@ class ELF(ELFFile):
     def save(self, path):
         """Save the ELF to a file
 
-        >>> bash = ELF(which('bash'))
-        >>> bash.save('/tmp/bash_copy')
-        >>> copy = open('/tmp/bash_copy', 'rb')
-        >>> bash = open(which('bash'), 'rb')
-        >>> bash.read() == copy.read()
-        True
+        Examples:
+
+            >>> bash = ELF(which('bash'))
+            >>> bash.save('/tmp/bash_copy')
+            >>> copy = open('/tmp/bash_copy', 'rb')
+            >>> bash = open(which('bash'), 'rb')
+            >>> bash.read() == copy.read()
+            True
         """
         old = self.stream.tell()
 
@@ -633,10 +646,12 @@ class ELF(ELFFile):
     def get_data(self):
         """Retrieve the raw data from the ELF file.
 
-        >>> bash = ELF(which('bash'))
-        >>> fd   = open(which('bash'), 'rb')
-        >>> bash.get_data() == fd.read()
-        True
+        Examples:
+
+            >>> bash = ELF(which('bash'))
+            >>> fd = open(which('bash'), 'rb')
+            >>> bash.get_data() == fd.read()
+            True
         """
         old = self.stream.tell()
         self.stream.seek(0)
@@ -817,16 +832,25 @@ class ELF(ELFFile):
         return False
 
     def p64(self, address, data, *a, **kw): return self.write(address, packing.p64(data, *a, **kw))
+
     def p32(self, address, data, *a, **kw): return self.write(address, packing.p32(data, *a, **kw))
+
     def p16(self, address, data, *a, **kw): return self.write(address, packing.p16(data, *a, **kw))
+
     def p8(self, address, data, *a, **kw): return self.write(address, packing.p8(data, *a, **kw))
+
     def pack(self, address, data, *a, **kw): return self.write(address, packing.pack(data, *a, **kw))
 
     def u64(self, address, *a, **kw): return packing.u64(self.read(address, 8), *a, **kw)
+
     def u32(self, address, *a, **kw): return packing.u32(self.read(address, 4), *a, **kw)
+
     def u16(self, address, *a, **kw): return packing.u16(self.read(address, 2), *a, **kw)
+
     def u8(self, address, *a, **kw): return packing.u8(self.read(address, 1), *a, **kw)
+
     def unpack(self, address, *a, **kw): return packing.unpack(self.read(address, context.bytes), *a, **kw)
+
     def string(self, address):
         data = b''
         while True:

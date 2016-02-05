@@ -11,14 +11,14 @@ def partition(lst, f, save_keys=False):
     an :class:`collections.OrderedDict`.
 
     Arguments:
-      lst: The iterable to partition
-      f(function): The function to use as the partitioner.
-      save_keys(bool): Set this to True, if you want the OrderedDict
-                       returned instead of just the values
+        lst: The iterable to partition
+        f(function): The function to use as the partitioner.
+        save_keys(bool): Set this to True, if you want the OrderedDict
+                         returned instead of just the values
 
     Example:
-      >>> partition([1, 2, 3, 4, 5], lambda x: x & 1)
-      [[1, 3, 5], [2, 4]]
+        >>> partition([1, 2, 3, 4, 5], lambda x: x & 1)
+        [[1, 3, 5], [2, 4]]
     """
     d = collections.OrderedDict()
 
@@ -40,23 +40,23 @@ def group(n, lst, underfull_action='ignore', fill_value=None):
     returned as is, thrown out or padded with the value specified in fill_value.
 
     Arguments:
-      n (int): The size of resulting groups
-      lst: The list, tuple or string to group
-      underfull_action (str): The action to take in case of an underfull group at the end. Possible values are 'ignore', 'drop' or 'fill'.
-      fill_value: The value to fill into an underfull remaining group.
+        n (int): The size of resulting groups
+        lst: The list, tuple or string to group
+        underfull_action (str): The action to take in case of an underfull group at the end. Possible values are 'ignore', 'drop' or 'fill'.
+        fill_value: The value to fill into an underfull remaining group.
 
     Returns:
-      A list containing the grouped values.
+        A list containing the grouped values.
 
     Example:
-      >>> group(3, "ABCDEFG")
-      ['ABC', 'DEF', 'G']
-      >>> group(3, 'ABCDEFG', 'drop')
-      ['ABC', 'DEF']
-      >>> group(3, 'ABCDEFG', 'fill', 'Z')
-      ['ABC', 'DEF', 'GZZ']
-      >>> group(3, list('ABCDEFG'), 'fill')
-      [['A', 'B', 'C'], ['D', 'E', 'F'], ['G', None, None]]
+        >>> group(3, "ABCDEFG")
+        ['ABC', 'DEF', 'G']
+        >>> group(3, 'ABCDEFG', 'drop')
+        ['ABC', 'DEF']
+        >>> group(3, 'ABCDEFG', 'fill', 'Z')
+        ['ABC', 'DEF', 'GZZ']
+        >>> group(3, list('ABCDEFG'), 'fill')
+        [['A', 'B', 'C'], ['D', 'E', 'F'], ['G', None, None]]
     """
     if underfull_action not in ('ignore', 'drop', 'fill'):
         raise ValueError("group(): underfull_action must be either 'ignore', 'drop' or 'fill'")
@@ -94,9 +94,8 @@ def concat(l):
 
     Example:
 
-      >>> concat([[1, 2], [3]])
-      [1, 2, 3]
-
+        >>> concat([[1, 2], [3]])
+        [1, 2, 3]
     """
     res = []
     for k in l:
@@ -111,8 +110,8 @@ def concat_all(*args):
     Concats all the arguments together.
 
     Example:
-       >>> concat_all(0, [1, (2, 3)], [([[4, 5, 6]])])
-       [0, 1, 2, 3, 4, 5, 6]
+        >>> concat_all(0, [1, (2, 3)], [([[4, 5, 6]])])
+        [0, 1, 2, 3, 4, 5, 6]
     """
     if len(args) != 1:
         return concat_all(list(args))
@@ -133,8 +132,8 @@ def ordlist(s):
     Turns a string into a list of the corresponding ascii values.
 
     Example:
-      >>> ordlist("hello")
-      [104, 101, 108, 108, 111]
+        >>> ordlist("hello")
+        [104, 101, 108, 108, 111]
     """
     return list(map(ord, s))
 
@@ -145,8 +144,8 @@ def unordlist(cs):
     Takes a list of ascii values and returns the corresponding string.
 
     Example:
-      >>> unordlist([104, 101, 108, 108, 111])
-      'hello'
+        >>> unordlist([104, 101, 108, 108, 111])
+        'hello'
     """
     return ''.join(chr(c) for c in cs)
 
@@ -158,13 +157,13 @@ def findall(haystack, needle):
     Knuth-Morris-Pratt algorithm.
 
     Example:
-      >>> foo = findall([1, 2, 3, 4, 4, 3, 4, 2, 1], 4)
-      >>> next(foo)
-      3
-      >>> next(foo)
-      4
-      >>> next(foo)
-      6
+        >>> foo = findall([1, 2, 3, 4, 4, 3, 4, 2, 1], 4)
+        >>> next(foo)
+        3
+        >>> next(foo)
+        4
+        >>> next(foo)
+        6
     """
     def __kmp_table(W):
         pos = 1

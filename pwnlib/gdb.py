@@ -180,14 +180,14 @@ def attach(target, execute=None, exe=None, need_ptrace_scope=True):
     If `gdb-multiarch` is installed we use that or 'gdb' otherwise.
 
     Arguments:
-      target: The target to attach to.
-      execute (str or file): GDB script to run after attaching.
-      exe (str): The path of the target binary.
-      arch (str): Architechture of the target binary.  If `exe` known GDB will
-      detect the architechture automatically (if it is supported).
+        target: The target to attach to.
+        execute (str or file): GDB script to run after attaching.
+        exe (str): The path of the target binary.
+        arch (str): Architechture of the target binary.  If `exe` known GDB will
+                    detect the architechture automatically (if it is supported).
 
     Returns:
-      :const:`None`
+        :const:`None`
     """
     if context.noptrace:
         log.warn_once("Skipping debug attach since context.noptrace == True")
@@ -441,13 +441,13 @@ def find_module_addresses(binary, ssh=None, ulimit=False):
 
     Example:
 
-    >>> with context.local(log_level=9999): # doctest: +SKIP
-    ...     shell = ssh(host='bandit.labs.overthewire.org', user='bandit0', password='bandit0')
-    ...     bash_libs = gdb.find_module_addresses('/bin/bash', shell)
-    >>> os.path.basename(bash_libs[0].path) # doctest: +SKIP
-    'libc.so.6'
-    >>> hex(bash_libs[0].symbols[b'system']) # doctest: +SKIP
-    '0x7ffff7634660'
+        >>> with context.local(log_level=9999): # doctest: +SKIP
+        ...     shell = ssh(host='bandit.labs.overthewire.org', user='bandit0', password='bandit0')
+        ...     bash_libs = gdb.find_module_addresses('/bin/bash', shell)
+        >>> os.path.basename(bash_libs[0].path) # doctest: +SKIP
+        'libc.so.6'
+        >>> hex(bash_libs[0].symbols[b'system']) # doctest: +SKIP
+        '0x7ffff7634660'
     """
     #
     # Download all of the remote libraries

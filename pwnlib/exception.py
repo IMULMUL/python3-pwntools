@@ -8,7 +8,8 @@ class PwnlibException(Exception):
     '''Exception thrown by :func:`pwnlib.log.error`.
 
     Pwnlib functions that encounters unrecoverable errors should call the
-    :func:`pwnlib.log.error` function instead of throwing this exception directly.'''
+    :func:`pwnlib.log.error` function instead of throwing this exception directly.
+    '''
 
     def __init__(self, message, reason=None, exit_code=None):
         self.message = message

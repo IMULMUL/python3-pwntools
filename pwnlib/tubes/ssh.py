@@ -286,7 +286,8 @@ class ssh_channel(sock):
         self.info('Closed SSH channel with %s' % self.host)
 
     def getenv(self, variable, **kwargs):
-        """Retrieve the address of an environment variable in the remote process.
+        """
+        Retrieve the address of an environment variable in the remote process.
         """
         if not hasattr(self, 'argv'):
             self.error("Can only call getenv() on ssh_channel objects created with ssh.process")
@@ -932,6 +933,7 @@ os.execve(exe, argv, os.environ)
         Return a :class:`pwnlib.tubes.ssh.ssh_channel` object.
 
         Examples:
+
             >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
@@ -996,6 +998,7 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
         a TTY on the remote server.
 
         Examples:
+
             >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
@@ -1018,6 +1021,7 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
         Returns a :class:`pwnlib.tubes.ssh.ssh_connecter` object.
 
         Examples:
+
             >>> from pwn import *
             >>> l = listen()
             >>> s = ssh(host='example.pwnme',
@@ -1255,6 +1259,7 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
             remote(bytes, str): The remote filename to download.
 
         Examples:
+
             >>> with open('/tmp/bar','w+') as f:
             ...     _ = f.write('Hello, world')
             >>> os.chmod('/tmp/bar', 0o777)
@@ -1267,7 +1272,6 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
             >>> s.sftp = False
             >>> s.download_data('/tmp/bar')
             b'Hello, world'
-
         """
         with self.progress('Downloading %r' % remote) as p:
             with open(self._download_to_cache(remote, p), 'rb') as fd:
@@ -1338,7 +1342,8 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
             data(bytes, str): The data to upload.
             remote(bytes, str): The filename to upload it to.
 
-        Examoles:
+        Examples:
+
             >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')
@@ -1377,8 +1382,9 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
         """Uploads a file to the remote server. Returns the remote filename.
 
         Arguments:
-        filename(bytes, str): The local filename to download
-        remote(bytes, str): The remote filename to save it to. Default is to infer it from the local filename."""
+            filename(bytes, str): The local filename to download
+            remote(bytes, str): The remote filename to save it to. Default is to infer it from the local filename.
+        """
         if remote is None:
             remote = os.path.normpath(filename)
             remote = os.path.basename(remote)
@@ -1461,7 +1467,8 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
         and downloading the relevant files.
 
         The directory argument specified where to download the files. This defaults
-        to './$HOSTNAME' where $HOSTNAME is the hostname of the remote server."""
+        to './$HOSTNAME' where $HOSTNAME is the hostname of the remote server.
+        """
         directory = directory or self.host
         directory = os.path.realpath(directory)
         directory = misc.force_bytes(directory)
@@ -1496,7 +1503,8 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
 
         This is a simple wrapper for creating a new
         :class:`pwnlib.tubes.ssh.ssh_channel` object and calling
-        :meth:`pwnlib.tubes.ssh.ssh_channel.interactive` on it."""
+        :meth:`pwnlib.tubes.ssh.ssh_channel.interactive` on it.
+        """
         s = self.shell(shell)
 
         if self.cwd != '.':
@@ -1518,10 +1526,12 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
             In order to work around this, we also ``chmod +x`` the directory.
 
         Arguments:
-            wd(string): Working directory.  Default is to auto-generate a directory
-                based on the result of running 'mktemp -d' on the remote machine.
+            wd(bytes, string): Working directory.  Default is to auto-generate
+                a directory based on the result of running 'mktemp -d' on the
+                remote machine.
 
         Examples:
+
             >>> s = ssh(host='example.pwnme',
             ...         user='travis',
             ...         password='demopass')

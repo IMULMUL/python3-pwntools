@@ -14,20 +14,20 @@ def wget(url, save=None, timeout=5, **kwargs):
     Downloads a file via HTTP/HTTPS.
 
     Arguments:
-      url (str): URL to download
-      save (bytes, str, bool): Name to save as.  Any truthy value
-            will auto-generate a name based on the URL.
-      timeout (int): Timeout, in seconds
+        url (str): URL to download
+        save (bytes, str, bool): Name to save as.  Any truthy value will
+                                 auto-generate a name based on the URL.
+        timeout (int): Timeout, in seconds
 
     Example:
 
-      >>> url = 'https://httpbin.org/robots.txt'
-      >>> result = wget(url)
-      >>> result
-      b'User-agent: *\\nDisallow: /deny\\n'
-      >>> result2 = wget(url, True)
-      >>> result == open('robots.txt', 'rb').read()
-      True
+        >>> url = 'https://httpbin.org/robots.txt'
+        >>> result = wget(url)
+        >>> result
+        b'User-agent: *\\nDisallow: /deny\\n'
+        >>> result2 = wget(url, True)
+        >>> result == open('robots.txt', 'rb').read()
+        True
     """
     import requests
 

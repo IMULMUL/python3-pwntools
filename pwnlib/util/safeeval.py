@@ -21,9 +21,11 @@ def _get_opcodes(codeobj):
 
     Extract the actual opcodes as a list from a code object
 
-    >>> c = compile("[1 + 2, (1,2)]", "", "eval")
-    >>> _get_opcodes(c)
-    [100, 100, 103, 83]
+    Example:
+
+        >>> c = compile("[1 + 2, (1,2)]", "", "eval")
+        >>> _get_opcodes(c)
+        [100, 100, 103, 83]
     """
     import dis
     i = 0

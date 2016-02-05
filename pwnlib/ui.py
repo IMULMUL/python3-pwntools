@@ -11,13 +11,12 @@ def yesno(prompt, default=None):
     the user must answer yes or no.
 
     Arguments:
-      prompt (str): The prompt to show
-      default: The default option;  `True` means "yes"
+        prompt (str): The prompt to show
+        default: The default option;  `True` means "yes"
 
     Returns:
-      `True` if the answer was "yes", `False` if "no"
-"""
-
+        `True` if the answer was "yes", `False` if "no"
+    """
     if not isinstance(default, (bool, type(None))):
         raise ValueError('yesno(): default must be a boolean or None')
 
@@ -64,14 +63,13 @@ def options(prompt, opts, default=None):
     form of a question) and a number of options.
 
     Arguments:
-      prompt (str): The prompt to show
-      opts (list): The options to show to the user
-      default: The default option to choose
+        prompt (str): The prompt to show
+        opts (list): The options to show to the user
+        default: The default option to choose
 
     Returns:
-      The users choice in the form of an integer.
-"""
-
+        The users choice in the form of an integer.
+    """
     if not isinstance(default, (int, type(None))):
         raise ValueError('options(): default must be a number or None')
 
@@ -174,10 +172,10 @@ def more(text):
     It not in term_mode, just prints the data to the screen.
 
     Arguments:
-      text(str):  The text to show.
+        text(str):  The text to show.
 
     Returns:
-      :const:`None`
+        :const:`None`
     """
     if term.term_mode:
         lines = text.split('\n')

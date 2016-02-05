@@ -522,19 +522,19 @@ def flat(*args, **kwargs):
     values in :mod:`pwnlib.context` if not specified as an argument.
 
     Arguments:
-      args: Values to flatten
-      preprocessor (function): Gets called on every element to optionally
-         transform the element before flattening. If :const:`None` is
-         returned, then the original value is uded.
-      word_size (int): Word size of the converted integer.
-      endianness (str): Endianness of the converted integer ("little"/"big").
-      sign (str): Signedness of the converted integer (False/True)
+        args: Values to flatten
+        preprocessor (function): Gets called on every element to optionally
+           transform the element before flattening. If :const:`None` is
+           returned, then the original value is uded.
+        word_size (int): Word size of the converted integer.
+        endianness (str): Endianness of the converted integer ("little"/"big").
+        sign (str): Signedness of the converted integer (False/True)
 
     Examples:
-      >>> flat(1, "test", [[["AB"] * 2] * 3], endianness='little', word_size=16, sign=False)
-      b'\\x01\\x00testABABABABABAB'
-      >>> flat([1, [2, 3]], preprocessor=lambda x: str(x+1))
-      b'234'
+        >>> flat(1, "test", [[["AB"] * 2] * 3], endianness='little', word_size=16, sign=False)
+        b'\\x01\\x00testABABABABABAB'
+        >>> flat([1, [2, 3]], preprocessor=lambda x: str(x+1))
+        b'234'
     """
     preprocessor = kwargs.pop('preprocessor', lambda x: None)
     word_size = kwargs.pop('word_size', None)

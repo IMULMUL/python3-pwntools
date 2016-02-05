@@ -10,7 +10,6 @@ def run_assembly(assembly):
     Given an assembly listing, assemble and execute it.
 
     Returns:
-
         A ``process`` tube to interact with the process.
 
     Example:
@@ -56,7 +55,6 @@ def run_assembly_exitcode(assembly):
     the process to die.
 
     Returns:
-
         The exit code of the process.
 
     Example:
@@ -76,7 +74,6 @@ def run_shellcode_exitcode(bytes):
     the process to die.
 
     Returns:
-
         The exit code of the process.
 
     Example:

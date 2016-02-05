@@ -953,4 +953,5 @@ def mbruteforce(func, alphabet, length, method='upto', start=None, threads=None)
                 if all(x is None for x in processes):
                     done = True
         time.sleep(0.3)
+
     h.failure('No matches found')

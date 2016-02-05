@@ -45,7 +45,6 @@ def register(func, *args, **kwargs):
       atexception.unregister(handler)
 
     This function is thread safe.
-
     """
     global _ident
     with _lock:

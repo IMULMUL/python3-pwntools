@@ -11,10 +11,12 @@ def get_qemu_arch():
     Returns the name which QEMU uses for the currently selected
     architecture.
 
-    >>> get_qemu_arch()
-    'i386'
-    >>> get_qemu_arch(arch='powerpc')
-    'ppc'
+    Examples:
+
+        >>> get_qemu_arch()
+        'i386'
+        >>> get_qemu_arch(arch='powerpc')
+        'ppc'
     """
     return {
         ('amd64', 'little'): 'x86_64',
@@ -35,10 +37,12 @@ def get_qemu_user():
     Returns the path to the QEMU-user binary for the currently
     selected architecture.
 
-    >>> get_qemu_user()
-    'qemu-i386-static'
-    >>> get_qemu_user(arch='thumb')
-    'qemu-arm-static'
+    Examples:
+
+        >>> get_qemu_user()
+        'qemu-i386-static'
+        >>> get_qemu_user(arch='thumb')
+        'qemu-arm-static'
     """
     arch = get_qemu_arch()
     normal = 'qemu-' + arch

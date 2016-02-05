@@ -49,7 +49,6 @@ def register(func, *args, **kwargs):
       atexit.unregister(handler)
 
     This function is thread safe.
-
     """
     global _ident
     with _lock:

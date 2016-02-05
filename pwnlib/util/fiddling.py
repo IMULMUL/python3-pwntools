@@ -182,7 +182,7 @@ def unbits(s, endian='big'):
         endian (str):  The string "little" or "big", which specifies the bits endianness.
 
     Returns:
-       A string of the decoded bits.
+        A string of the decoded bits.
 
     Example:
         >>> unbits([1])
@@ -523,15 +523,14 @@ def naf(n):
 
     Example:
 
-      >>> n = 45
-      >>> m = 0
-      >>> x = 1
-      >>> for z in naf(n):
-      ...     m += x * z
-      ...     x *= 2
-      >>> n == m
-      True
-
+        >>> n = 45
+        >>> m = 0
+        >>> x = 1
+        >>> for z in naf(n):
+        ...     m += x * z
+        ...     x *= 2
+        >>> n == m
+        True
     """
     while n:
         z = 2 - n % 4 if n & 1 else 0
@@ -733,18 +732,18 @@ def hexdump(s, width=16, skip=True, hexii=False, begin=0,
 
     Arguments:
 
-      s(str, bytes): The data to hexdump.
-      width(int): The number of characters per line
-      skip(bool): Set to True, if repeated lines should be replaced by a "*"
-      hexii(bool): Set to True, if a hexii-dump should be returned instead of a
-                   hexdump.
-      begin(int): Offset of the first byte to print in the left column
-      style(dict): Color scheme to use.
-      highlight(iterable): Byte sequences to highlight.  A byte sequence is an
-                           iterable where each element is either a character or
-                           an integer, or `None` which means "any byte".  Output
-                           lines containing a match will have a "<" appended
-                           (hint: grep for "<$").
+        s(str, bytes): The data to hexdump.
+        width(int): The number of characters per line
+        skip(bool): Set to True, if repeated lines should be replaced by a "*"
+        hexii(bool): Set to True, if a hexii-dump should be returned instead
+                     of a hexdump.
+        begin(int): Offset of the first byte to print in the left column
+        style(dict): Color scheme to use.
+        highlight(iterable): Byte sequences to highlight.  A byte sequence
+                             is an iterable where each element is either a
+                             character or an integer, or `None` which means
+                             "any byte".  Output lines containing a match will
+                             have a "<" appended (hint: grep for "<$").
     """
     s = packing.flat(s)
     return '\n'.join(hexdump_iter(s,

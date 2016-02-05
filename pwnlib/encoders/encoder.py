@@ -50,7 +50,6 @@ def encode(raw_bytes, avoid=None, expr=None, force=0, pcreg=''):
     any bytes in ``avoid`` or ``expr``.
 
     Arguments:
-
         raw_bytes(bytes):  Sequence of shellcode bytes to encode.
         avoid(bytes):      Bytes to avoid
         expr(bytes, str):  Regular expression which matches bad characters.

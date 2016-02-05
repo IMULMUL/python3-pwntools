@@ -117,6 +117,7 @@ def fmtstr_payload(offset, writes, numbwritten=0, write_size='byte'):
         The payload in order to do needed writes
 
     Examples:
+
         >>> context.clear(arch='amd64')
         >>> fmtstr_payload(1, {0x0: 0x1337babe}, write_size='int')
         b'\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00%322419374c%1$n%3972547906c%2$n'
@@ -131,7 +132,6 @@ def fmtstr_payload(offset, writes, numbwritten=0, write_size='byte'):
         b'\x00\x00\x00\x00\x02\x00\x00\x00%47798c%1$hn%22649c%2$hn'
         >>> fmtstr_payload(1, {0x0: 0x1337babe}, write_size='byte')
         b'\x00\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00%174c%1$hhn%252c%2$hhn%125c%3$hhn%220c%4$hhn'
-
     """
 
     # 'byte': (number, step, mask, format, decalage)
@@ -195,10 +195,10 @@ class FmtStr:
     offset by leaking stack data.
 
     Arguments:
-            execute_fmt(function): function to call for communicate with the vulnerable process
-            offset(int): the first formatter's offset you control
-            padlen(int): size of the pad you want to add before the payload
-            numbwritten(int): number of already written bytes
+        execute_fmt(function): function to call for communicate with the vulnerable process
+        offset(int): the first formatter's offset you control
+        padlen(int): size of the pad you want to add before the payload
+        numbwritten(int): number of already written bytes
 
     """
 
@@ -273,7 +273,6 @@ class FmtStr:
 
         Returns:
             None
-
         """
         fmtstr = randoms(self.padlen, string.ascii_letters.encode('utf8'))
         fmtstr += fmtstr_payload(self.offset, self.writes, numbwritten=self.padlen, write_size='byte')
@@ -301,6 +300,5 @@ class FmtStr:
             >>> f.write(0x08040506, 0x1337babe)
             >>> f.execute_writes()
             b'\x06\x05\x04\x08\x07\x05\x04\x08\x08\x05\x04\x08\t\x05\x04\x08%174c%5$hhn%252c%6$hhn%125c%7$hhn%220c%8$hhn'
-
         """
         self.writes[addr] = data

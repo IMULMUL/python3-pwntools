@@ -255,13 +255,15 @@ def _longest(d):
     This is useful for performing substring matching via ``str.startswith``,
     as it ensures the most complete match will be found.
 
-    >>> data = {'a': 1, 'bb': 2, 'ccc': 3}
-    >>> _longest(data) == data
-    True
-    >>> for i in _longest(data): print(i)
-    ccc
-    bb
-    a
+    Examples:
+
+        >>> data = {'a': 1, 'bb': 2, 'ccc': 3}
+        >>> _longest(data) == data
+        True
+        >>> for i in _longest(data): print(i)
+        ccc
+        bb
+        a
     """
     return collections.OrderedDict((k, d[k]) for k in sorted(d, key=len, reverse=True))
 
@@ -992,13 +994,15 @@ class ContextType:
         """
         Default proxy for all socket connections.
 
-        >>> context.proxy = 'localhost' #doctest: +ELLIPSIS
-        >>> r = remote('google.com', 80)
-        Traceback (most recent call last):
-        ...
-        pwnlib.exception.PwnlibException: Could not connect to google.com on port 80
-        >>> context.proxy = None
-        >>> r = remote('google.com', 80, level='error')
+        Examples:
+
+            >>> context.proxy = 'localhost' #doctest: +ELLIPSIS
+            >>> r = remote('google.com', 80)
+            Traceback (most recent call last):
+            ...
+            pwnlib.exception.PwnlibException: Could not connect to google.com on port 80
+            >>> context.proxy = None
+            >>> r = remote('google.com', 80, level='error')
         """
         if not proxy:
             socket.socket = _original_socket

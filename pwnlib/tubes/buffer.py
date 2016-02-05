@@ -36,13 +36,15 @@ class Buffer(Exception):
 
     def __len__(self):
         """
-        >>> b = Buffer()
-        >>> b.add(b'lol')
-        >>> len(b) == 3
-        True
-        >>> b.add(b'foobar')
-        >>> len(b) == 9
-        True
+        Examples:
+
+            >>> b = Buffer()
+            >>> b.add(b'lol')
+            >>> len(b) == 3
+            True
+            >>> b.add(b'foobar')
+            >>> len(b) == 9
+            True
         """
         return self.size
 
@@ -51,13 +53,15 @@ class Buffer(Exception):
 
     def __contains__(self, x):
         """
-        >>> b = Buffer()
-        >>> b.add(b'asdf')
-        >>> b'x' in b
-        False
-        >>> b.add(b'x')
-        >>> b'x' in b
-        True
+        Examples:
+
+            >>> b = Buffer()
+            >>> b.add(b'asdf')
+            >>> b'x' in b
+            False
+            >>> b.add(b'x')
+            >>> b'x' in b
+            True
         """
         for b in self.data:
             if x in b:
@@ -66,11 +70,13 @@ class Buffer(Exception):
 
     def index(self, x):
         """
-        >>> b = Buffer()
-        >>> b.add(b'asdf')
-        >>> b.add(b'qwert')
-        >>> b.index(b't') == len(b) - 1
-        True
+        Examples:
+
+            >>> b = Buffer()
+            >>> b.add(b'asdf')
+            >>> b.add(b'qwert')
+            >>> b.index(b't') == len(b) - 1
+            True
         """
         sofar = 0
 

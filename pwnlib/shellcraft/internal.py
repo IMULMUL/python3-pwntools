@@ -84,12 +84,14 @@ def lookup_template(filename):
 
 def get_context_from_dirpath(directory):
     """
-    >>> get_context_from_dirpath('common')
-    {}
-    >>> get_context_from_dirpath('i386')
-    {'arch': 'i386'}
-    >>> get_context_from_dirpath('amd64/linux') == {'arch': 'amd64', 'os': 'linux'}
-    True
+    Examples:
+
+        >>> get_context_from_dirpath('common')
+        {}
+        >>> get_context_from_dirpath('i386')
+        {'arch': 'i386'}
+        >>> get_context_from_dirpath('amd64/linux') == {'arch': 'amd64', 'os': 'linux'}
+        True
     """
     A, O = os.path.split(directory)
 

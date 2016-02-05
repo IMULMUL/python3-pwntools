@@ -138,7 +138,6 @@ def regsort(in_out, all_regs, tmp=None, xchg=True, randomize=None):
       an exception is raised.
 
     Arguments:
-
         in_out(dict):
             Dictionary of desired register states.
             Keys are registers, values are either registers or any other value.
@@ -161,7 +160,6 @@ def regsort(in_out, all_regs, tmp=None, xchg=True, randomize=None):
             Randomize as much as possible about the order or registers.
 
     Returns:
-
         A list of tuples of ``(src, dest)``.
 
         Each register may appear more than once, if a register is used
