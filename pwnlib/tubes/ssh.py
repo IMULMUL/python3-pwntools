@@ -617,7 +617,7 @@ class ssh(Timeout, Logger):
 
     def process(self, argv=None, executable=None, tty=True, cwd=None, env=None,
                 timeout=Timeout.default, run=True, stdin=0, stdout=1, stderr=2,
-                preexec_fn=None, preexec_args=[], raw=True, aslr=None, nosetuid=False):
+                preexec_fn=None, preexec_args=[], raw=True, aslr=None, setuid=None):
         r"""
         Executes a process on the remote server, in the same fashion
         as pwnlib.tubes.process.process.
@@ -667,9 +667,9 @@ class ssh(Timeout, Logger):
             raw(bool):
                 If ``True``, disable TTY control code interpretation.
             aslr(bool):
-                If ``False``, attempt to disable ASLR for the process.
-            nosetuid(bool):
-                If ``True``, prevent setuid from taking effect.
+                See ``pwnlib.tubes.process.process`` for more information.
+            setuid(bool):
+                See ``pwnlib.tubes.process.process`` for more information.
 
         Returns:
             A new SSH channel, or a path to a script if ``run=False``.
@@ -790,6 +790,8 @@ class ssh(Timeout, Logger):
         if func_name == (lambda: 0).__name__:
             self.error("preexec_fn cannot be a lambda")
 
+        setuid = setuid if setuid is None else bool(setuid)
+
         script = r"""
 #!/usr/bin/env python2
 import os, sys, ctypes, resource, platform
@@ -821,7 +823,7 @@ if not is_exe(exe):
     sys.stderr.write("{} is not executable or does not exist in $PATH: {}".format(exe, PATH))
     sys.exit(-1)
 
-if %(nosetuid)r:
+if %(setuid)r is False:
     PR_SET_NO_NEW_PRIVS = 38
     result = ctypes.CDLL('libc.so.6').prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)
 
@@ -845,7 +847,7 @@ for fd, newfd in {0: %(stdin)r, 1: %(stdout)r, 2:%(stderr)r}.items():
         os.dup2(fd, newfd)
 
 if not %(aslr)r:
-    if platform.system().lower() == 'linux':
+    if platform.system().lower() == 'linux' and %(setuid)r is not True:
         ADDR_NO_RANDOMIZE = 0x0040000
         ctypes.CDLL('libc.so.6').personality(ADDR_NO_RANDOMIZE)
 
