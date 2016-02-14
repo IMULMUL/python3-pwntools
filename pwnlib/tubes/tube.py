@@ -141,7 +141,7 @@ class tube(Timeout, Logger):
     def _recv(self, numb=4096, timeout=default):
         """_recv(numb=4096, timeout=default) -> bytes
 
-        Recieves one chunk from the internal buffer or from the OS if the
+        Receives one chunk from the internal buffer or from the OS if the
         buffer is empty.
         """
         # No buffered data, could not put anything in the buffer
@@ -192,7 +192,7 @@ class tube(Timeout, Logger):
     def recvn(self, numb, timeout=default):
         """recvn(numb, timeout=default) -> bytes
 
-        Recieves exactly `n` bytes.
+        Receives exactly `n` bytes.
 
         If the request is not satisfied before ``timeout`` seconds pass,
         all data is buffered and an empty bytes (``b''``) is returned.
@@ -240,7 +240,7 @@ class tube(Timeout, Logger):
     def recvuntil(self, delims, drop=False, timeout=default):
         """recvuntil(delims, timeout=default) -> bytes
 
-        Recieve data until one of `delims` is encountered.
+        Receive data until one of `delims` is encountered.
 
         If the request is not satisfied before ``timeout`` seconds pass,
         all data is buffered and an empty bytes (``b''``) is returned.
@@ -333,7 +333,7 @@ class tube(Timeout, Logger):
     def recvlines(self, numlines=2**20, keepends=False, timeout=default):
         r"""recvlines(numlines, keepends=False, timeout=default) -> bytes list
 
-        Recieve up to ``numlines`` lines.
+        Receive up to ``numlines`` lines.
 
         A "line" is any sequence of bytes terminated by the byte sequence
         set by :attr:`newline`, which defaults to ``b'\n'``.
@@ -511,8 +511,8 @@ class tube(Timeout, Logger):
     def recvline_startswith(self, delims, keepends=False, timeout=default):
         r"""recvline_startswith(delims, keepends=False, timeout=default) -> bytes
 
-        Keep recieving lines until one is found that starts with one of
-        `delims`.  Returns the last line recieved.
+        Keep receiving lines until one is found that starts with one of
+        `delims`.  Returns the last line received.
 
         If the request is not satisfied before ``timeout`` seconds pass,
         all data is buffered and an empty bytes (``b''``) is returned.
@@ -550,8 +550,8 @@ class tube(Timeout, Logger):
     def recvline_endswith(self, delims, keepends=False, timeout=default):
         r"""recvline_endswith(delims, keepends=False, timeout=default) -> bytes
 
-        Keep recieving lines until one is found that starts with one of
-        `delims`.  Returns the last line recieved.
+        Keep receiving lines until one is found that starts with one of
+        `delims`.  Returns the last line received.
 
         If the request is not satisfied before ``timeout`` seconds pass,
         all data is buffered and an empty bytes (``b''``) is returned.
@@ -850,7 +850,7 @@ class tube(Timeout, Logger):
     def clean_and_log(self, timeout=0.05):
         r"""clean_and_log(timeout=0.05) -> bytes
 
-        Works exactly as :meth:`pwnlib.tubes.tube.tube.clean`, but logs recieved
+        Works exactly as :meth:`pwnlib.tubes.tube.tube.clean`, but logs received
         data with :meth:`pwnlib.self.info`.
 
         Returns:
