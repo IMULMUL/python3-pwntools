@@ -83,10 +83,10 @@ def pack(number, word_size=None, endianness=None, sign=None, **kwargs):
         b'\\xff\\x00'
         >>> pack(0x0102030405, 'all', 'little', True)
         b'\\x05\\x04\\x03\\x02\\x01'
-        >>> pack(0x80000000, 'all', 'big', True)
-        b'\\x00\\x80\\x00\\x00\\x00'
         >>> pack(-1)
         b'\\xff\\xff\\xff\\xff'
+        >>> pack(0x80000000, 'all', 'big', True)
+        b'\\x00\\x80\\x00\\x00\\x00'
     """
     if sign is None and number < 0:
         sign = True

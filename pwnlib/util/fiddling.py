@@ -140,8 +140,6 @@ def bits(s, endian='big', zero=0, one=1):
             else:
                 out += byte[::-1]
     elif isinstance(s, int):
-        if s < 0:
-            s = s & ((1 << context.bits) - 1)
         if s == 0:
             out.append(zero)
         while s:

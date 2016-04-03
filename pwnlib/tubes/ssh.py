@@ -59,7 +59,7 @@ class ssh_channel(sock):
 
     #: Executable of the process
     #: Only valid when instantiated through :meth:`ssh.process`
-    exe = None
+    executable = None
 
     #: Arguments passed to the process
     #: Only valid when instantiated through :meth:`ssh.process`
@@ -235,6 +235,7 @@ class ssh_channel(sock):
                         continue
 
                     cur = cur.replace(b'\r\n', b'\n')
+                    cur = cur.replace(b'\r', b'')
                     sys.stdout.buffer.write(cur)
                     sys.stdout.flush()
                 except EOFError:
@@ -573,16 +574,24 @@ class ssh(Timeout, Logger):
             self.transport = self.client.get_transport()
             h.success()
 
-        try:
-            self.sftp = self.transport.open_sftp_client()
-        except Exception:
-            self.sftp = None
+        self._tried_sftp = False
 
         with context.local(log_level='error'):
             try:
                 self.pid = int(self.system('echo $PPID').recv(timeout=1))
             except Exception:
                 self.pid = None
+
+    @property
+    def sftp(self):
+        if not self._tried_sftp:
+            try:
+                self._sftp = self.transport.open_sftp_client()
+            except Exception:
+                self._sftp = None
+
+        self._tried_sftp = True
+        return self._sftp
 
     def __enter__(self, *a):
         return self
@@ -833,7 +842,8 @@ if %(setuid)r is False:
 
 if sys.argv[-1] == 'check':
     sys.stdout.write('1\n')
-    sys.stdout.write(str(os.getpid()) + "\n")
+    sys.stdout.write(str(os.getpid()) + '\n')
+    sys.stdout.write(exe + '\x00')
     sys.stdout.flush()
 
 for fd, newfd in {0: %(stdin)r, 1: %(stdout)r, 2:%(stderr)r}.items():
@@ -904,7 +914,7 @@ os.execve(exe, argv, os.environ)
 
             python.pid = safeeval.const(python.recvline())
             python.argv = argv
-            python.executable = executable
+            python.executable = python.recvuntil(b'\x00')[:-1]
 
         return python
 
@@ -914,6 +924,10 @@ os.execve(exe, argv, os.environ)
         Minor modification to just directly invoking ``which`` on the remote
         system which adds the current working directory to the end of ``$PATH``.
         """
+        # If name is a path, do not attempt to resolve it.
+        if os.path.sep in program:
+            return program
+
         result = self.run('export PATH=$PATH:$PWD; which %s' % program).recvall().strip()
 
         if b'/' not in result:
@@ -1035,6 +1049,8 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
         """
         return ssh_connecter(self, host, port, timeout, level=self.level)
 
+    remote = connect_remote
+
     def listen_remote(self, port=0, bind_address='', timeout=Timeout.default):
         r"""listen_remote(port=0, bind_address='', timeout=Timeout.default) -> ssh_connecter
 
@@ -1057,6 +1073,8 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
             b'Hello\n'
         """
         return ssh_listener(self, bind_address, port, timeout, level=self.level)
+
+    listen = listen_remote
 
     def __getitem__(self, attr):
         """Permits indexed access to run commands over SSH
@@ -1269,7 +1287,8 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
             ...         cache=False)
             >>> s.download_data('/tmp/bar')
             b'Hello, world'
-            >>> s.sftp = False
+            >>> s._sftp = None
+            >>> s._tried_sftp = True
             >>> s.download_data('/tmp/bar')
             b'Hello, world'
         """
@@ -1350,7 +1369,8 @@ from ctypes import *; libc = CDLL('libc.so.6'); print(libc.getenv(%r))
             >>> s.upload_data(b'Hello, world', '/tmp/upload_foo')
             >>> open('/tmp/upload_foo', 'rb').read()
             b'Hello, world'
-            >>> s.sftp = False
+            >>> s._sftp = False
+            >>> s._tried_sftp = True
             >>> s.upload_data(b'Hello, world', '/tmp/upload_bar')
             >>> open('/tmp/upload_bar', 'rb').read()
             b'Hello, world'

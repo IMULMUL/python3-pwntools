@@ -700,11 +700,13 @@ class process(tube):
 
         # Enumerate all of the libraries actually loaded right now.
         for line in maps_raw.splitlines():
-            if '/' not in line: continue
+            if '/' not in line:
+                continue
+
             path = line[line.index('/'):]
             path = os.path.realpath(path)
             if path not in maps:
-                maps[path]=0
+                maps[path] = 0
 
         for lib in maps:
             path = os.path.realpath(lib)
@@ -735,7 +737,7 @@ class process(tube):
     @property
     def corefile(self):
         # Prevent gdb.attach from spawning a new window
-        with context.local(terminal = ['sh', '-c']): # , log_level='error'):
+        with context.local(terminal=['sh', '-c']): # , log_level='error'):
             filename = '%s.core' % (self.pid)
 
             # Hurray cyclic dependencies!
@@ -747,3 +749,18 @@ class process(tube):
 
             import pwnlib.elf.corefile
             return pwnlib.elf.corefile.Core(filename)
+
+    def leak(self, address, count=0):
+        """Leaks memory within the process at the specified address.
+
+        Arguments:
+            address(int): Address to leak memory at
+            count(int): Number of bytes to leak at that address.
+        """
+        # If it's running under qemu-user, don't leak anything.
+        if 'qemu-' in os.path.realpath('/proc/%i/exe' % self.pid):
+            log.error("Cannot use leaker on binaries under QEMU.")
+
+        with open('/proc/%i/mem' % self.pid, 'rb') as mem:
+            mem.seek(address)
+            return mem.read(count) or None

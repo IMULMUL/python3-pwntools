@@ -816,6 +816,15 @@ class ELF(ELFFile):
         if self.fortify:
             res.append("FORTIFY:".ljust(10) + green("Enabled"))
 
+        if self.asan:
+            res.append("ASAN:".ljust(10) + green("Enabled"))
+
+        if self.msan:
+            res.append("MSAN:".ljust(10) + green("Enabled"))
+
+        if self.ubsan:
+            res.append("UBSAN:".ljust(10) + green("Enabled"))
+
         return '\n'.join(res)
 
     @property
@@ -830,6 +839,18 @@ class ELF(ELFFile):
         if any(s.endswith(b'_chk') for s in self.plt):
             return True
         return False
+
+    @property
+    def asan(self):
+        return any(s.startswith(b'__asan_') for s in self.symbols)
+
+    @property
+    def msan(self):
+        return any(s.startswith(b'__msan_') for s in self.symbols)
+
+    @property
+    def ubsan(self):
+        return any(s.startswith(b'__ubsan_') for s in self.symbols)
 
     def p64(self, address, data, *a, **kw): return self.write(address, packing.p64(data, *a, **kw))
 

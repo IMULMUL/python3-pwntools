@@ -636,10 +636,9 @@ class ContextType:
         # Lowercase
         arch = arch.lower()
 
-        # Attempt to perform convenience and legacy compatibility
-        # transformations.
+        # Attempt to perform convenience and legacy compatibility transformations.
         # We have to make sure that x86_64 appears before x86 for this to work correctly.
-        transform = [('ppc', 'powerpc'), ('x86_64', 'amd64'), ('x86', 'i386')]
+        transform = [('ppc', 'powerpc'), ('x86_64', 'amd64'), ('x86', 'i386'), ('i686', 'i386')]
         for k, v in transform:
             if arch.startswith(k):
                 arch = arch.replace(k, v, 1)

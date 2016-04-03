@@ -41,6 +41,8 @@ class MemLeak:
             leaking 0x0
             leaking 0x4
             b'\\x7fELF'
+            >>> leaker[:4]
+            b'\\x7fELF'
             >>> hex(leaker.d(0))
             '0x464c457f'
             >>> hex(leaker.clearb(1))
@@ -221,19 +223,18 @@ class MemLeak:
             out += b
         return out
 
-    def __getitem__(self, key):
-        if isinstance(key, int):
-            return self.rawb(key)
+    def __getitem__(self, item):
+        if isinstance(item, slice):
+            start = item.start or 0
+            stop = item.stop
+            step = item.step
         else:
-            if None in (key.start, key.stop):
-                raise ValueError("Bot start and stop must be given for leaked range")
-            out = b''
-            for addr in range(key.start, key.stop, key.step or 1):
-                b = self.rawb(addr)
-                if b is None:
-                    return None
-                out += b
-            return out
+            start, stop, step = (item, item + 1, 1)
+
+        if None in (stop, start):
+            log.error("Cannot perform unbounded leaks")
+
+        return self.n(start, stop - start)[::step]
 
     def _int(self, addr, ndx, size):
         addr += ndx * size
