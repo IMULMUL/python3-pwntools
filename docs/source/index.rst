@@ -55,14 +55,11 @@ Each of the ``pwntools`` modules is documented here.
    useragents
    util/*
 
-.. toctree::
-   :hidden:
+.. only:: not dash
 
-   testexample
+   Indices and tables
+   ==================
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   * :ref:`genindex`
+   * :ref:`modindex`
+   * :ref:`search`

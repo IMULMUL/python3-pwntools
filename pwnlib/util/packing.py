@@ -83,6 +83,8 @@ def pack(number, word_size=None, endianness=None, sign=None, **kwargs):
         b'\\xff\\x00'
         >>> pack(0x0102030405, 'all', 'little', True)
         b'\\x05\\x04\\x03\\x02\\x01'
+        >>> pack(0x80000000, 'all', 'big', True)
+        b'\\x00\\x80\\x00\\x00\\x00'
         >>> pack(-1)
         b'\\xff\\xff\\xff\\xff'
     """
@@ -116,7 +118,10 @@ def pack(number, word_size=None, endianness=None, sign=None, **kwargs):
             if number == 0:
                 word_size = 8
             elif number > 0:
-                word_size = ((number.bit_length() - 1) | 7) + 1
+                if sign is False:
+                    word_size = ((number.bit_length() - 1) | 7) + 1
+                else:
+                    word_size = (number.bit_length() | 7) + 1
             else:
                 if sign is False:
                     raise ValueError("pack(): number does not fit within word_size")
@@ -670,3 +675,187 @@ def signed(integer):
 
 def unsigned(integer):
     return unpack(pack(integer))
+
+
+def dd(dst, src, count=0, skip=0, seek=0, truncate=False):
+    r"""dd(dst, src, count=0, skip=0, seek=0, truncate=False) -> dst
+
+    Inspired by the command line tool ``dd``, this function copies `count` byte
+    values from offset `seek` in `src` to offset `skip` in `dst`.  If `count` is
+    0, all of ``src[seek:]`` is copied.
+
+    If `dst` is a mutable type it will be updated.  Otherwise a new instance of
+    the same type will be created.  In either case the result is returned.
+
+    `src` can be an iterable of characters or integers, a unicode string or a
+    file object.  If it is an iterable of integers, each integer must be in the
+    range [0;255].  If it is a unicode string, its UTF-8 encoding will be used.
+
+    The seek offset of file objects will be preserved.
+
+    Arguments:
+      dst: Supported types are `:class:file`, `:class:list`, `:class:tuple`,
+           `:class:str`, `:class:bytearray` and `:class:unicode`.
+      src: An iterable of byte values (characters or integers), a unicode
+           string or a file object.
+      count (int): How many bytes to copy.  If `count` is 0 or larger than
+                   ``len(src[seek:])``, all bytes until the end of `src` are
+                   copied.
+      skip (int): Offset in `dst` to copy to.
+      seek (int): Offset in `src` to copy from.
+      truncate (bool): If `:const:True`, `dst` is truncated at the last copied
+                       byte.
+
+    Returns:
+      A modified version of `dst`.  If `dst` is a mutable type it will be
+      modified in-place.
+
+    Examples:
+        >>> dd(tuple(b'Hello!'), '?', skip=5)
+        (72, 101, 108, 108, 111, 63)
+        >>> dd(list(b'Hello!'), (63,), skip=5)
+        [72, 101, 108, 108, 111, 63]
+        >>> write('/tmp/foo', 'A' * 10)
+        >>> _ = dd(open('/tmp/foo'), open('/dev/zero'), skip=3, count=4)
+        >>> read('/tmp/foo', mode='rb')
+        b'AAA\x00\x00\x00\x00AAA'
+        >>> write('/tmp/foo', 'A' * 10)
+        >>> _ = dd(open('/tmp/foo'), open('/dev/zero'), skip=3, count=4, truncate=True)
+        >>> read('/tmp/foo', mode='rb')
+        b'AAA\x00\x00\x00\x00'
+
+    """
+
+    # Re-open file objects to make sure we have the mode right
+    if hasattr(src, 'name'):
+        src = open(src.name, 'rb')
+    if hasattr(dst, 'name'):
+        real_dst = dst
+        dst = open(dst.name, 'rb+')
+
+    # Special case: both `src` and `dst` are files, so we don't need to hold
+    # everything in memory
+    if hasattr(src, 'fileno') and hasattr(dst, 'fileno'):
+        src.seek(seek)
+        dst.seek(skip)
+        n = 0
+        if count:
+            while n < count:
+                s = src.read(min(count - n, 0x1000))
+                if not s:
+                    break
+                n += len(s)
+                dst.write(s)
+        else:
+            while True:
+                s = src.read(0x1000)
+                if not s:
+                    break
+                n += len(s)
+                dst.write(s)
+        if truncate:
+            dst.truncate(skip + n)
+        src.close()
+        dst.close()
+        return real_dst
+
+    # Otherwise get `src` in canonical form, i.e. a string of at most `count`
+    # bytes
+    if isinstance(src, str):
+        if count:
+            # The only way to know where the `seek`th byte is, is to decode, but
+            # we only need to decode up to the first `seek + count` code points
+            src = src[:seek + count].encode('utf8')
+            # The code points may result in more that `seek + count` bytes
+            src = src[seek:seek + count]
+        else:
+            src = src.encode('utf8')[seek:]
+
+    elif hasattr(src, 'fileno'):
+        src.seek(seek)
+        src_ = b''
+        if count:
+            while len(src_) < count:
+                s = src.read(count - len(src_))
+                if not s:
+                    break
+                src_ += s
+        else:
+            while True:
+                s = src.read()
+                if not s:
+                    break
+                src_ += s
+        src.close()
+        src = src_
+
+    elif isinstance(src, bytes):
+        if count:
+            src = src[seek:seek + count]
+        else:
+            src = src[seek:]
+
+    elif hasattr(src, '__iter__'):
+        src = src[seek:]
+        src_ = b''
+        for i, b in enumerate(src, seek):
+            if count and i > count + seek:
+                break
+            if isinstance(b, bytes):
+                src_ += b
+            elif isinstance(b, int):
+                if b > 255 or b < 0:
+                    raise ValueError("dd(): Source value %d at index %d is not in range [0;255]" % (b, i))
+                src_ += bytes([b])
+            else:
+                raise TypeError("dd(): Unsupported `src` element type: %r" % type(b))
+        src = src_
+
+    else:
+        raise TypeError("dd(): Unsupported `src` type: %r" % type(src))
+
+    # If truncate, then where?
+    if truncate:
+        truncate = skip + len(src)
+
+    # UTF-8 encode unicode `dst`
+    if isinstance(dst, str):
+        dst = dst.encode('utf8')
+        utf8 = True
+    else:
+        utf8 = False
+
+    # Match on the type of `dst`
+    if hasattr(dst, 'fileno'):
+        dst.seek(skip)
+        dst.write(src)
+        if truncate:
+            dst.truncate(truncate)
+        dst.close()
+        dst = real_dst
+
+    elif isinstance(dst, (list, bytearray)):
+        dst[skip:skip + len(src)] = list(src)
+        if truncate:
+            while len(dst) > truncate:
+                dst.pop()
+
+    elif isinstance(dst, tuple):
+        tail = dst[skip + len(src):]
+        dst = dst[:skip] + tuple(src)
+        if not truncate:
+            dst = dst + tail
+
+    elif isinstance(dst, bytes):
+        tail = dst[skip + len(src):]
+        dst = dst[:skip] + src
+        if not truncate:
+            dst = dst + tail
+
+    else:
+        raise TypeError("dd(): Unsupported `dst` type: %r" % type(dst))
+
+    if utf8:
+        dst = dst.decode('utf8')
+
+    return dst
