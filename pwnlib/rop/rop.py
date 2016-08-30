@@ -912,7 +912,12 @@ class ROP:
                     regs.append(pop.match(insn).group(1))
                     sp_move += self.align
                 elif add.match(insn):
-                    sp_move += int(add.match(insn).group(1), 16)
+                    # This throws a value error when it comes across something
+                    # like `add esp, eax` so catch that
+                    try:
+                        sp_move += int(add.match(insn).group(1), 16)
+                    except ValueError:
+                        pass
                 elif ret.match(insn):
                     sp_move += self.align
                 elif leave.match(insn):
