@@ -376,7 +376,7 @@ class ELF(ELFFile):
                 if not symbol.entry.st_value:
                     continue
 
-                self.symbols[symbol.name] = symbol.entry.st_value
+                self.symbols[symbol.name.encode('ascii')] = symbol.entry.st_value
 
         # Add 'plt.foo' and 'got.foo' to the symbols for entries,
         # iff there is no symbol for that address
