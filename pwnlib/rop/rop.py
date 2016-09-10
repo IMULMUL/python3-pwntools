@@ -379,13 +379,11 @@ class ROP:
     #: which is not contiguous
     migrated = False
 
-    def __init__(self, elfs, base=None, **kwargs):
+    def __init__(self, elfs, base=None, should_load_gadgets=True, **kwargs):
         """
         Arguments:
             elfs(list): List of ``pwnlib.elf.ELF`` objects for mining
         """
-        import ropgadget
-
         # Permit singular ROP(elf) vs ROP([elf])
         if isinstance(elfs, ELF):
             elfs = [elfs]
@@ -395,6 +393,7 @@ class ROP:
         self.elfs = elfs
         self._chain = []
         self.base = base
+        self.should_load_gadgets = should_load_gadgets
         self.align = max(e.elfclass for e in elfs) // 8
         self.migrated = False
         self.__load()
@@ -871,6 +870,9 @@ class ROP:
 
             if cache:
                 gadgets.update(cache)
+                continue
+
+            if self.should_load_gadgets is False:
                 continue
 
             log.info_once('Loading gadgets for %r' % elf.path)
