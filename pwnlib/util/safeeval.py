@@ -28,16 +28,23 @@ def _get_opcodes(codeobj):
         [100, 100, 103, 83]
     """
     import dis
+    import sys
     i = 0
     opcodes = []
     s = codeobj.co_code
-    while i < len(s):
-        code = s[i]
-        opcodes.append(code)
-        if code >= dis.HAVE_ARGUMENT:
-            i += 3
-        else:
-            i += 1
+
+    if sys.version_info[1] >= 6: # bytecode change in python >= 3.6
+        for i in range(0, len(s), 2):
+            opcodes.append(s[i])
+    else:
+        while i < len(s):
+            code = s[i]
+            opcodes.append(code)
+            if code >= dis.HAVE_ARGUMENT:
+                i += 3
+            else:
+                i += 1
+
     return opcodes
 
 
