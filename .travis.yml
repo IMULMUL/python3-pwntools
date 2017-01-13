@@ -16,9 +16,9 @@ cache:
         - /home/travis/virtualenv/python3.5.0/lib/python3.5/site-packages/
         - /home/travis/virtualenv/python3.5.0/bin/
 python:
-# Sphinx requires at least Python 3.3 to run.
+# Sphinx requires at least Python 3.4 to run.
 #  - "3.2"
-  - "3.3"
+#  - "3.3"
   - "3.4"
   - "3.5"
   - "3.6"
