@@ -306,7 +306,7 @@ class ELF(ELFFile):
             >>> any(map(lambda x: 'libc' in x, bash.libs.keys()))
             True
         """
-        if not self.get_section_by_name(b'.dynamic'):
+        if not self.get_section_by_name('.dynamic'):
             self.libs = {}
             return
 
@@ -364,7 +364,7 @@ class ELF(ELFFile):
         """
         # By default, have 'symbols' include everything in the PLT.
         #
-        # This way, elf.symbols['write'] will be a valid address to call
+        # This way, elf.symbols[b'write'] will be a valid address to call
         # for write().
         self.symbols = dotdict(self.plt)
 
@@ -408,8 +408,8 @@ class ELF(ELFFile):
             >>> all(map(validate_got_plt, bash.got.keys()))
             True
         """
-        plt = self.get_section_by_name(b'.plt')
-        got = self.get_section_by_name(b'.got')
+        plt = self.get_section_by_name('.plt')
+        got = self.get_section_by_name('.got')
 
         self.got = {}
         self.plt = {}
@@ -424,7 +424,7 @@ class ELF(ELFFile):
                            isinstance(s, RelocationSection))
         except StopIteration:
             # Evidently whatever android-ndk uses to build binaries zeroes out sh_info for rel.plt
-            rel_plt = self.get_section_by_name(b'.rel.plt') or self.get_section_by_name(b'.rela.plt')
+            rel_plt = self.get_section_by_name('.rel.plt') or self.get_section_by_name('.rela.plt')
 
         if not rel_plt:
             log.warning("Couldn't find relocations against PLT to get symbols")
@@ -438,8 +438,7 @@ class ELF(ELFFile):
             for rel in rel_plt.iter_relocations():
                 sym_idx = rel.entry.r_info_sym
                 symbol = sym_rel_plt.get_symbol(sym_idx)
-                name = symbol.name
-
+                name = symbol.name.encode('ascii')
                 self.got[name] = rel.entry.r_offset
 
         # Depending on the architecture, the beginning of the .plt will differ
@@ -683,7 +682,7 @@ class ELF(ELFFile):
 
     def bss(self, offset=0):
         """Returns an index into the .bss segment"""
-        orig_bss = self.get_section_by_name(b'.bss').header.sh_addr
+        orig_bss = self.get_section_by_name('.bss').header.sh_addr
         curr_bss = orig_bss - self.load_addr + self.address
         return curr_bss + offset
 
@@ -692,7 +691,7 @@ class ELF(ELFFile):
 
     def dynamic_by_tag(self, tag):
         dt = None
-        dynamic = self.get_section_by_name(b'.dynamic')
+        dynamic = self.get_section_by_name('.dynamic')
 
         if not dynamic:
             return None
@@ -829,7 +828,7 @@ class ELF(ELFFile):
 
     @property
     def buildid(self):
-        section = self.get_section_by_name(b'.note.gnu.build-id')
+        section = self.get_section_by_name('.note.gnu.build-id')
         if section:
             return section.data()[16:]
         return None
