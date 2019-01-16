@@ -5,7 +5,9 @@
 [![Twitter](https://img.shields.io/badge/twitter-Gallopsled-4099FF.svg?style=flat)](https://twitter.com/Gallopsled)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](http://choosealicense.com/licenses/mit/)
 
-Fork for python 3 of pwntools, the CTF framework and exploit development library. It is designed for rapid prototyping and development, and intended to make exploit writing as simple as possible.
+Unofficial fork for python 3 of pwntools, the CTF framework and exploit development library. It is designed for rapid prototyping and development, and intended to make exploit writing as simple as possible.
+
+**This project is not maintained anymore.**
 
 ```python
 from pwn import *
