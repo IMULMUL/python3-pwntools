@@ -7,7 +7,9 @@
 
 Unofficial fork for python 3 of pwntools, the CTF framework and exploit development library. It is designed for rapid prototyping and development, and intended to make exploit writing as simple as possible.
 
-**This project is not maintained anymore.**
+**The official [pwntools project](https://github.com/Gallopsled/pwntools) now supports python 3, starting with pwntools 4.0beta0.**
+
+**Since this repository is not maintained anymore, we recommend to use the official repository.**
 
 ```python
 from pwn import *
